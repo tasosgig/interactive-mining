@@ -1,0 +1,9 @@
+First edit settings.py to set the web server port and the paths of madis and DB.
+
+To start the stats server use:
+
+python madserver.py
+
+You'll find a service script (put it into /etc/init.d), for starting and stopping
+the stats server. The script maps port 80->8080 (comment the iptables rules out if you don't
+want the mapping), and starts the service without giving it root credentials.

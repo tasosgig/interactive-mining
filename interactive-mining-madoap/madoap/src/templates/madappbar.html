@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block profileclass %} class="current" {% end %}
+{% block content %}
+
+<title>Statistics</title>
+
+<div id="sidebar">
+
+			<h4>Metrics & Patterns</h4>
+			<ul>
+			{% for a in apps %}
+				<li><a href="/{{settings.APPDIRNAME}}/{{a['link']}}">{{a['linktitle']}}</a></li>
+			{% end %}
+                             
+			</ul>
+                        {% if evals %}
+                        <h4>Comparing</h4>
+                        {% end %}
+
+			<!--<h4>Comparing</h4>-->
+			<ul>
+			{% for a in evals %}
+				<li><a href="/{{settings.APPDIRNAME}}/{{a['link']}}">{{a['linktitle']}}</a></li>
+			{% end %}
+			</ul>
+<br>
+<blockquote style=padding:2;margin:0;>
+<h3> Terms explanation </h3>
+<ul> <b>View Count (VC)</b>:<br>Number of times that a publication's metadata has been browsed.</ul>
+<ul> <b>Download Counts (DC)</b>:<br>Number of times that a publication has been downloaded.</ul>
+<ul> <b>Hit index (HI)</b>:<br>Sum of <i>VC</i> and <i>DC</i>.</ul>
+<ul> <b>Popularity Index (PI)</b>:<br>Weighted combination of <i>VC</i> and <i>DC</i>, putting more emphasis on <i>DC</i>.</ul>
+</blockquote>
+                        <br>
+                        <br>
+                        <br>
+</div>
+		<div id="page">
+		{% block service %}
+			<h1>Welcome to OpenAIRE statistics service</h1>
+		{% end %}
+		</div>
+{% end %}

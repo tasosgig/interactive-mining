@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head><meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+
+<link rel="stylesheet" type="text/css" href="{{ static_url("styles.css") }}" />
+
+{% block jsimports %}{% end %}
+{% block loadfun %}
+<script type="text/javascript">
+
+function httpGet(theUrl){
+    var xmlHttp = null;
+
+    xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false );
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
+}
+    
+function load(){
+}
+</script>
+{% end %}
+
+
+
+</head>
+
+<body  onload="load()">
+
+
+    
+        <div id="header">
+                    <div style=" float:left; height:100px; left:5px; top:5px;">
+                         <div style="height:100px; float:left;">
+                       <img src="{{ static_url("OpenAIREplus_logo2.png") }}"/>
+                         </div>
+                       <div style="float:right; height:100px;">
+                       <h1 style="position:relative; margin-left: 0px; margin-top:0px; bottom:-69px; " >{% block title %}mining service <font align=left style="font-size:0.9em; color:lightgrey">Beta</font>{% end %}</h1>
+                        </div>
+                        <div style="clear: both"></div>
+                         </div>
+                    <div style="float:right; margin:30px 20px 0 20px;"><blockquote style="font-style: normal; margin:0; background:#E0F8EC"><p align=left style="font-size:0.7em">To contact us, click on:<br>
+                            <a href="http://www.openaire.eu/en/support/helpdesk">http://www.openaire.eu/en/support/helpdesk</a>
+                            <br>select <i>"Submit new question"</i> and then <br><i>"subject: Technical - Mining service"</i></p></blockquote>
+                    </div>
+                <div style="clear: both"></div>
+                </div>
+        <div id="menu"  {%if 'color' in globals()%} style="border-bottom: 20px solid  {{ color }}" {% end %}>
+            <ul>
+                <li><a href="/" title="Interactive project mining" {% block interactive %}  {% end %} >Interactive project mining</a></li>
+            
+            </ul>
+        </div>
+        <div id="content">
+
+        {% block content %}{% end %}
+        </div>
+    <div style="height:40px;"></div>
+
+    <div id="footer">
+        <p>&copy; National and Kapodistrian University of Athens (NKUA) </p>
+    </div>
+
+
+
+
+</body>
+</html>

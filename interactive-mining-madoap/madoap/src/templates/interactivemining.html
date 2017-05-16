@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block interactive %} class="current" {% end %}
+{% block content %}
+<link rel="stylesheet" href="/static/interactivemining_styles.css" />
+<title>Query Generator</title>
+<div id="sidebar">
+	<h3>Interactive Project Mining details</h3>
+	<p>Steps:</p>
+	<ul>
+		<li> <p>First <b>upload</b> a text file containing the project codes you want to text mine. The file should contain one project <b>code per line</b>.</p></li>
+		<li> <p><b>Insert or remove</b> your positive and negative words (or phrases). A positive word (or phrase) is a word that may occur with high possibility around the project code in an actual acknowledgement statement. A negative word is a word that shouldn't exist around a project code.</p></li>
+		<li> <p>Select the <b>preprocessing steps</b> that have to be applied to the text</p></li>
+		<li> <p> Provide your <b>UTF-8</b> encoded text in the text area and press submit.</p></li>
+		<!-- <li><b>document</b>: UTF-8 encoded text</li>
+		<li><b>projects</b>: Project processing (on/<b>off</b>)</li>
+		<li><b>datacitations</b>: Data citation processing (on/<b>off</b>)</li>
+		<li><b>classification</b>: Classification processing (on/<b>off</b>)</li>
+		<li><b>pdb</b>: Pdb processing (<b>on</b>/off)</li> -->
+	</ul>
+	<p>The service will return a <b>JSON</b> encoded result containing the following fields:</p>
+	<ul>
+		<li><b>funding_info</b>: Result category</li>
+		<li><b>code</b>: Matched funding code</li>
+	</ul>
+	<p>Result example:</p>
+	<p>
+		<code>{"funding_info": [{"code": "246686"}, {"code": "283595"}]}</code>
+	</p>
+	<!-- <blockquote style=margin:0;>
+		<p> <b> Note: </b> </p>
+		<p>You can also use the form on the right to directly paste your document
+		<p>
+	</blockquote> -->
+</div>
+<div id="page" style="margin:0">
+	<div class="file-upload-wrapper js">
+		<h2>Add your <b>Text File</b> of codes</h2>
+		<form id="file-input-form" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+			<header>
+				<input name="operation" id="file-input-operation" hidden />
+				<input type="file" name="upload" id="file-input" class="inputfile" />
+				<label for="file-input" id="file-input-label" ><strong><svg xmlns="http://www.w3.org/2000/svg" width="20" height="17" viewBox="0 0 20 17"><path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"/></svg> Choose a file&hellip;</strong> <span id="file-title-text"></span></label>
+				<input type="button" id="example" class="btn example" name="example" value="Load fp7 codes" style="float: right;" onclick="handleLoadExampleFile()">
+			    <button id="upload-button" class="btn" style="float: right; margin-right: 5px;" >Start upload</button>
+		    </header>
+		    <footer>
+		    	<span class="response" id="file-upload-response">
+		    	{% if numOfGrants %}
+		    		<b style="color: #268D26">{{numOfGrants}} Codes</b> loaded successfully!
+		    	{% end %}
+		    	</span>
+		    </footer>
+		</form>
+	</div>
+	<!--end file-upload-wrapper-->
+	<div class="list-wrapper">
+		<h2>Add your <b style="color: #2A56D4;">positive</b> words or phrases</h2>
+		<div class="word-container">
+			<header>
+				<div style="width: 100%; padding: 0 0 5px 5px;">
+					<div style="width: 48%; display: inline-block;">Phrase</div>
+					<div style="width: 27%; display: inline-block;">Weight</div>
+				</div>
+				<form class="word-form" id="word-form-pos">
+					<input type="text" id="text-pos" placeholder="Write a positive Word.."/>
+					<input type="number" name="weight" min="0" max="100" id="weight-pos" placeholder="Weight" value="1"/>
+					<input type="submit" class="btn" value="Add"/>
+				</form>
+				<div class="scroll_holder">
+					<div class="scroller"></div>
+				</div>
+			</header>
+			<ul class="words" id="word-pos" style="background-color: #EAEDF6">
+			</ul>
+			<footer>
+				<span class="count" id="count-pos"></span>
+				<button class="btn clear-all" id="clear-all-pos">Delete All</button>
+			</footer>
+		</div>
+	</div>
+	<!--end list-wrapper-->
+	<div class="list-wrapper">
+		<h2 style="color: #FA5858;">Add your <b style="color: #DA2E2E;">negative</b> words or phrases</h2>
+		<div class="word-container">
+			<header>
+				<div style="display: flex; flex-direction: row; padding: 0 0 5px 2px;">
+					<div style="text-align: left; flex-grow:2;">Phrase</div>
+					<div style="text-align: left; flex-grow:1;">Weight</div>
+					<div style="text-align: left; flex-grow:1;"></div>
+				</div>
+				<form class="word-form" id="word-form-neg">
+					<input type="text" id="text-neg" placeholder="Write a negative Word.."/>
+					<input type="number" name="weight" min="0" max="100" id="weight-neg" placeholder="Weight" value="1"/>
+					<input type="submit" class="btn" value="Add" />
+				</form>
+				<div class="scroll_holder">
+					<div class="scroller"></div>
+				</div>
+			</header>
+			<ul class="words" id="word-neg" style="background-color: #F6EAEA">
+			</ul>
+			<footer>
+				<span class="count" id="count-neg"></span>
+				<button class="btn clear-all" id="clear-all-neg">Delete All</button>
+			</footer>
+		</div>
+	</div>
+	<!--end list-wrapper-->
+	<div style="clear:both"></div>
+
+	<h2>Insert your <b>Text</b> here:</h2>
+	<select id="textUploadSelect" style="display: inline;">
+		<option value="1">Upload a single .pdf file containing a document</option>
+		<option value="2">Upload a single .txt file containing your documents in json format</option>
+		<option value="3" selected="selected">Paste your custom text</option>
+	</select>
+	<input id="docPasteExample" class="btn example" name="example" onclick="getElementById('docText').value = httpGet('/static/interactiveminingExample.txt')" value="Insert example text" style="display: inline;" type="button">
+	<div id="docUploadText" class="file-upload-wrapper js" style="display: none;">
+		<h2 class="title">Add your <b>Zip File</b> of .PDF files</h2>
+		<form id="zip-file-input-form" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+			<header>
+				<input type="file" name="upload" id="zip-file-input" class="inputfile" />
+				<label for="zip-file-input" id="zip-file-input-label" ><strong><svg xmlns="http://www.w3.org/2000/svg" width="20" height="17" viewBox="0 0 20 17"><path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"/></svg> Choose a file&hellip;</strong> <span id="zip-file-title-text"></span></label>
+				<button id="zip-upload-button" class="btn" style="float: right; margin-right: 5px;" >Start upload</button>
+			</header>
+			<footer>
+				<span class="response" id="zip-file-upload-response"></span>
+			</footer>
+		</form>
+	</div>
+	<form method="post" name="toanalyze" target="iframe">
+		<div id="docPasteText">
+			<textarea id="docText" class="textarea" onblur="this.placeholder = 'Paste your citations here, separated by newline'" onfocus="this.placeholder = ''" name="document" rows="20" placeholder="Paste your citations here, separated by newline"></textarea>
+		</div>
+
+		<div class="filters-wrapper">
+			<h2>Select the <b>preprocessing</b> steps to clean your text.</h2>
+
+			<h4>A filter that removes stop words from the token text.</h4>
+			<input type="checkbox" name="stopwords" id="stop-words-filter" checked>
+			<label for="stop-words-filter">Stop Words</label>
+
+			<h4>A filter that normalizes token text to lower case.</h4>
+			<input type="checkbox" name="lowercase" id="lowercase-filter" checked>
+			<label for="lowercase-filter">Lowercase</label>
+
+			<h4>A filter that splits the text into words on intra-word delimiters (all non alpha-numeric characters).</h4>
+			<input type="checkbox" name="keywords" id="keywords-filter" checked>
+			<label for="keywords-filter">Keywords</label>
+		</div>
+		<!--end filters-wrapper-->
+
+		<input id="docs-file-uploaded" type="checkbox" name="docsfileuploaded" hidden>
+		<textarea id="pos-words-text" name="poswords" hidden></textarea>
+		<textarea id="neg-words-text" name="negwords" hidden></textarea>
+		<br>
+		<input id="submit" type="submit" value="Execute algorithm" class="btn">
+	</form>
+	<iframe name="iframe" src="?data=0" width=99% height="200px" style="border:0px"></iframe>
+</div>
+<script>(function(e,t,n){var r=e.querySelectorAll("html")[0];r.className=r.className.replace(/(^|\s)no-js(\s|$)/,"$1js$2")})(document,window,0);</script>
+<script src="https://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+<script src="/static/interactivemining.js" type="text/javascript"></script>
+{% end %}

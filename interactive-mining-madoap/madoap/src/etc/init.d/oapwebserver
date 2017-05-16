@@ -1,0 +1,74 @@
+#! /bin/sh
+# oastatwebserver: OpenAIRE statistics server.
+#
+#   chkconfig: 2345 56 10
+# description:  OpenAIRE statistics server.
+#
+
+### BEGIN INIT INFO
+# Provides:          oawebserver
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:      
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6 
+# Short-Description: OA web server
+### END INIT INFO
+
+# Source function library.
+
+# RedHat
+#. /etc/rc.d/init.d/functions
+
+# Debian
+# to install:
+# chmod 755 /etc/init.d/oawebserver
+# update-rc.d oapwebserver defaults
+
+. /lib/lsb/init-functions
+
+DUSER="openaire"
+SERVERNAME="oapwebserver"
+
+start()
+{
+#iptables -t nat -A PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 8080
+#iptables -t nat -A PREROUTING -p udp -m udp --dport 80 -j REDIRECT --to-ports 8080
+#iptables -t nat -A PREROUTING -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 8443 
+#iptables -t nat -A PREROUTING -p udp -m udp --dport 443 -j REDIRECT --to-ports 8443 
+
+        echo -n $"Starting OpenAIRE stat server: "
+	su $DUSER -c 'screen -r '$SERVERNAME' -qX quit' > /dev/null 2>&1
+        su $DUSER -c 'screen -q -d -m -S '$SERVERNAME' /usr/bin/python /home/'$DUSER'/programs/madoap/src/madserver.py' > /dev/null 2>&1
+        echo
+}
+
+stop()
+{
+        echo -n $"Shutting down web server: "
+	su $DUSER -c 'screen -r '$SERVERNAME' -qX quit' > /dev/null 2>&1
+
+        echo
+}
+
+
+# See how we were called.
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart|reload)
+        stop
+	sleep 1
+        start
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|restart|reload}"
+        exit 1
+esac
+
+exit 0
+

@@ -1,0 +1,152 @@
+table.top{
+border: 0px ;
+border-spacing:10px;
+font-family:"Bookman Old Style";
+}
+.usimilar{
+display:none;
+}
+
+.uprofile{
+display:none;
+}
+
+div#uprofile td.innerheader{
+	background-color:#ccff66;
+	border:1px ridge;
+	width:110;
+	/*font-weight: bold; */
+	}
+	
+div#uprofile	td.username{
+background-color:#ccff66;
+}
+
+table.userProfile{
+    width:100%;
+border: 2px ridge;
+border-spacing:0px;
+border-color:#333333;
+background-color:#333333;
+}
+
+.username {
+font-family:"Bookman Old Style";
+font-size:36px;
+text-align:center;
+}
+
+td.username{
+background-color:#999999;
+}
+
+tr.username{
+border:#333333;
+}
+
+table.innerprofile{
+/*border-spacing: 0pt;*/
+/*padding:3px;*/
+width:100%;
+border-spacing:0px;
+border:1px solid; 
+border-color:#333333;
+}
+
+table.innerprofile td{
+/*dding:3px;*/
+border-spacing:0px;
+border:1px solid; 
+border-color:#333333;
+}
+
+td.innerheader{
+background-color:#cccccc;
+border:1px ridge;
+width:110;
+/*font-weight: bold; */
+}
+
+
+
+
+
+tr.innerheader{
+
+border:1px ridge;
+
+}
+
+table.inner{
+border:0px;
+width:100%;
+border-spacing:0px;
+background-color:#ffffff;
+border-color:#ffffff;
+}
+
+
+td.innerprofile{
+background-color:#ffffff;
+border-color:#333333;
+border:1px solid; 
+}
+
+    html {
+	
+}
+body {
+	 margin:0 auto;
+	 padding:0; 
+	 width:100%;
+	 height:100%; 
+	 font-family:Arial, Helvetica, sans-serif;
+	 /*background-color:#999;*/
+}
+/* Global */
+a { 
+	font-weight:bold;
+	text-decoration:underline;
+	color:#333;
+        position: relative;
+}
+a:hover { 
+	color:#5882FA;
+}
+
+.extra {
+
+   text-decoration:none;
+}
+
+ a span.extra {display: none; 
+   text-decoration:none;
+   
+}
+
+
+ a:hover span.extra {
+   text-decoration:none;
+   display: block;
+   width:130px;
+   position: absolute;
+   padding: 5px; 
+   /*margin: 5px; */
+   z-index: 10000;
+   color: #000000;
+   background: white;
+   font: 10px Verdana, sans-serif; 
+   left:10px;
+   top:15px
+ }
+
+
+
+ #term-vis {
+     padding:50px;
+margin-left:auto;
+margin-right:auto;
+width:70%;
+border:1px solid rgb(204, 204, 204);
+text-align:center;
+ }
