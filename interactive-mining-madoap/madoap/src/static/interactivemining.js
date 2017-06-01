@@ -1,3 +1,34 @@
+function handleConfigDownload() {
+    var formData = new FormData();
+    formData.append("poswords", $('#pos-words-text').val());
+    formData.append("negwords", $('#neg-words-text').val());
+    filters_list = {};
+    filters_list["stopwords"] = $('#stop-words-filter').prop('checked')===true?1:0;
+    filters_list["lowercase"] = $('#lowercase-filter').prop('checked')===true?1:0;
+    filters_list["keywords"] = $('#keywords-filter').prop('checked')===true?1:0;
+    formData.append("filters", JSON.stringify(filters_list));
+    $.ajax({
+        url: "save-config-controller",
+        type: 'POST',
+        data: formData,
+        async: false,
+        success: function (data) {
+            $('#file-upload-response').html(JSON.parse(data).respond)
+            // if (data.indexOf('successfully!') != -1) {
+            //   $('#file-uploaded')[0].checked = true;
+            // }
+            window.location="download-config-controller?saveprofile=1"
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+          $('#file-upload-response').html('<b style=\"color: red\">File Failed to Upload!</b>'+xhr.status)
+          // $('#file-uploaded')[0].checked = false;
+        },
+        cache: false,
+        contentType: false,
+        processData: false
+    });
+}
+
 function handleLoadExampleFile() {
     $("#file-input-operation").val('example');
     $("#file-title-text").html('');
@@ -64,6 +95,58 @@ $( window ).resize(function() {
     .on( 'focus', function(){ $input.addClass( 'has-focus' ); })
     .on( 'blur', function(){ $input.removeClass( 'has-focus' ); });
   });
+
+  function handleProfileUploadButton() {
+      $("form#profile-input-form").submit(function(){
+          if ($('#profile-input')[0].value === "") {
+            window.alert("You must specify a profile to import.");
+            return false;
+          }
+          // $('#user-id').val(getCookie("madgikmining"));
+          $("#profile-input-operation").val('normal');
+          var formData = new FormData($(this)[0]);
+          $.ajax({
+              url: "upload-profile-controller",
+              type: 'POST',
+              data: formData,
+              async: false,
+              success: function (data) {
+                  $('#profile-upload-response').html(JSON.parse(data).respond);
+                  obj = JSON && JSON.parse(data) || $.parseJSON(data);
+                  console.log(obj);
+                  for (var key1 in obj) {
+                    if (obj.hasOwnProperty(key1)) {
+                      if (key1==="poswords") {
+                        // delete all poswords from the lists
+                        deleteAllPosWords(0);
+                        for (var key2 in obj[key1]) {
+                          createWord(1, generateId(1), key2, obj[key1][key2]);
+                        }
+                      } else if (key1 === "negwords") {
+                        deleteAllNegWords(0);
+                        for (var key2 in obj[key1]) {
+                          createWord(0, generateId(0), key2, obj[key1][key2]);
+                        }
+                      } else if (key1 === "filters") {
+                        for (var key2 in obj[key1]) {
+                          console.log(key2, obj[key1][key2]);
+                        }
+                      }
+                    }
+                  }
+              },
+              error: function (xhr, ajaxOptions, thrownError) {
+                $('#profile-upload-response').html('<b style=\"color: red\">File Failed to Upload!</b>'+xhr.status)
+                // $('#profile-uploaded')[0].checked = false;
+              },
+              cache: false,
+              contentType: false,
+              processData: false
+          });
+
+          return false;
+      });
+  }
 
   function handleFileUploadButton() {
         $("form#file-input-form").submit(function(){
@@ -152,6 +235,7 @@ $( window ).resize(function() {
           }
       });
   }
+
 
 
 /////////// LIST FUNCTIONS
@@ -445,46 +529,50 @@ $( window ).resize(function() {
      //     }
      //   }
      // };
+     var deleteAllPosWords = function(warnUser = 1) {
+      if(!warnUser || confirm('Are you sure you want to delete all the items in the list? There is no turning back after that.')){                 //remove items from DOM
+        var items = $('li[id ^= positive]');
+        items.addClass('removed-item').one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(e) {
+          $(this).remove();
+       });
+
+        //look for items in localStorage that start with word- and remove them
+        var keys = [];
+        for(var key in localStorage){
+           if(key.indexOf('positive') === 0){
+             localStorage.removeItem(key);
+           }
+        }
+        count_pos = 0;
+        updateCounter(1);
+      }
+      updatetextereas();
+    };
+
+    var deleteAllNegWords = function(warnUser = 1) {
+      if(!warnUser || confirm('Are you sure you want to delete all the items in the list? There is no turning back after that.')){                 //remove items from DOM
+        var items = $('li[id ^= negative]');
+        items.addClass('removed-item').one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(e) {
+          $(this).remove();
+       });
+
+        //look for items in localStorage that start with word- and remove them
+        var keys = [];
+        for(var key in localStorage){
+           if(key.indexOf('negative') === 0){
+             localStorage.removeItem(key);
+           }
+        }
+        count_neg = 0;
+        updateCounter(0);
+      }
+      updatetextereas();
+    };
+
   //handler for the "delete all" button
      var handleDeleteButton = function(){
-          $('#clear-all-pos').on('click', function(){
-            if(confirm('Are you sure you want to delete all the items in the list? There is no turning back after that.')){                 //remove items from DOM
-              var items = $('li[id ^= positive]');
-              items.addClass('removed-item').one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(e) {
-                $(this).remove();
-             });
-
-              //look for items in localStorage that start with word- and remove them
-              var keys = [];
-              for(var key in localStorage){
-                 if(key.indexOf('positive') === 0){
-                   localStorage.removeItem(key);
-                 }
-              }
-              count_pos = 0;
-              updateCounter(1);
-            }
-            updatetextereas();
-          });
-          $('#clear-all-neg').on('click', function(){
-            if(confirm('Are you sure you want to delete all the items in the list? There is no turning back after that.')){                 //remove items from DOM
-              var items = $('li[id ^= negative]');
-              items.addClass('removed-item').one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(e) {
-                $(this).remove();
-             });
-
-              //look for items in localStorage that start with word- and remove them
-              var keys = [];
-              for(var key in localStorage){
-                 if(key.indexOf('negative') === 0){
-                   localStorage.removeItem(key);
-                 }
-              }
-              count_neg = 0;
-              updateCounter(0);
-            }
-            updatetextereas();
-          });
+          $('#clear-all-pos').on('click', deleteAllPosWords);
+          $('#clear-all-neg').on('click', deleteAllNegWords);
       };
   
     var init = function(){
@@ -499,6 +587,7 @@ $( window ).resize(function() {
            handleFileUploadButton();
            handleZipFileUploadButton();
            handleDocsUploadSelect();
+           handleProfileUploadButton();
     };
   //start all
   init();

@@ -70,6 +70,9 @@ class Application(tornado.web.Application):
             (r"/", madAppQueryGenerator),
             (r"/importing-controller", importingControllerHandler),
             (r"/importing-text-controller", importingTextsControllerHandler),
+            (r"/save-config-controller", profileCreationHandler),
+            (r"/download-config-controller", profileServeHandler),
+            (r"/upload-profile-controller", profileUploadHandler),
             (r"/?$", madAppBarHandler),
             (r"/[^/]+/?$", madAppHandler),
             (r"/[^/]+/.+$", madAppDataHandler)
@@ -316,6 +319,8 @@ class madAppQueryGenerator(BaseHandler):
 
         # Get the unique user id from the coookie set
         user_id = self.get_secure_cookie('madgikmining')
+        if user_id is None:
+            return
         # data to be sent
         data = {}
         try:
@@ -409,19 +414,151 @@ class madAppQueryGenerator(BaseHandler):
             pass
         self.write(json.dumps(data))
         self.flush()
+        self.finish()
 
 
-class saveProfileHandler(BaseHandler):
+class profileCreationHandler(BaseHandler):
     def post(self):
-        """Controls the importing job as follows:
-            *** load-raw-data (reading and saving them in the DB)"""
         try:
             user_id = self.get_secure_cookie('madgikmining')
-            if 'saveprofile' in self.request.arguments:
-                print "asda"
+            if user_id is None:
+                return
+
+            import sys
+            sys.path.append(msettings.MADIS_PATH)
+            import madis
+            # get the database cursor
+            # profile file name
+            profile_file_name = "/tmp/OAMiningProfile_{0}.oamp".format(user_id)
+            cursor=madis.functions.Connection(profile_file_name).cursor()
+            # Create poswords table
+            cursor.execute("drop table if exists poswords", parse=False)
+            cursor.execute("create table poswords(c1,c2)", parse=False)
+            # Create negwords table
+            cursor.execute("drop table if exists negwords", parse=False)
+            cursor.execute("create table negwords(c1,c2)", parse=False)
+            # Create filters table
+            cursor.execute("drop table if exists filters", parse=False)
+            cursor.execute("create table filters(c1,c2)", parse=False)
+            # Create grants table
+            cursor.execute("drop table if exists grants", parse=False)
+            cursor.execute("create table grants(c1)", parse=False)
+            if 'poswords' in self.request.arguments and self.request.arguments['poswords'][0] != '{}':
+                # construct math string for positive words matching calculation with weights
+                pos_words = json.loads(self.request.arguments['poswords'][0])
+                cursor.executemany("insert into poswords(c1,c2) values(?,?)",
+                          (
+                                (key, value,) for key, value in pos_words.iteritems()
+                          )
+                )
+            if 'negwords' in self.request.arguments and self.request.arguments['negwords'][0] != '{}':
+                # construct math string for negative words matching calculation with weights
+                neg_words = json.loads(self.request.arguments['negwords'][0])
+                cursor.executemany("insert into negwords(c1,c2) values(?,?)",
+                          (
+                                (key, value,) for key, value in neg_words.iteritems()
+                          )
+                )
+            if 'filters' in self.request.arguments and self.request.arguments['filters'][0] != '{}':
+                # construct math string for negative words matching calculation with weights
+                filters = json.loads(self.request.arguments['filters'][0])
+                cursor.executemany("insert into filters(c1,c2) values(?,?)",
+                          (
+                                (key, value,) for key, value in filters.iteritems()
+                          )
+                )
+            if numberOfGrantsUploaded(user_id, self.get_secure_cookie('madgikmining_grantsuploaded')) != 0:
+                  cursor.execute("insert into grants select stripchars(c1) as c1 from (file '/tmp/p{0}.csv')".format(user_id))
+            cursor.close()
+
+            self.write(json.dumps({'respond': "File ploaded.<br><b>1 Code</b> loaded! <i>Please make sure that you separate each code with newline!</i>"}))
 
         except Exception as ints:
-            self.write(json.dumps({'respond': "<b style=\"color: red\">SOomething went very wrong!</b>"}))
+            self.write(json.dumps({'respond': "<b style=\"color: red\">Mining profile couldn't be saved!</b>"}))
+            print ints
+            return
+        self.finish()
+
+
+class profileServeHandler(BaseHandler):
+    def get(self):
+        try:
+            user_id = self.get_secure_cookie('madgikmining')
+            if user_id is None:
+                return
+            if 'saveprofile' in self.request.arguments:
+                print "asda"
+                profile_file_name = "/tmp/OAMiningProfile_{0}.oamp".format(user_id)
+                buf_size = 4096
+                self.set_header('Content-Type', 'application/octet-stream')
+                self.set_header('Content-Disposition', 'attachment; filename=' + "OAMiningProfile_{0}.oamp".format(user_id))
+                self.flush()
+                with open(profile_file_name, 'r') as f:
+                    while True:
+                        data = f.read(buf_size)
+                        if not data:
+                            break
+                        self.write(data)
+                self.finish()
+                # TODO delete file after sending if needed
+
+        except Exception as ints:
+            self.write(json.dumps({'respond': "<b style=\"color: red\">Something went very wrong!</b>"}))
+            print ints
+            return
+
+class profileUploadHandler(BaseHandler):
+    def post(self):
+        try:
+            user_id = self.get_secure_cookie('madgikmining')
+            if user_id is None:
+                return
+            # get file info and body from post data
+            fileinfo = self.request.files['upload'][0]
+            fname = fileinfo['filename']
+            extn = os.path.splitext(fname)[1]
+            # must be .pdf or .json
+            if extn != ".oamp":
+                self.write(json.dumps({'respond': "<b style=\"color: red\">File must be .oamp compatible profile</b>"}))
+                return
+            # write data to physical file
+            cname = "/tmp/profile{0}.oamp".format(user_id)
+            fh = open(cname, 'w')
+            fh.write(fileinfo['body'])
+            fh.close()
+            # extract data from profile file
+            import sys
+            sys.path.append(msettings.MADIS_PATH)
+            import madis
+            # get the profile database cursor
+            cursor=madis.functions.Connection(cname).cursor()
+
+            # data to be sent
+            data = {}
+            # Write to csv file the grants ids
+            if len([r for r in cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='grants'")]):
+                cursor.execute("output '/tmp/p{0}.csv' select * from grants".format(user_id))
+                numberOfGrants = numberOfGrantsUploaded(user_id, "puppet_value")
+                self.set_secure_cookie('madgikmining_grantsuploaded', str(numberOfGrants))
+                data['grants'] = numberOfGrants
+            # write to json the poswords
+            if len([r for r in cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='poswords'")]):
+                results = [r for r in cursor.execute("select c1, c2 from poswords")]
+                data['poswords'] = {value:key for value, key in results}
+            # write to json the negwords
+            if len([r for r in cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='negwords'")]):
+                results = [r for r in cursor.execute("select c1, c2 from negwords")]
+                data['negwords'] = {value:key for value, key in results}
+            # write to json the filters
+            if len([r for r in cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='filters'")]):
+                results = [r for r in cursor.execute("select c1, c2 from filters")]
+                data['filters'] = {value:key for value, key in results}
+            cursor.close()
+            self.write(json.dumps(data))
+            self.finish()
+
+        except Exception as ints:
+            self.write(json.dumps({'respond': "<b style=\"color: red\">Something went very wrong!</b>"}))
             print ints
             return
 
@@ -434,7 +571,8 @@ class importingControllerHandler(BaseHandler):
         try:
 
             user_id = self.get_secure_cookie('madgikmining')
-
+            if user_id is None:
+                return
             csv_file_name = "/tmp/p{0}.csv".format(user_id)
             csv_file = open(csv_file_name, 'w')
 
