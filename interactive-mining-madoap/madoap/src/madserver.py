@@ -73,6 +73,7 @@ class Application(tornado.web.Application):
             (r"/save-config-controller", profileCreationHandler),
             (r"/download-config-controller", profileServeHandler),
             (r"/upload-profile-controller", profileUploadHandler),
+            (r"/create-upload-profile", createUploadProfileHandler),
             (r"/?$", madAppBarHandler),
             (r"/[^/]+/?$", madAppHandler),
             (r"/[^/]+/.+$", madAppDataHandler)
@@ -481,6 +482,7 @@ class profileCreationHandler(BaseHandler):
 
 
 class profileServeHandler(BaseHandler):
+    passwordless=True
     def get(self):
         try:
             user_id = self.get_secure_cookie('madgikmining')
@@ -696,6 +698,23 @@ class importingTextsControllerHandler(BaseHandler):
             self.write(json.dumps({'respond': "<b style=\"color: red\">File Failed to Upload!</b>"}))
             print ints
             return
+
+
+class createUploadProfileHandler(BaseHandler):
+    passwordless=True
+    # When loading the page first time and evry refresh
+    def get(self):
+        if 'data' in self.request.arguments:
+            return
+        else:
+            # check if we already gave client a user_id
+            user_id = self.get_secure_cookie('madgikmining')
+            if not user_id:
+                # give him a unique user_id
+                user_id = 'user{0}'.format(datetime.datetime.now().microsecond + (random.randrange(1, 100+1) * 100000))
+                self.set_secure_cookie('madgikmining', user_id)
+            # check if he already uploaded his grants ids and inform him via a message
+            self.render('create_upload_profile.html', settings=msettings)
 
 
 
