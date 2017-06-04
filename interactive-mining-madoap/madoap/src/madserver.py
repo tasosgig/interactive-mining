@@ -100,7 +100,7 @@ def auth_callback(request, realm, username, password):
 
 def numberOfGrantsUploaded(user_id, cookie_set):
     if cookie_set and user_id:
-        file_name = "/tmp/p%s.csv" % (user_id)
+        file_name = "/tmp/p%s.tsv" % (user_id)
         if os.path.isfile(file_name):
             num_lines = sum(1 for line in open(file_name))
             if str(num_lines) == cookie_set: 
@@ -371,10 +371,40 @@ class madAppQueryGenerator(BaseHandler):
 
             # get the database cursor
             cursor=msettings.Connection.cursor()
+            # clean grants and acknowledgments
+            ackn_filters = "regexpr(\"\\'\", c2,'')"
+            if 'ackn-keywords' in self.request.arguments and self.request.arguments['ackn-keywords'][0] in trueset:
+                ackn_filters = 'keywords('+ackn_filters+')'
+            if 'ackn-lowercase' in self.request.arguments and self.request.arguments['ackn-lowercase'][0] in trueset:
+                ackn_filters = 'lower('+ackn_filters+')'
+            if 'ackn-stopwords' in self.request.arguments and self.request.arguments['ackn-stopwords'][0] in trueset:
+                ackn_filters = 'filterstopwords('+ackn_filters+')'
+            list(cursor.execute("drop table if exists grantstemp"+user_id, parse=False))
+            query_pre_grants = "create temp table grantstemp{0} as select stripchars(c1) as c1, case when c2 is null then null else {1} end as c2 from (setschema 'c1,c2' file '/tmp/p{0}.tsv' dialect:tsv)".format(user_id, ackn_filters)
+            cursor.execute(query_pre_grants)
             # create temp table with grants
+            # select c1, jmergeregexp(jgroup('(\b\s)'||middle||'(\b\s)')) from (select c1,textwindow2s(regexpr("([\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|])", regexpr("\'",c2,""),'\\\1'),0,2,0) from (setschema 'c1,c2' file '/tmp/p{1}.csv' dialect:tsv) where c1 or c1!='') group by c1;
+            # select c1, jmergeregexp(jgroup(case when middle=" " then '(?!.*)' else '(\b\s)'||middle||'(\b\s)' end)) as c2 froselect c1,textwindow2s(regexpr("([\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|])", regexpr("\'",case when c2 is null then " " else c2 end,""),'\\\1'),0,2,0) from (setschema 'c1,c2' file 'fp7grants.csv' dialect:tsv) where c1 or c1!='') group by c1;
+            # select c1, jmergeregexp(jgroup('(\b\s)'||middle||'(\b\s)')) as c2 from (setschema 'c1,prev,middle,next' select c1,textwindow2s(regexpr("([\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|])", regexpr("\'",c2,""),'\\\1'),0,2,0) from grantstemp{0} where (c1 or c1!='') and c2 not null) group by c1 union all select distinct c1, "(?!.*)" as c2 from grantstemp{0} where (c1 or c1!='') and c2 is null;
             list(cursor.execute("drop table if exists grants"+user_id, parse=False))
-            query0 = "create temp table grants{0} as select stripchars(c1) as c3 from (file '/tmp/p{1}.csv')".format(user_id, user_id)
+            # string concatenation workaround because of the special characters conflicts
+            if 'word-split' in self.request.arguments and self.request.arguments['word-split'][0] != '':
+                words_split = int(self.request.arguments['word-split'][0])
+                if 0 < words_split and words_split <= 10:
+                    acknowledgment_split = r'textwindow2s(regexpr("([\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|])", c2, "\\\1"),0,'+str(words_split)+r',0)'
+                else:
+                    acknowledgment_split = r'"prev" as prev, regexpr("([\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|])", c2, "\\\1") as middle, "next" as next'
+            query0 = r"create temp table grants"+user_id+r' as select c1 as c3, jmergeregexp(jgroup("(?<=[\s\b])"||middle||"(?=[\s\b])")) as c4 from '+r"(setschema 'c1,prev,middle,next' select c1, "+acknowledgment_split+r' from grantstemp'+user_id+r' where (c1 or c1!="") and c2 not null) group by c1 union all select distinct c1 as c3, "(?!.*)" as c4 from grantstemp'+user_id+r" where (c1 or c1!='') and c2 is null"
             cursor.execute(query0)
+
+            # for r in cursor.execute("select * from grants"+user_id):
+            #     print r[0], r[1]
+
+
+            # create temp table with grants
+            # list(cursor.execute("drop table if exists grants"+user_id, parse=False))
+            # query0 = "create temp table grants{0} as select stripchars(c1) as c3, c2 as c4 from (setschema 'c1,c2' file '/tmp/p{1}.csv' dialect:tsv) where c1 or c1!=''".format(user_id, user_id)
+            # cursor.execute(query0)
             if 'document' in self.request.arguments and self.request.arguments['document'][0] != '':
                 doc_filters = "regexpr('[\n|\r]',?,' ')"
                 if 'keywords' in self.request.arguments and self.request.arguments['keywords'][0] in trueset:
@@ -386,7 +416,8 @@ class madAppQueryGenerator(BaseHandler):
                 list(cursor.execute("select var('doc"+user_id+"', "+doc_filters+")", (doc,), parse=False))
 
                 #print 'query', [r for r in cursor.execute("select middle, j2s(prev,middle,next) %s from (select textwindow2s(var('doc%s'),10,1,5))" % (conf, user_id))]
-                query1 = "select c1 {0} from (select textwindow2s(var('doc{1}'),10,1,5)), (cache select stripchars(c1) as c1 from (file '/tmp/p{2}.csv')) T where middle = T.c1 {3}".format(conf, user_id, user_id, whr_conf)
+                query1 = "select c1, max(confidence) as confidence from (select c1, regexpcountuniquematches(c2, j2s(prev,middle,next)) as confidence {0} from (select textwindow2s(var('doc{1}'),10,1,5)), (cache select c3 as c1, c4 as c2 from grants{1}) T where middle = T.c1 {2}) group by c1".format(conf, user_id, whr_conf)
+                # query1 = "select c1, regexpcountuniquematches(c2, j2s(prev,middle,next)) as confidence {0} from (select textwindow2s(var('doc{1}'),10,1,5)), (cache select c3 as c1, c4 as c2 from grants{1}) T where middle = T.c1 {2}".format(conf, user_id, whr_conf)
                 data['funding_info'] = [{"code": r[0]} for r in cursor.execute(query1)]
             elif numberOfDocsUploaded(user_id) != 0:
                 doc_filters = "regexpr('[\n|\r]',c2,' ')"
@@ -397,10 +428,11 @@ class madAppQueryGenerator(BaseHandler):
                 if 'stopwords' in self.request.arguments and self.request.arguments['stopwords'][0] in trueset:
                     doc_filters = 'filterstopwords('+doc_filters+')'
                 list(cursor.execute("drop table if exists docs"+user_id, parse=False))
-                query1 = "create temp table docs{0} as select c1, {1} as c2 from (setschema 'c1,c2' select jsonpath(c1, '$.id', '$.text') from (file '/tmp/docs{2}.json'))".format(user_id, doc_filters, user_id)
+                query1 = "create temp table docs{0} as select c1, {1} as c2 from (setschema 'c1,c2' select jsonpath(c1, '$.id', '$.text') from (file '/tmp/docs{0}.json'))".format(user_id, doc_filters)
                 cursor.execute(query1)
 
-                query2 = "select c1, c3 {0} from (select c1, textwindow2s(c2,10,1,5) from (select * from docs{1})), (select c3 from grants{2}) T where middle = T.c3 {3}".format(conf, user_id, user_id, whr_conf)
+                query2 = "select c1, c3, max(confidence) as confidence from (select c1, c3, regexpcountuniquematches(c4, j2s(prev,middle,next)) as confidence {0} from (select c1, textwindow2s(c2,10,1,5) from (select * from docs{1})), (select c3, c4 from grants{1}) T where middle = T.c3 {2}) group by c1".format(conf, user_id, whr_conf)
+                # query2 = "select c1, c3 {0} from (select c1, textwindow2s(c2,10,1,5) from (select * from docs{1})), (select c3 from grants{1}) T where middle = T.c3 {2}".format(conf, user_id, whr_conf)
                 results = [r for r in cursor.execute(query2)]
                 data['funding_info'] = [{"code": r[1]} for r in results]
 
@@ -575,7 +607,7 @@ class importingControllerHandler(BaseHandler):
             user_id = self.get_secure_cookie('madgikmining')
             if user_id is None:
                 return
-            csv_file_name = "/tmp/p{0}.csv".format(user_id)
+            csv_file_name = "/tmp/p{0}.tsv".format(user_id)
             csv_file = open(csv_file_name, 'w')
 
             body_split = [l.strip() for l in StringIO.StringIO(self.request.body).readlines()]

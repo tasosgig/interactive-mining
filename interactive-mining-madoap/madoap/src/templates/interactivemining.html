@@ -161,6 +161,25 @@
 			<input type="checkbox" name="keywords" id="keywords-filter" checked>
 			<label for="keywords-filter">Keywords</label>
 		</div>
+
+		<div class="acknowledgement-wrapper">
+			<h2>Select the <b>configuration</b> for the suggested statements.</h2>
+
+			<h4>Choose in how many word-pairs each suggested statement will be splitted. (Use 0 to not split the suggested statements).</h4>
+			<input type="number" name="word-split" min="0" max="10" id="word-split" placeholder="Word pairs" value="0"/>
+
+			<h4>Remove stop words from the suggested statements.</h4>
+			<input type="checkbox" name="ackn-stopwords" id="ackn-stop-words-filter" checked>
+			<label for="ackn-stop-words-filter">Stop Words</label>
+
+			<h4>Normalize suggested statements to lower case.</h4>
+			<input type="checkbox" name="ackn-lowercase" id="ackn-lowercase-filter" checked>
+			<label for="ackn-lowercase-filter">Lowercase</label>
+
+			<h4>Split the suggested statements into words on intra-word delimiters (all non alpha-numeric characters).</h4>
+			<input type="checkbox" name="ackn-keywords" id="ackn-keywords-filter" checked>
+			<label for="ackn-keywords-filter">Keywords</label>
+		</div>
 		<!--end filters-wrapper-->
 
 		<input id="docs-file-uploaded" type="checkbox" name="docsfileuploaded" hidden>
