@@ -33,7 +33,7 @@
 	</blockquote> -->
 </div>
 <div id="page" style="margin:0">
-	<div class="file-upload-wrapper js">
+	<div class="file-upload-wrapper js" style="margin-bottom: 389px;">
 		<h2>Add your <b>Text File</b> of codes</h2>
 		<form id="file-input-form" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
 			<header>
@@ -147,6 +147,25 @@
 			<h4>A filter that splits the text into words on intra-word delimiters (all non alpha-numeric characters).</h4>
 			<input type="checkbox" name="keywords" id="keywords-filter" checked>
 			<label for="keywords-filter">Keywords</label>
+		</div>
+
+		<div class="acknowledgement-wrapper" style="position: absolute;top: 356px;">
+			<h2>Select the <b>configuration</b> for the suggested statements.</h2>
+
+			<h4>Choose in how many word-pairs each suggested statement will be splitted. (Use 0 to not split the suggested statements).</h4>
+			<input type="number" name="word-split" min="0" max="10" id="word-split" placeholder="Word pairs" value="0"/>
+
+			<h4>Remove stop words from the suggested statements.</h4>
+			<input type="checkbox" name="ackn-stopwords" id="ackn-stop-words-filter" checked>
+			<label for="ackn-stop-words-filter">Stop Words</label>
+
+			<h4>Normalize suggested statements to lower case.</h4>
+			<input type="checkbox" name="ackn-lowercase" id="ackn-lowercase-filter" checked>
+			<label for="ackn-lowercase-filter">Lowercase</label>
+
+			<h4>Split the suggested statements into words on intra-word delimiters (all non alpha-numeric characters).</h4>
+			<input type="checkbox" name="ackn-keywords" id="ackn-keywords-filter" checked>
+			<label for="ackn-keywords-filter">Keywords</label>
 		</div>
 		<!--end filters-wrapper-->
 

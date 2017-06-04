@@ -11,7 +11,8 @@ h4 {
 
 .file-upload-wrapper,
 .list-wrapper,
-.filters-wrapper {
+.filters-wrapper,
+.acknowledgement-wrapper {
   margin-right: 30px;
   margin-bottom: 30px;
   background-color: #f5f5f5;
@@ -30,7 +31,8 @@ h4 {
   width: 400px;
 }
 
-.filters-wrapper {
+.filters-wrapper,
+.acknowledgement-wrapper {
   max-width: 850px;
   min-width: 500px;
 }
