@@ -34,7 +34,8 @@
 </div>
 <div id="page" style="margin:0">
 	<div class="file-upload-wrapper js" style="margin-bottom: 389px;">
-		<h2>Add your <b>Text File</b> of codes</h2>
+		<h2>Add your <b>text file</b> of project codes or (sub)community names</h2>
+		<h4>This file contains two tab separated columns. The first column contains the project code or the name of the community, and the second column contains its specific suggested acknowledgement.</h4>
 		<form id="file-input-form" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
 			<header>
 				<input name="operation" id="file-input-operation" hidden />
@@ -149,10 +150,10 @@
 			<label for="keywords-filter">Keywords</label>
 		</div>
 
-		<div class="acknowledgement-wrapper" style="position: absolute;top: 356px;">
+		<div class="acknowledgement-wrapper" style="position: absolute;top: 388px;">
 			<h2>Select the <b>configuration</b> for the suggested statements.</h2>
 
-			<h4>Choose in how many word-pairs each suggested statement will be splitted. (Use 0 to not split the suggested statements).</h4>
+			<h4>Select the length of the N-grams used to be matched in the text.</h4>
 			<input type="number" name="word-split" min="0" max="10" id="word-split" placeholder="Word pairs" value="0"/>
 
 			<h4>Remove stop words from the suggested statements.</h4>
