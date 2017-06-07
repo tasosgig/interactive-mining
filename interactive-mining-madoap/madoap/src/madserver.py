@@ -74,6 +74,9 @@ class Application(tornado.web.Application):
             (r"/download-config-controller", profileServeHandler),
             (r"/upload-profile-controller", profileUploadHandler),
             (r"/create-upload-profile", createUploadProfileHandler),
+            (r"/upload-codes", uploadCodesHandler),
+            (r"/configure-profile", configureProfileHandler),
+            (r"/save-profile", saveProfileHandler),
             (r"/?$", madAppBarHandler),
             (r"/[^/]+/?$", madAppHandler),
             (r"/[^/]+/.+$", madAppDataHandler)
@@ -745,9 +748,52 @@ class createUploadProfileHandler(BaseHandler):
                 # give him a unique user_id
                 user_id = 'user{0}'.format(datetime.datetime.now().microsecond + (random.randrange(1, 100+1) * 100000))
                 self.set_secure_cookie('madgikmining', user_id)
-            # check if he already uploaded his grants ids and inform him via a message
             self.render('create_upload_profile.html', settings=msettings)
 
+
+class uploadCodesHandler(BaseHandler):
+    passwordless=True
+    # When loading the page first time and evry refresh
+    def get(self):
+        if 'data' in self.request.arguments:
+            return
+        else:
+            # check if we already gave client a user_id
+            user_id = self.get_secure_cookie('madgikmining')
+            if user_id is None:
+                return 
+            # check if he already uploaded his grants ids and inform him via a message
+            self.render('upload_codes.html', settings=msettings)
+
+
+class configureProfileHandler(BaseHandler):
+    passwordless=True
+    # When loading the page first time and evry refresh
+    def get(self):
+        if 'data' in self.request.arguments:
+            return
+        else:
+            # check if we already gave client a user_id
+            user_id = self.get_secure_cookie('madgikmining')
+            if user_id is None:
+                return 
+            # check if he already uploaded his grants ids and inform him via a message
+            self.render('configure_profile.html', settings=msettings)
+
+
+class saveProfileHandler(BaseHandler):
+    passwordless=True
+    # When loading the page first time and evry refresh
+    def get(self):
+        if 'data' in self.request.arguments:
+            return
+        else:
+            # check if we already gave client a user_id
+            user_id = self.get_secure_cookie('madgikmining')
+            if user_id is None:
+                return 
+            # check if he already uploaded his grants ids and inform him via a message
+            self.render('save_profile.html', settings=msettings)
 
 
 class madAppHandler(BaseHandler):

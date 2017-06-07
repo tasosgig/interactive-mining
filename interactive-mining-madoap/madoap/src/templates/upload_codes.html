@@ -3,8 +3,40 @@
 {% block content %}
 <title>Upload project codes</title>
 
-https://getuikit.com/docs/upload
+<button class="uk-close-large" type="button" uk-close></button>
+<div class="uk-container tm-toolbar custom-discover-toolbar uk-visible@m uk-container-small">
+    <div class="uk-flex uk-flex-middle">
+        <div class="uk-margin-auto-right">
+            <div class="uk-grid-medium uk-child-width-auto uk-flex-middle uk-grid uk-grid-stack" uk-grid="margin: uk-margin-small-top">
+                <div class="uk-first-column">
+                    <ul class="uk-subnav uk-subnav-line">
+                        <li class="custom-discover-li"><a href="#" class="router-link-active">Upload your project codes</a></li>
+                        <li><a href="#">Configure the matching proccess</a></li>
+                        <li><a href="#">Save matching profile</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<span class="uk-label">TXT</span>
+<div class="uk-container uk-container-small">
+    <h4 title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom">Upload your project codes you want to match <span uk-icon="icon: info"></span></h4>
+    <div class="test-upload uk-placeholder uk-text-center">
+        <p><span uk-icon="icon: upload; ratio: 3.5"></span></p>
+        <p>
+            <span class="uk-text-middle">Attach project codes by dropping them here or</span>
+            <div uk-form-custom>
+                <input type="file">
+                <span class="uk-link">browse file</span>
+            </div>
+        </p>
+        <p>
+            <span class="uk-label uk-margin-small-right">TSV</span><span class="uk-label">TXT</span>
+            <span class="uk-text">file types</span>
+        </p>
+        <p class="uk-text-middle">Maximum 10MB upload</p>
+    </div>
+</div>
 
 {% end %}
