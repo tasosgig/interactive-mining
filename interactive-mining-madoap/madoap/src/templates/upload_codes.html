@@ -3,7 +3,7 @@
 {% block content %}
 <title>Upload project codes</title>
 
-<button class="uk-close-large" type="button" uk-close></button>
+<button class="uk-close-large" id="cancel-proccess-btn" type="button" uk-close></button>
 <div class="uk-container tm-toolbar custom-discover-toolbar uk-visible@m uk-container-small">
     <div class="uk-flex uk-flex-middle">
         <div class="uk-margin-auto-right">
@@ -21,8 +21,23 @@
 </div>
 
 <div class="uk-container uk-container-small">
-    <h4 title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom">Upload your project codes you want to match <span uk-icon="icon: info"></span></h4>
-    <div class="test-upload uk-placeholder uk-text-center">
+    <h4>Upload your project codes you want to match <span title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom" uk-icon="icon: info"></span></h4>
+
+    <div class="file-upload-wrapper js">
+        <form id="codes-file-input-form" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+            <header>
+                <input type="file" name="upload" id="codes-file-input" class="inputfile" />
+                <label for="codes-file-input" id="codes-file-input-label" ><strong><svg xmlns="http://www.w3.org/2000/svg" width="20" height="17" viewBox="0 0 20 17"><path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"/></svg> Choose a file&hellip;</strong> <span id="codes-file-title-text"></span></label>
+                <button id="upload-button" class="btn" style="float: right; margin-right: 5px;" >Upload</button>
+            </header>
+            <footer>
+                <span class="response" id="codes-file-upload-response">
+                </span>
+            </footer>
+        </form>
+    </div>
+
+<!--     <div class="test-upload uk-placeholder uk-text-center">
         <p><span uk-icon="icon: upload; ratio: 3.5"></span></p>
         <p>
             <span class="uk-text-middle">Attach project codes by dropping them here or</span>
@@ -36,7 +51,34 @@
             <span class="uk-text">file types</span>
         </p>
         <p class="uk-text-middle">Maximum 10MB upload</p>
+    </div> -->
+
+    <input id="initial-type-input" class="uk-input uk-form-width-medium uk-form-large uk-width-1-1 uk-text-center" type="text" placeholder="Start typing project or Paste">
+
+    <table id="data-table" class="uk-table uk-table-divider .uk-table-striped uk-table-hover">
+        <thead>
+            <tr>
+                <th class="uk-table-shrink">#</th>
+                <th class="uk-width-small">Name</th>
+                <th class="uk-table-expand">Acknowledgment</th>
+                <th class="uk-table-shrink"></th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td colspan="4"><button id="add-row-below" class="uk-button uk-button-small uk-button-default uk-width-1-1 uk-text-center">
+                    <span class="uk-text-middle"><span uk-icon="icon: plus-circle"></span> Add a row in the bottom</span>
+                </button></td>
+            </tr>
+        </tfoot>
+        <tbody>
+        </tbody>
+    </table>
+
+    <button id="next-button" class="uk-button uk-button-primary uk-margin-top uk-margin-right uk-float-right">Next</button>
+    <div >
     </div>
 </div>
 
+<script src="/static/upload-codes.js" type="text/javascript"></script>
 {% end %}

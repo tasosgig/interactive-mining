@@ -737,7 +737,7 @@ class importingTextsControllerHandler(BaseHandler):
 
 class createUploadProfileHandler(BaseHandler):
     passwordless=True
-    # When loading the page first time and evry refresh
+    # When loading the page first time and every refresh
     def get(self):
         if 'data' in self.request.arguments:
             return
@@ -749,11 +749,12 @@ class createUploadProfileHandler(BaseHandler):
                 user_id = 'user{0}'.format(datetime.datetime.now().microsecond + (random.randrange(1, 100+1) * 100000))
                 self.set_secure_cookie('madgikmining', user_id)
             self.render('create_upload_profile.html', settings=msettings)
+    # TODO Upload profile post
 
 
 class uploadCodesHandler(BaseHandler):
     passwordless=True
-    # When loading the page first time and evry refresh
+    # When loading the page first time and every refresh
     def get(self):
         if 'data' in self.request.arguments:
             return
@@ -764,6 +765,31 @@ class uploadCodesHandler(BaseHandler):
                 return 
             # check if he already uploaded his grants ids and inform him via a message
             self.render('upload_codes.html', settings=msettings)
+    def post(self):
+        try:
+            # get user id from cookie. Must have
+            user_id = self.get_secure_cookie('madgikmining')
+            if user_id is None:
+                return
+            if 'upload' in self.request.files:
+                # get file info and body from post data
+                fileinfo = self.request.files['upload'][0]
+                fname = fileinfo['filename']
+                extn = os.path.splitext(fname)[1]
+                # must be .pdf or .json
+                if extn != ".txt" and extn != ".pdf":
+                    self.write(json.dumps({'respond': "<b style=\"color: red\">File must be .pdf or .txt</b>"}))
+                    return
+                # write data to physical file
+                cname = "/tmp/docs{0}{1}".format(user_id, extn)
+                fh = open(cname, 'w')
+                fh.write(fileinfo['body'])
+                fh.close()
+
+        except Exception as ints:
+            self.write(json.dumps({'respond': "<b style=\"color: red\">File Failed to Upload!</b>"}))
+            print ints
+            return
 
 
 class configureProfileHandler(BaseHandler):
