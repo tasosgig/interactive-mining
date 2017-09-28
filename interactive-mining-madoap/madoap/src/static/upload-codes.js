@@ -41,7 +41,7 @@
 
     var onUserStartTyping = function() {
         $("#initial-type-input").on( 'keypress', function( e ){
-            $(this).css('display', 'none');
+            triggerDataTable();
             var value = $(this).val();
             var newId = generateId();
             addDataToTable(newId, value, "");
@@ -52,7 +52,10 @@
 
     var handleAddRowButton = function() {
         $('#add-row-below').on('click', function( e ) {
-            addDataToTable(generateId(), "", "");
+            var newId = generateId();
+            addDataToTable(newId, "", "");
+            var currentEle = $('#'+ newId).find("td.code");
+            editValue(currentEle, " ", 0);
         });
     }
 
@@ -88,6 +91,8 @@
             // $(this).children('td').each(function(ii, vv){
             //     data[i][ii] = $(this).text();
             // });
+            if ($(v).find("td.code").text() === '')
+              return true;
             data[$(v).find("td.code").text()] = $(v).find("td.acknowl").text();
         })
         return data
@@ -148,17 +153,27 @@
 
     var removeDataRow = function(id){
       var item = $('#' + id );
-      
+    
       item.addClass('removed-item')
           .one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(e) {
               $(this).remove();
+              // fix # column numbering
+              count_table_rows = 1;
+              $("#data-table tbody tr").each(function(i, v){
+                // data[i] = Array();
+                // $(this).children('td').each(function(ii, vv){
+                //     data[i][ii] = $(this).text();
+                // });
+                $(v).find("td.num").text(count_table_rows);
+                count_table_rows++;
+              })
            });
     };
 
     var count_table_rows = 1;
 
     var addDataToTable = function(id, code, acknowledgment) {
-        var row = '<tr id="' + id + '"><td>'+count_table_rows+'</td><td class="code">' + code + '</td><td class="acknowl">' + acknowledgment +'</td></tr>'
+        var row = '<tr id="' + id + '"><td class="num">'+count_table_rows+'</td><td class="code">' + code + '</td><td class="acknowl">' + acknowledgment +'</td></tr>'
         table = $('#data-table tbody');
 
         // if content is correct and not empty append to table
@@ -187,8 +202,13 @@
         });
     }
 
+    var triggerDataTable = function() {
+      $("#initial-type-input").remove();
+      $("#data-table").show();
+    }
+
     var handleFileUploadButton = function() {
-        $("form#codes-file-input-form").submit(function(){
+        $("form#codes-file-input-form").on('change', function(){
             if ($('#codes-file-input')[0].value === "") {
               window.alert("You must specify a data file to import.");
               return false;
@@ -209,6 +229,7 @@
                           addDataToTable(generateId(), key1, obj[key1]);
                         }
                     }
+                    triggerDataTable();
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
                   $('#codes-file-upload-response').html('<b style=\"color: red\">File Failed to Upload!</b>'+xhr.status)
@@ -223,8 +244,40 @@
         });
     }
 
+    var checkAlreadyUserState = function() {
+      var formData = new FormData();
+      formData.append("already", "");
+      $.ajax({
+          url: "upload-codes",
+          type: 'POST',
+          data: formData,
+          async: false,
+          success: function (data) {
+              obj = JSON && JSON.parse(data).data || $.parseJSON(data).data;
+              // console.log(obj);
+              var numOfCodes = 0;
+              for (var key1 in obj) {
+                  if (obj.hasOwnProperty(key1)) {
+                    addDataToTable(generateId(), key1, obj[key1]);
+                  }
+                  numOfCodes++
+              }
+              if (numOfCodes != 0) {
+                triggerDataTable();
+              }
+          },
+          error: function (xhr, ajaxOptions, thrownError) {
+            $('#codes-file-upload-response').html('<b style=\"color: red\">File Failed to Upload!</b>'+xhr.status)
+            // $('#file-uploaded')[0].checked = false;
+          },
+          cache: false,
+          contentType: false,
+          processData: false
+      });
+    }
+
     var init = function(){
-        localStorage.clear();
+        checkAlreadyUserState();
         handleFileUploadButton();
         onUserStartTyping();
         handleAddRowButton();

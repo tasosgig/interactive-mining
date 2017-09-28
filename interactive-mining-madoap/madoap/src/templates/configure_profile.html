@@ -2,17 +2,18 @@
 {% block configure_profile %} class="current" {% end %}
 {% block content %}
 <title>Configure profile</title>
+<link rel="stylesheet" href="/static/animations.css"/>
 
-<button class="uk-close-large" type="button" uk-close></button>
+<a href="/"><button id="cancel-main-btn" class="uk-close-large" type="button" uk-close></button></a>
 <div class="uk-container tm-toolbar custom-discover-toolbar uk-visible@m uk-container-small">
     <div class="uk-flex uk-flex-middle">
         <div class="uk-margin-auto-right">
             <div class="uk-grid-medium uk-child-width-auto uk-flex-middle uk-grid uk-grid-stack" uk-grid="margin: uk-margin-small-top">
                 <div class="uk-first-column">
                     <ul class="uk-subnav uk-subnav-line">
-                        <li><a href="#">Upload your project codes</a></li>
-                        <li class="custom-discover-li"><a class="router-link-active" href="#">Configure the matching proccess</a></li>
-                        <li><a href="#">Save matching profile</a></li>
+                        <li><a href="upload-codes">Upload your project codes</a></li>
+                        <li class="custom-discover-li"><a class="router-link-active" href="configure-profile">Configure the matching proccess</a></li>
+                        <li><a id="save-profile-option">Save matching profile</a></li>
                     </ul>
                 </div>
             </div>
@@ -48,7 +49,7 @@
                     </div>
                 </div>
                 <hr>
-                <ul uk-accordion id="uk-accordion">
+                <ul uk-accordion id="advanced-opts-toggle">
                     <li>
                         <h5 class="uk-accordion-title">Advance tools <span uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></h5>
                         <div class="uk-accordion-content">
@@ -77,8 +78,8 @@
                                                     </tbody>
                                                 </table>
                                                 <footer>
-                                                    <span class="count" id="count-pos"></span>
-                                                    <button class="btn clear-all" id="clear-all-pos">Delete All</button>
+                                                    <span class="count" id="count-pos">0</span>
+                                                    <button class="uk-button uk-button-default" disabled id="clear-all-pos">Delete All</button>
                                                 </footer>
                                             </div>
                                         </div>
@@ -104,8 +105,8 @@
                                                     </tbody>
                                                 </table>
                                                 <footer>
-                                                    <span class="count" id="count-neg"></span>
-                                                    <button class="btn clear-all" id="clear-all-neg">Delete All</button>
+                                                    <span class="count" id="count-neg">0</span>
+                                                    <button class="uk-button uk-button-default" disabled id="clear-all-neg">Delete All</button>
                                                 </footer>
                                             </div>
                                         </div>
@@ -122,12 +123,21 @@
                             <div class="uk-section uk-section-default">
                                 <div class="uk-container">
                                     <h5>Clean matching area's text<span uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></h5>
-                                    <div class="uk-margin uk-grid-small uk-child-width-auto" uk-grid>
-                                        <label>N-grams length<span uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span><input type="number" name="word-split" min="0" max="10" id="word-split" placeholder="Word pairs" value="2"/></label>
-                                        <label><input id="stop-words-filter" class="uk-checkbox" type="checkbox" checked> Remove stop words<span uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></label>
-                                        <label><input id="punctuation-filter" class="uk-checkbox" type="checkbox"> Remove punctuation<span uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></label>
-                                        <form class="uk-form-horizontal">
-                                            <label class="uk-form-label" for="letter-case-select">Letter case convertion to<span uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></label>
+                                    <form class="uk-form-stacked">
+                                        <div class="uk-margin">
+                                            <label class="uk-form-label" for="word-split">N-grams length <span uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></label>
+                                            <div class="uk-form-controls">
+                                                <input class="uk-input" type="number" name="word-split" min="0" max="10" id="word-split" placeholder="Word pairs" value="2"/>
+                                            </div>
+                                        </div>
+                                        <div class="uk-margin">
+                                            <label class="uk-form-label" for="stop-words-filter"><input id="stop-words-filter" class="uk-checkbox" type="checkbox"> Remove stop words <span uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></label>
+                                        </div>
+                                        <div class="uk-margin">
+                                            <label class="uk-form-label" for="punctuation-filter"><input id="punctuation-filter" class="uk-checkbox" type="checkbox"> Remove punctuation <span uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></label>
+                                        </div>
+                                        <div class="uk-margin">
+                                            <label class="uk-form-label" for="letter-case-select">Letter case convertion to <span uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></label>
                                             <div class="uk-form-controls">
                                                 <select class="uk-select" id="letter-case-select">
                                                     <option>None</option>
@@ -135,9 +145,8 @@
                                                     <option>Uppercase</option>
                                                 </select>
                                             </div>
-                                        </form>
-                                        
-                                    </div>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -150,8 +159,8 @@
                         <div>
                             <h4>Matching results<span uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></h4>
                         </div>
-                        <div>
-                            <div class="uk-float-right">
+                        <div id="documents-section" class="uk-inline">
+                            <div id="documents-change-btn" class="uk-float-right">
                                 <span id="docs-number" class="uk-text">0 documents uploaded</span>
                                 <span id="docs-more-btn" class="uk-margin-small-left" uk-icon="icon: more" style="display: none;"></span>
                             </div>
@@ -159,43 +168,40 @@
                     </div>
                     <button id="run-mining-btn" class="uk-button uk-button-primary uk-margin-top" disabled>Run mining</button>
                 </div>
-                <div id="initial-docs-upload-form" class="uk-section uk-section-muted uk-margin-top uk-padding">
-                    <div class="uk-container">
-                        <div class="uk-alert-danger" uk-alert>
-                            <a class="uk-alert-close" uk-close></a>
-                            <p>No documents to test matching accuracy.</p>
-                        </div>
-                        <h4>Choose a sample of documents to load<span uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></h4>
-                        <div class="uk-text-center">
-                            <button id="nih-sample" class="uk-button uk-width-large uk-button-primary uk-margin-small">NIH documents</button>
-                            <button id="rcuk-sample" class="uk-button uk-width-large uk-button-primary uk-margin-small">RCUK documents</button>
-                            <button id="arxiv-sample" class="uk-button uk-width-large uk-button-primary uk-margin-small">ARXIV documents</button>
-                        </div>
-                        <h4>Upload your project codes you want to match<span uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></h4>
-                        <div class="test-upload uk-placeholder uk-text-center">
-                            <p><span uk-icon="icon: upload; ratio: 3.5"></span></p>
-                            <p>
-                                <span class="uk-text-middle">Attach documents file by dropping them here or</span>
-                                <div uk-form-custom>
-                                    <form id="docs-input-form" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
-                                        <input type="file" name="upload" id="docs-file-input" class="inputfile">
-                                    </form>
-                                    <span class="uk-link">browse documents file</span>
-                                </div>
-                            </p>
-                            <p>
-                                <span class="uk-label uk-margin-small-right">JSON</span><span class="uk-label uk-margin-small-right">PDF</span><span class="uk-label">TXT</span>
-                                <span class="uk-text">file types</span>
-                            </p>
-                            <p class="uk-text-middle">Maximum 10MB upload</p>
-                        </div>
+                <div id="initial-docs-upload-form" class="uk-card uk-card-default uk-card-large uk-card-body">
+                    <h4>Choose a sample of documents to load<span uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></h4>
+                    <div class="uk-text-center">
+                        <button id="egi-sample" class="uk-button uk-width-large uk-button-primary uk-margin-small">EGI documents</button>
+                        <button id="rcuk-sample" class="uk-button uk-width-large uk-button-primary uk-margin-small">RCUK documents</button>
+                        <button id="arxiv-sample" class="uk-button uk-width-large uk-button-primary uk-margin-small">ARXIV documents</button>
+                    </div>
+                    <h4>Upload your project codes you want to match<span uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></h4>
+                    <div class="test-upload uk-placeholder uk-text-center">
+                        <p><span uk-icon="icon: upload; ratio: 3.5"></span></p>
+                        <p>
+                            <span class="uk-text-middle">Attach documents file by dropping them here or</span>
+                            <div uk-form-custom>
+                                <form id="docs-input-form" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+                                    <input type="file" name="upload" id="docs-file-input" class="inputfile">
+                                </form>
+                                <span class="uk-link">browse documents file</span>
+                            </div>
+                        </p>
+                        <p>
+                            <span class="uk-label uk-margin-small-right">JSON</span><span class="uk-label uk-margin-small-right">PDF</span><span class="uk-label">TXT</span>
+                            <span class="uk-text">file types</span>
+                        </p>
+                        <p class="uk-text-middle">Maximum 10MB upload</p>
                     </div>
                 </div>
                 <div id="results-section" class="uk-section uk-section-default" style="display: none;">
-                    <div class="uk-container">
-
+                    <div class="uk-container" style="overflow: auto; -webkit-overflow-scrolling: touch; max-height: 600px;">
+                        <ul id="docs-results" uk-accordion="multiple: true">
+                            
+                        </ul>
                     </div>
                 </div>
+                <button id="next-button" class="uk-button uk-button-primary uk-margin-top uk-margin-right uk-float-right">Next</button>
             </div>
         </div>
     </div>

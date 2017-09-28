@@ -113,6 +113,16 @@ def numberOfDocsUploaded(user_id):
             return num_lines
     return 0
 
+def deleteAllUserFiles(user_id):
+    if user_id:
+        file_name = "/tmp/p%s.tsv" % (user_id)
+        if os.path.isfile(file_name):
+            os.remove(file_name)
+        file_name = "/tmp/docs%s.json" % (user_id)
+        if os.path.isfile(file_name):
+            os.remove(file_name)
+
+
 class BaseHandler(ozhandler.DjangoErrorMixin, ozhandler.BasicAuthMixin, tornado.web.RequestHandler):
     def __init__(self, *args):
         tornado.web.RequestHandler.__init__(self, *args)
@@ -299,9 +309,6 @@ class createUploadProfileHandler(BaseHandler):
     def get(self):
         if 'data' in self.request.arguments:
             return
-        elif 'reset' in self.request.arguments:
-            # TODO RESET everything
-            print "TODO RESET everything"
         else:
             # check if we already gave client a user_id
             user_id = self.get_secure_cookie('madgikmining')
@@ -373,19 +380,23 @@ class uploadCodesHandler(BaseHandler):
     def get(self):
         if 'data' in self.request.arguments:
             return
-        else:
-            # check if we already gave client a user_id
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
-                return 
-            # check if he already uploaded his grants ids and inform him via a message
-            self.render('upload_codes.html', settings=msettings)
+        # check if we gave client a user_id
+        user_id = self.get_secure_cookie('madgikmining')
+        if user_id is None:
+            return 
+        if 'new' in self.request.arguments and self.request.arguments['new'][0] == '1':
+            msettings.RESET_FIELDS = 1
+            # reset everything
+            deleteAllUserFiles(user_id)
+        # check if he already uploaded his grants ids and inform him via a message
+        self.render('upload_codes.html', settings=msettings)
     def post(self):
         try:
             # get user id from cookie. Must have
             user_id = self.get_secure_cookie('madgikmining')
             if user_id is None:
                 return
+            # service to upload a tsv file with the codes. Returns the codes
             if 'upload' in self.request.files:
                 # get file info and body from post data
                 fileinfo = self.request.files['upload'][0]
@@ -398,7 +409,7 @@ class uploadCodesHandler(BaseHandler):
                 codes = {}
                 lines = fileinfo['body'].splitlines()
                 for line in lines:
-                    columns = re.split(r'\t+', line.rstrip('\t'))
+                    columns = re.split(r'\t+', line.rstrip('\t\n\r'))
                     if len(columns) and columns[0] == '':
                         continue
                     elif len(columns) > 1:
@@ -415,12 +426,15 @@ class uploadCodesHandler(BaseHandler):
                     self.set_secure_cookie('madgikmining_grantsuploaded', str(len(lines)))
                 self.write(json.dumps(data))
                 self.finish()
+            # service to store the final user codes. Returns the number of the codes
             elif 'concepts' in self.request.arguments and self.request.arguments['concepts'][0] != '{}':
                 # write data to physical file
                 cname = "/tmp/p{0}.tsv".format(user_id)
                 fh = open(cname, 'w')
                 concepts = json.loads(self.request.arguments['concepts'][0])
                 for key, value in concepts.iteritems():
+                    if key == '':
+                        continue
                     fh.write("{0}\t{1}\n".format(key,value))
                 fh.close()
                 # data to be sent
@@ -430,6 +444,28 @@ class uploadCodesHandler(BaseHandler):
                 else:
                     data['respond'] = "<b>{0} Codes</b> loaded successfully!".format(len(concepts))
                     self.set_secure_cookie('madgikmining_grantsuploaded', str(len(concepts)))
+                self.write(json.dumps(data))
+                self.finish()
+            # service to return the already uploaded user codes
+            elif 'already' in self.request.arguments:
+                data = {}
+                data['data'] = {}
+                file_name = "/tmp/p%s.tsv" % (user_id)
+                if os.path.isfile(file_name):
+                    codes = {}
+                    num_lines = 0
+                    for line in open(file_name):
+                        columns = re.split(r'\t+', line.rstrip('\t\n\r'))
+                        if len(columns) and columns[0] == '':
+                            continue
+                        elif len(columns) > 1:
+                            codes[columns[0]] = columns[1]
+                        elif len(columns) == 1:
+                            codes[columns[0]] = ''
+                        num_lines += 1
+                    cookie = self.get_secure_cookie('madgikmining_grantsuploaded')
+                    if cookie and str(num_lines) == cookie:
+                        data['data'] = codes
                 self.write(json.dumps(data))
                 self.finish()
 
@@ -452,9 +488,12 @@ class configureProfileHandler(BaseHandler):
             # check if we already gave client a user_id
             user_id = self.get_secure_cookie('madgikmining')
             if user_id is None:
-                return 
-            # check if he already uploaded his grants ids and inform him via a message
-            self.render('configure_profile.html', settings=msettings)
+                return
+            # check if he uploaded his codes
+            if numberOfGrantsUploaded(user_id, self.get_secure_cookie('madgikmining_grantsuploaded')):
+                self.render('configure_profile.html', settings=msettings)
+            else:
+                self.redirect('/upload-codes')
     def post(self):
         try:
             # get user id from cookie. Must have
@@ -508,15 +547,17 @@ class configureProfileHandler(BaseHandler):
                         os.remove(cname)
                         print e
                         return
-                data['respond'] = "<b>File {0}</b> uploaded successfully!".format(fname)
+                file_name = "/tmp/docs%s.json" % (user_id)
+                if os.path.isfile(file_name):
+                    data['data'] = sum(1 for line in open(file_name))
                 self.write(json.dumps(data))
                 self.finish()
             # post case where the user selects form preset documents samples
             elif 'doc_sample' in self.request.arguments and self.request.arguments['doc_sample'][0] != '':
 
                 sample_file_name = ""
-                if self.request.arguments['doc_sample'][0] == "nih_sample":
-                    sample_file_name = "static/nih_sample.tsv"
+                if self.request.arguments['doc_sample'][0] == "egi_sample":
+                    sample_file_name = "static/egi_sample.tsv"
                 elif self.request.arguments['doc_sample'][0] == "rcuk_sample":
                     sample_file_name = "static/rcuk_sample.tsv"
                 elif self.request.arguments['doc_sample'][0] == "arxiv_sample":
@@ -524,7 +565,7 @@ class configureProfileHandler(BaseHandler):
                 sample_file = open(sample_file_name, 'r')
 
                 # write data to physical file
-                cname = "/tmp/docs{0}/json".format(user_id)
+                cname = "/tmp/docs{0}.json".format(user_id)
                 fh = open(cname, 'w')
                 while 1:
                     copy_buffer = sample_file.read(1048576)
@@ -532,14 +573,27 @@ class configureProfileHandler(BaseHandler):
                         break
                     fh.write(copy_buffer)
                 fh.close()
+                lines_num = sum(1 for line in open(cname))
                 
                 # data to be sent
                 data = {}
-                if len(concepts) == 0:
+                if lines_num == 0:
                     data['error'] = "You have to provide at least one concept to continue"
                 else:
-                    data['respond'] = "<b>{0} Codes</b> loaded successfully!".format(len(concepts))
-                    self.set_secure_cookie('madgikmining_grantsuploaded', str(len(concepts)))
+                    data['data'] = lines_num
+                self.write(json.dumps(data))
+                self.finish()
+            # service to return the already uploaded documents
+            elif 'already' in self.request.arguments:
+                data = {}
+                if msettings.RESET_FIELDS == 1:
+                    data['data'] = -1
+                else:
+                    data['data'] = 0
+                file_name = "/tmp/docs%s.json" % (user_id)
+                if os.path.isfile(file_name):
+                    data['data'] = sum(1 for line in open(file_name))
+                msettings.RESET_FIELDS = 0
                 self.write(json.dumps(data))
                 self.finish()
             # post case for the actual mining proccess
@@ -549,16 +603,20 @@ class configureProfileHandler(BaseHandler):
                 # create positive and negative words weighted regex text
                 pos_set = neg_set = conf = whr_conf = ''
                 if 'poswords' in self.request.arguments and self.request.arguments['poswords'][0] != '{}':
+                    data['poswords'] = []
                     # construct math string for positive words matching calculation with weights
                     pos_words = json.loads(self.request.arguments['poswords'][0])
                     for key, value in pos_words.iteritems():
                         pos_set += r'regexpcountuniquematches("(?:\b)%s(?:\b)",j2s(prev,middle,next))*%s + ' % (key,value)
+                        data['poswords'].append(key)
                     pos_set += "0"
                 if 'negwords' in self.request.arguments and self.request.arguments['negwords'][0] != '{}':
+                    data['negwords'] = []
                     # construct math string for negative words matching calculation with weights
                     neg_words = json.loads(self.request.arguments['negwords'][0])
                     for key, value in neg_words.iteritems():
                         neg_set += r'regexpcountuniquematches("(?:\b)%s(?:\b)",j2s(prev,middle,next))*%s - ' % (key,value)
+                        data['negwords'].append(key)
                     neg_set += "0"
                 if pos_set != '' and neg_set != '':
                     conf = ", ({0} - {1})".format(pos_set, neg_set)
@@ -574,8 +632,8 @@ class configureProfileHandler(BaseHandler):
                 cursor=msettings.Connection.cursor()
 
                 if numberOfDocsUploaded(user_id) != 0:
-                    doc_filters = "regexpr('[\n|\r]',c2,' ')"
-                    ackn_filters = "regexpr(\"\\'\", c2,'')"
+                    doc_filters = "regexpr('[\n|\r]',d2,' ')"
+                    ackn_filters = "regexpr(\"\\'\", p2,'')"
                     if 'punctuation' in self.request.arguments and self.request.arguments['punctuation'][0] == "1":
                         doc_filters = 'keywords('+doc_filters+')'
                         ackn_filters = 'keywords('+ackn_filters+')'
@@ -590,10 +648,10 @@ class configureProfileHandler(BaseHandler):
                         doc_filters = 'filterstopwords('+doc_filters+')'
                         ackn_filters = 'filterstopwords('+ackn_filters+')'
                     list(cursor.execute("drop table if exists grantstemp"+user_id, parse=False))
-                    query_pre_grants = "create temp table grantstemp{0} as select stripchars(c1) as c1, case when c2 is null then null else {1} end as c2 from (setschema 'c1,c2' file '/tmp/p{0}.tsv' dialect:tsv)".format(user_id, ackn_filters)
+                    query_pre_grants = "create temp table grantstemp{0} as select stripchars(p1) as gt1, case when p2 is null then null else {1} end as gt2 from (setschema 'p1,p2' file '/tmp/p{0}.tsv' dialect:tsv)".format(user_id, ackn_filters)
                     cursor.execute(query_pre_grants)
                     list(cursor.execute("drop table if exists docs"+user_id, parse=False))
-                    query1 = "create temp table docs{0} as select c1, {1} as c2 from (setschema 'c1,c2' select jsonpath(c1, '$.id', '$.text') from (file '/tmp/docs{0}.json'))".format(user_id, doc_filters)
+                    query1 = "create temp table docs{0} as select d1, {1} as d2 from (setschema 'd1,d2' select jsonpath(c1, '$.id', '$.text') from (file '/tmp/docs{0}.json'))".format(user_id, doc_filters)
                     cursor.execute(query1)
                 else:
                     data['error'] = "You have to provide at least one concept to continue"
@@ -606,23 +664,33 @@ class configureProfileHandler(BaseHandler):
                 if 'wordssplitnum' in self.request.arguments and self.request.arguments['wordssplitnum'][0] != '':
                     words_split = int(self.request.arguments['wordssplitnum'][0])
                     if 0 < words_split and words_split <= 10:
-                        acknowledgment_split = r'textwindow2s(regexpr("([\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|])", c2, "\\\1"),0,'+str(words_split)+r',0)'
+                        acknowledgment_split = r'textwindow2s(regexpr("([\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|])", gt2, "\\\1"),0,'+str(words_split)+r',0)'
                     else:
-                        acknowledgment_split = r'"prev" as prev, regexpr("([\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|])", c2, "\\\1") as middle, "next" as next'
-                    query0 = r"create temp table grants"+user_id+r' as select c1 as c3, jmergeregexp(jgroup("(?<=[\s\b])"||middle||"(?=[\s\b])")) as c4 from '+r"(setschema 'c1,prev,middle,next' select c1, "+acknowledgment_split+r' from grantstemp'+user_id+r' where (c1 or c1!="") and c2 not null) group by c1 union all select distinct c1 as c3, "(?!.*)" as c4 from grantstemp'+user_id+r" where (c1 or c1!='') and c2 is null"
+                        acknowledgment_split = r'"prev" as prev, regexpr("([\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|])", gt2, "\\\1") as middle, "next" as next'
+                    # query0 = r"create temp table grants"+user_id+r' as select gt1 as g1, jmergeregexp(jgroup("(?<=[\s\b])"||middle||"(?=[\s\b])")) as g2 from '+r"(setschema 'gt1,prev,middle,next' select gt1, "+acknowledgment_split+r' from grantstemp'+user_id+r' where (gt1 or gt1!="") and gt2 not null) group by gt1 union all select distinct gt1 as g1, "(?!.*)" as g2 from grantstemp'+user_id+r" where (gt1 or gt1!='') and gt2 is null"
+                    query0 = r"create temp table grants"+user_id+r' as select gt1 as g1, jmergeregexp(jgroup(middle)) as g2 from '+r"(setschema 'gt1,prev,middle,next' select gt1, "+acknowledgment_split+r' from grantstemp'+user_id+r' where (gt1 or gt1!="") and gt2 not null) group by gt1 union all select distinct gt1 as g1, "(?!.*)" as g2 from grantstemp'+user_id+r" where (gt1 or gt1!='') and gt2 is null"
                     cursor.execute(query0)
+                    query0get = "select * from grants{0}".format(user_id)
+                    results0get = [r for r in cursor.execute(query0get)]
+                    print results0get
 
-                query2 = "select c1, c3, max(confidence) as confidence from (select c1, c3, regexpcountuniquematches(c4, j2s(prev,middle,next)) as confidence {0} from (select c1, textwindow2s(c2,10,1,5) from (select * from docs{1})), (select c3, c4 from grants{1}) T where middle = T.c3 {2}) group by c1".format(conf, user_id, whr_conf)
+                query2 = "select d1, g1, context, acknmatch, max(confidence) as confidence from (select d1, g1, regexpcountuniquematches(g2, j2s(prev,middle,next)) as confidence, j2s(prev,middle,next) as context, regexprfindall(g2, j2s(prev,middle,next)) as acknmatch {0} from (select d1, textwindow2s(d2,20,1,20) from (select * from docs{1})), (select g1, g2 from grants{1}) T where middle = T.g1 {2}) group by d1".format(conf, user_id, whr_conf)
                 # query2 = "select c1, c3 {0} from (select c1, textwindow2s(c2,10,1,5) from (select * from docs{1})), (select c3 from grants{1}) T where middle = T.c3 {2}".format(conf, user_id, whr_conf)
                 results = [r for r in cursor.execute(query2)]
-                data['funding_info'] = [{"code": r[1]} for r in results]
+                print results
+                doctitles = {}
+                for r in results:
+                    if r[0] not in doctitles:
+                        doctitles[r[0]] = []
+                    doctitles[r[0]].append({"match": r[1], "context": r[2], "acknmatch": json.loads(r[3]), "confidence": r[4]})
+                data['matches'] = doctitles
                 self.write(json.dumps(data))
                 self.flush()
                 self.finish()
 
         except Exception as ints:
             data = {}
-            data['error'] = "<b style=\"color: red\">File Failed to Upload!</b>"
+            data['error'] = "<b style=\"color: red\">Something went very very wrong!</b>"
             self.write(json.dumps(data))
             self.finish()
             print ints
@@ -639,13 +707,104 @@ class saveProfileHandler(BaseHandler):
     def get(self):
         if 'data' in self.request.arguments:
             return
+        elif 'saveprofile' in self.request.arguments and self.request.arguments['saveprofile'][0] == '1':
+            user_id = self.get_secure_cookie('madgikmining')
+            if user_id is None:
+                return
+            profile_file_name = "/tmp/OAMiningProfile_{0}.oamp".format(user_id)
+            buf_size = 4096
+            self.set_header('Content-Type', 'application/octet-stream')
+            self.set_header('Content-Disposition', 'attachment; filename=' + "OAMiningProfile_{0}.oamp".format(user_id))
+            self.flush()
+            with open(profile_file_name, 'r') as f:
+                while True:
+                    data = f.read(buf_size)
+                    if not data:
+                        break
+                    self.write(data)
+            self.finish()
         else:
             # check if we already gave client a user_id
             user_id = self.get_secure_cookie('madgikmining')
             if user_id is None:
-                return 
-            # check if he already uploaded his grants ids and inform him via a message
-            self.render('save_profile.html', settings=msettings)
+                return
+            # check if he uploaded his codes
+            if numberOfGrantsUploaded(user_id, self.get_secure_cookie('madgikmining_grantsuploaded')):
+                self.render('save_profile.html', settings=msettings)
+            else:
+                self.redirect('/upload-codes')
+    def post(self):
+        try:
+            # get user id from cookie. Must have
+            user_id = self.get_secure_cookie('madgikmining')
+            if user_id is None:
+                return
+            # post case where the profile data is uploaded to create the profile file
+            if 'createprofile' in self.request.arguments and self.request.arguments['createprofile'][0] == '1':
+                import sys
+                sys.path.append(msettings.MADIS_PATH)
+                import madis
+                # get the database cursor
+                # profile file name
+                profile_file_name = "/tmp/OAMiningProfile_{0}.oamp".format(user_id)
+                cursor=madis.functions.Connection(profile_file_name).cursor()
+                # Create poswords table
+                cursor.execute("drop table if exists poswords", parse=False)
+                cursor.execute("create table poswords(c1,c2)", parse=False)
+                # Create negwords table
+                cursor.execute("drop table if exists negwords", parse=False)
+                cursor.execute("create table negwords(c1,c2)", parse=False)
+                # Create filters table
+                cursor.execute("drop table if exists filters", parse=False)
+                cursor.execute("create table filters(c1,c2)", parse=False)
+                # Create grants table
+                cursor.execute("drop table if exists grants", parse=False)
+                cursor.execute("create table grants(c1)", parse=False)
+                if 'poswords' in self.request.arguments and self.request.arguments['poswords'][0] != '{}':
+                    # construct math string for positive words matching calculation with weights
+                    pos_words = json.loads(self.request.arguments['poswords'][0])
+                    cursor.executemany("insert into poswords(c1,c2) values(?,?)",
+                              (
+                                    (key, value,) for key, value in pos_words.iteritems()
+                              )
+                    )
+                if 'negwords' in self.request.arguments and self.request.arguments['negwords'][0] != '{}':
+                    # construct math string for negative words matching calculation with weights
+                    neg_words = json.loads(self.request.arguments['negwords'][0])
+                    cursor.executemany("insert into negwords(c1,c2) values(?,?)",
+                              (
+                                    (key, value,) for key, value in neg_words.iteritems()
+                              )
+                    )
+                if 'filters' in self.request.arguments and self.request.arguments['filters'][0] != '{}':
+                    # construct math string for negative words matching calculation with weights
+                    filters = json.loads(self.request.arguments['filters'][0])
+                    cursor.executemany("insert into filters(c1,c2) values(?,?)",
+                              (
+                                    (key, value,) for key, value in filters.iteritems()
+                              )
+                    )
+                if numberOfGrantsUploaded(user_id, self.get_secure_cookie('madgikmining_grantsuploaded')) != 0:
+                      cursor.execute("insert into grants select stripchars(c1) as c1 from (file '/tmp/p{0}.csv')".format(user_id))
+                cursor.close()
+
+                data = {}
+                data['data'] = 1
+                self.write(json.dumps(data))
+                self.flush()
+                self.finish()
+
+        except Exception as ints:
+            data = {}
+            data['error'] = "<b style=\"color: red\">Something went very very wrong!</b>"
+            self.write(json.dumps(data))
+            self.finish()
+            print ints
+
+        try:
+            cursor.close()
+        except:
+            pass
 
 
 class profileCreationHandler(BaseHandler):

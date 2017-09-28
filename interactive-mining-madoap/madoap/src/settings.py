@@ -9,6 +9,7 @@ WEB_SERVER_PORT=8080
 APPDIRNAME='openaireplus'
 MADIS_PATH='../../../interactive-mining-3rdparty-madis/madis/src'
 DB='static/database.db'
+RESET_FIELDS=1
 
 FLOW_PATH=''
 
