@@ -113,6 +113,41 @@ def numberOfDocsUploaded(user_id):
             return num_lines
     return 0
 
+def loadProfile(profileLocation, user_id):
+    # extract data from profile file
+    import sys
+    sys.path.append(msettings.MADIS_PATH)
+    import madis
+    # get the profile database cursor
+    cursor=madis.functions.Connection(profileLocation).cursor()
+
+    # data to be sent
+    data = {}
+    # Write to csv file the grants ids
+    if len([r for r in cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='grants'")]):
+        cursor.execute("output '/tmp/p{0}.tsv' select c1,c2 from grants".format(user_id))
+        # Get the number of grants uploaded
+        file_name = "/tmp/p%s.tsv" % (user_id)
+        if os.path.isfile(file_name):
+            numberOfGrants = sum(1 for line in open(file_name))
+        data['grants'] = numberOfGrants
+    # write to json the poswords
+    if len([r for r in cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='poswords'")]):
+        results = [r for r in cursor.execute("select c1, c2 from poswords")]
+        data['poswords'] = {value:key for value, key in results}
+    # write to json the negwords
+    if len([r for r in cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='negwords'")]):
+        results = [r for r in cursor.execute("select c1, c2 from negwords")]
+        data['negwords'] = {value:key for value, key in results}
+    # write to json the filters
+    if len([r for r in cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='filters'")]):
+        results = [r for r in cursor.execute("select c1, c2 from filters")]
+        for value, key in results:
+            data[value] = key
+        # data['filters'] = {value:key for value, key in results}
+    cursor.close()
+    return data
+
 def deleteAllUserFiles(user_id):
     if user_id:
         file_name = "/tmp/p%s.tsv" % (user_id)
@@ -121,6 +156,22 @@ def deleteAllUserFiles(user_id):
         file_name = "/tmp/docs%s.json" % (user_id)
         if os.path.isfile(file_name):
             os.remove(file_name)
+
+def loadExampleDocs(user_id):
+    sample_file = open("static/exampleDocs.txt", 'r')
+    # write data to physical file
+    cname = "/tmp/docs{0}.json".format(user_id)
+    fh = open(cname, 'w')
+    while 1:
+        copy_buffer = sample_file.read(1048576)
+        if not copy_buffer:
+            break
+        fh.write(copy_buffer)
+    fh.close()
+    lines_num = sum(1 for line in open(cname))
+
+def loadExampleProfile(user_id):
+    return loadProfile("static/exampleProfile.oamp", user_id)
 
 
 class BaseHandler(ozhandler.DjangoErrorMixin, ozhandler.BasicAuthMixin, tornado.web.RequestHandler):
@@ -322,6 +373,8 @@ class createUploadProfileHandler(BaseHandler):
         try:
             user_id = self.get_secure_cookie('madgikmining')
             if user_id is None:
+                self.set_status(400)
+                self.write("Missing cookie containing user's id...")
                 return
             if 'upload' in self.request.files:
                 # get file info and body from post data
@@ -337,39 +390,23 @@ class createUploadProfileHandler(BaseHandler):
                 fh = open(cname, 'w')
                 fh.write(fileinfo['body'])
                 fh.close()
-                # extract data from profile file
-                import sys
-                sys.path.append(msettings.MADIS_PATH)
-                import madis
-                # get the profile database cursor
-                cursor=madis.functions.Connection(cname).cursor()
-
-                # data to be sent
-                data = {}
-                # Write to csv file the grants ids
-                if len([r for r in cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='grants'")]):
-                    cursor.execute("output '/tmp/p{0}.csv' select * from grants".format(user_id))
-                    numberOfGrants = numberOfGrantsUploaded(user_id, "puppet_value")
-                    self.set_secure_cookie('madgikmining_grantsuploaded', str(numberOfGrants))
-                    data['grants'] = numberOfGrants
-                # write to json the poswords
-                if len([r for r in cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='poswords'")]):
-                    results = [r for r in cursor.execute("select c1, c2 from poswords")]
-                    data['poswords'] = {value:key for value, key in results}
-                # write to json the negwords
-                if len([r for r in cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='negwords'")]):
-                    results = [r for r in cursor.execute("select c1, c2 from negwords")]
-                    data['negwords'] = {value:key for value, key in results}
-                # write to json the filters
-                if len([r for r in cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='filters'")]):
-                    results = [r for r in cursor.execute("select c1, c2 from filters")]
-                    data['filters'] = {value:key for value, key in results}
-                cursor.close()
+                data = loadProfile(cname, user_id)
+                self.set_secure_cookie('madgikmining_grantsuploaded', str(data['grants']))
+                self.write(json.dumps(data))
+                self.finish()
+            elif 'example' in self.request.arguments:
+                # reset everything
+                deleteAllUserFiles(user_id)
+                # load example data
+                loadExampleDocs(user_id)
+                data = loadExampleProfile(user_id)
+                self.set_secure_cookie('madgikmining_grantsuploaded', str(data['grants']))
                 self.write(json.dumps(data))
                 self.finish()
 
         except Exception as ints:
-            self.write(json.dumps({'respond': "<b style=\"color: red\">Something went very wrong!</b>"}))
+            self.set_status(400)
+            self.write("Something is wrong with this profile file...")
             print ints
             return
 
@@ -389,12 +426,15 @@ class uploadCodesHandler(BaseHandler):
             # reset everything
             deleteAllUserFiles(user_id)
         # check if he already uploaded his grants ids and inform him via a message
-        self.render('upload_codes.html', settings=msettings)
+        numOfGrants = numberOfGrantsUploaded(user_id, self.get_secure_cookie('madgikmining_grantsuploaded'))
+        self.render('upload_codes.html', settings=msettings, numOfGrants=numOfGrants)
     def post(self):
         try:
             # get user id from cookie. Must have
             user_id = self.get_secure_cookie('madgikmining')
             if user_id is None:
+                self.set_status(400)
+                self.write("Missing cookie containing user's id...")
                 return
             # service to upload a tsv file with the codes. Returns the codes
             if 'upload' in self.request.files:
@@ -404,7 +444,8 @@ class uploadCodesHandler(BaseHandler):
                 extn = os.path.splitext(fname)[1]
                 # must be .pdf or .json
                 if extn != ".tsv" and extn != ".txt":
-                    self.write(json.dumps({'respond': "<b style=\"color: red\">File must be .tsv or .txt</b>"}))
+                    self.set_status(400)
+                    self.write("File must be .tsv or .txt...")
                     return
                 codes = {}
                 lines = fileinfo['body'].splitlines()
@@ -440,7 +481,9 @@ class uploadCodesHandler(BaseHandler):
                 # data to be sent
                 data = {}
                 if len(concepts) == 0:
-                    data['error'] = "You have to provide at least one concept to continue"
+                    self.set_status(400)
+                    self.write("You have to provide at least one concept to continue!")
+                    return
                 else:
                     data['respond'] = "<b>{0} Codes</b> loaded successfully!".format(len(concepts))
                     self.set_secure_cookie('madgikmining_grantsuploaded', str(len(concepts)))
@@ -470,9 +513,8 @@ class uploadCodesHandler(BaseHandler):
                 self.finish()
 
         except Exception as ints:
-            data = {}
-            data['error'] = "<b style=\"color: red\">File Failed to Upload!</b>"
-            self.write(json.dumps(data))
+            self.set_status(400)
+            self.write("A server error occurred, please contact administrator!")
             self.finish()
             print ints
             return
@@ -491,7 +533,7 @@ class configureProfileHandler(BaseHandler):
                 return
             # check if he uploaded his codes
             if numberOfGrantsUploaded(user_id, self.get_secure_cookie('madgikmining_grantsuploaded')):
-                self.render('configure_profile.html', settings=msettings)
+                self.render('configure_profile2.html', settings=msettings)
             else:
                 self.redirect('/upload-codes')
     def post(self):
@@ -510,7 +552,9 @@ class configureProfileHandler(BaseHandler):
                 data = {}
                 # must be .pdf, .txt or .json
                 if extn != ".pdf" and extn != ".txt" and extn != ".json":
-                    data['error'] = "<b style=\"color: red\">File must be .pdf, .json or .txt</b>"
+                    self.set_status(400)
+                    self.write("File must be .pdf, .json or .txt")
+                    return
                     return
                 # write data to physical file
                 cname = "/tmp/docs{0}{1}".format(user_id, extn)
@@ -523,14 +567,16 @@ class configureProfileHandler(BaseHandler):
                     p = sub.Popen(['pdftotext', '-enc', 'UTF-8', cname],stdout=sub.PIPE,stderr=sub.PIPE)
                     output, errors = p.communicate()
                     if errors:
-                        data['error'] = "<b style=\"color: red\">Cannot convert .pdf to .txt</b>"
+                        self.set_status(400)
+                        self.write("An error occurred when trying to convert .pdf to .txt...")
                         return
                     os.remove(cname)
                     cname = "/tmp/docs{0}.txt".format(user_id)
                     with open(cname, 'r') as fin:
                         docData=fin.read().replace('\n', ' ')
                         if len(docData)==0:
-                            data['error'] = "<b style=\"color: red\">Cannot convert .pdf to .txt</b>"
+                            self.set_status(400)
+                            self.write("An error occurred when trying to convert .pdf to text...")
                             return
                     with open("/tmp/docs{0}.json".format(user_id), "wb") as fout:
                         json.dump({"text":docData,"id":os.path.splitext(fname)[0]}, fout)
@@ -543,13 +589,16 @@ class configureProfileHandler(BaseHandler):
                             jsonlist.append(json.loads(line))
                         os.rename(cname, "/tmp/docs{0}.json".format(user_id))
                     except ValueError, e:
-                        data['error'] = "<b style=\"color: red\">File is not in a valid json format</b>"
+                        self.set_status(400)
+                        self.write("File is not in a valid json format...")
                         os.remove(cname)
                         print e
                         return
                 file_name = "/tmp/docs%s.json" % (user_id)
                 if os.path.isfile(file_name):
-                    data['data'] = sum(1 for line in open(file_name))
+                    lines = sum(1 for line in open(file_name))
+                    data['respond'] = "<b>{0} Documents</b> loaded successfully!".format(lines)
+                    data['data'] = lines
                 self.write(json.dumps(data))
                 self.finish()
             # post case where the user selects form preset documents samples
@@ -578,8 +627,11 @@ class configureProfileHandler(BaseHandler):
                 # data to be sent
                 data = {}
                 if lines_num == 0:
-                    data['error'] = "You have to provide at least one concept to continue"
+                    self.set_status(400)
+                    self.write("File must contain atleast one document...")
+                    return
                 else:
+                    data['respond'] = "<b>{0} Documents</b> loaded successfully!".format(lines_num)
                     data['data'] = lines_num
                 self.write(json.dumps(data))
                 self.finish()
@@ -598,8 +650,63 @@ class configureProfileHandler(BaseHandler):
                 self.finish()
             # post case for the actual mining proccess
             else:
+                # get the database cursor
+                cursor=msettings.Connection.cursor()
+
                 # data to be sent
                 data = {}
+
+                # set the textwindow size
+                extracontextprev = 10
+                extracontextnext = 10
+                contextprev = 10
+                contextnext = 5
+                # Automatically find middle size from grant codes white spaces
+                querygrantsize = "select max(p1) from (select regexpcountwords('\s',stripchars(p1)) as p1 from (setschema 'p1,p2' file '/tmp/p{0}.tsv' dialect:tsv))".format(user_id)
+                contextmiddle = [r for r in cursor.execute(querygrantsize)][0][0]+1
+                if 'contextprev' in self.request.arguments and self.request.arguments['contextprev'][0] != '':
+                    contextprev = int(self.request.arguments['contextprev'][0])
+                    if contextprev < 0 or contextprev > 20:
+                        self.set_status(400)
+                        self.write("Context size must be in its limits...")
+                        return
+                if 'contextnext' in self.request.arguments and self.request.arguments['contextnext'][0] != '':
+                    contextnext = int(self.request.arguments['contextnext'][0])
+                    if contextnext < 0 or contextnext > 20:
+                        self.set_status(400)
+                        self.write("Context size must be in its limits...")
+                        return
+                j2sextraprev = "j2s(prev1"
+                for cnt in xrange(2,extracontextprev+1):
+                    j2sextraprev += ",prev"+str(cnt)
+                j2sextraprev += ")"
+                j2sprev = ""
+                j2scontext = "("
+                if contextprev:
+                    j2scontext = "j2s(prev"+str(extracontextprev+1)
+                    j2sprev = "j2s(prev"+str(extracontextprev+1)
+                    for cnt in xrange(extracontextprev+2,extracontextprev+contextprev+1):
+                        j2sprev += ",prev"+str(cnt)
+                        j2scontext += ",prev"+str(cnt)
+                    j2sprev += ")"
+                    j2scontext += ","
+                else:
+                    j2scontext = "j2s("
+                j2snext = "j2s(next1"
+                j2scontext += "middle"
+                if contextnext:
+                    j2scontext += ",next1"
+                    for cnt in xrange(2,contextnext+1):
+                        j2snext += ",next"+str(cnt)
+                        j2scontext += ",next"+str(cnt)
+                    j2snext += ")"
+                j2scontext += ")"
+                j2sextranext = "j2s(next"+str(contextnext+1)
+                for cnt in xrange(contextnext+2,extracontextnext+contextnext+1):
+                    j2sextranext += ",next"+str(cnt)
+                j2sextranext += ")"
+                print j2sextraprev, j2sprev, j2snext, j2sextranext, j2scontext
+
                 # create positive and negative words weighted regex text
                 pos_set = neg_set = conf = whr_conf = ''
                 if 'poswords' in self.request.arguments and self.request.arguments['poswords'][0] != '{}':
@@ -607,7 +714,10 @@ class configureProfileHandler(BaseHandler):
                     # construct math string for positive words matching calculation with weights
                     pos_words = json.loads(self.request.arguments['poswords'][0])
                     for key, value in pos_words.iteritems():
-                        pos_set += r'regexpcountuniquematches("(?:\b)%s(?:\b)",j2s(prev,middle,next))*%s + ' % (key,value)
+                        # MONO GIA TO EGI
+                        pos_set += r'regexpcountuniquematches("%s",%s)*%s + ' % (key,j2scontext,value)
+                        # ORIGINAL
+                        # pos_set += r'regexpcountuniquematches("(?:\b)%s(?:\b)",j2s(prev,middle,next))*%s + ' % (key,value)
                         data['poswords'].append(key)
                     pos_set += "0"
                 if 'negwords' in self.request.arguments and self.request.arguments['negwords'][0] != '{}':
@@ -615,7 +725,10 @@ class configureProfileHandler(BaseHandler):
                     # construct math string for negative words matching calculation with weights
                     neg_words = json.loads(self.request.arguments['negwords'][0])
                     for key, value in neg_words.iteritems():
-                        neg_set += r'regexpcountuniquematches("(?:\b)%s(?:\b)",j2s(prev,middle,next))*%s - ' % (key,value)
+                        # MONO GIA TO EGI
+                        neg_set += r'regexpcountuniquematches("%s",%s)*%s + ' % (key,j2scontext,value)
+                        # ORIGINAL
+                        # neg_set += r'regexpcountuniquematches("(?:\b)%s(?:\b)",j2s(prev,middle,next))*%s - ' % (key,value)
                         data['negwords'].append(key)
                     neg_set += "0"
                 if pos_set != '' and neg_set != '':
@@ -628,25 +741,23 @@ class configureProfileHandler(BaseHandler):
                     conf += ' as conf'
                     whr_conf = 'and conf>=0'
 
-                # get the database cursor
-                cursor=msettings.Connection.cursor()
-
                 if numberOfDocsUploaded(user_id) != 0:
-                    doc_filters = "regexpr('[\n|\r]',d2,' ')"
-                    ackn_filters = "regexpr(\"\\'\", p2,'')"
+                    doc_filters = "comprspaces(regexpr('[\n|\r]',d2,' '))"
+                    ackn_filters = "comprspaces(regexpr(\"\\'\", p2,''))"
                     if 'punctuation' in self.request.arguments and self.request.arguments['punctuation'][0] == "1":
                         doc_filters = 'keywords('+doc_filters+')'
                         ackn_filters = 'keywords('+ackn_filters+')'
-                    if 'lettercase' in self.request.arguments and self.request.arguments['lettercase'][0] != '' and self.request.arguments['lettercase'][0] != 'None':
-                        if self.request.arguments['lettercase'][0] == 'Lowercase':
+                    if 'lettercase' in self.request.arguments and self.request.arguments['lettercase'][0] != '' and self.request.arguments['lettercase'][0] != 'none':
+                        if self.request.arguments['lettercase'][0] == 'lowercase':
                             doc_filters = 'lower('+doc_filters+')'
                             ackn_filters = 'lower('+ackn_filters+')'
-                        elif self.request.arguments['lettercase'][0] == 'Uppercase':
+                        elif self.request.arguments['lettercase'][0] == 'uppercase':
                             doc_filters = 'upper('+doc_filters+')'
                             ackn_filters = 'upper('+ackn_filters+')'
                     if 'stopwords' in self.request.arguments and self.request.arguments['stopwords'][0] == "1":
                         doc_filters = 'filterstopwords('+doc_filters+')'
                         ackn_filters = 'filterstopwords('+ackn_filters+')'
+                    print "DOCCC", doc_filters
                     list(cursor.execute("drop table if exists grantstemp"+user_id, parse=False))
                     query_pre_grants = "create temp table grantstemp{0} as select stripchars(p1) as gt1, case when p2 is null then null else {1} end as gt2 from (setschema 'p1,p2' file '/tmp/p{0}.tsv' dialect:tsv)".format(user_id, ackn_filters)
                     cursor.execute(query_pre_grants)
@@ -654,27 +765,38 @@ class configureProfileHandler(BaseHandler):
                     query1 = "create temp table docs{0} as select d1, {1} as d2 from (setschema 'd1,d2' select jsonpath(c1, '$.id', '$.text') from (file '/tmp/docs{0}.json'))".format(user_id, doc_filters)
                     cursor.execute(query1)
                 else:
-                    data['error'] = "You have to provide at least one concept to continue"
-                    self.write(json.dumps(data))
-                    self.finish()
+                    self.set_status(400)
+                    self.write("You have to provide atleast 1 document...")
                     return
 
                 list(cursor.execute("drop table if exists grants"+user_id, parse=False))
                 # string concatenation workaround because of the special characters conflicts
                 if 'wordssplitnum' in self.request.arguments and self.request.arguments['wordssplitnum'][0] != '':
                     words_split = int(self.request.arguments['wordssplitnum'][0])
+                    # MONO GIA TO EGI
                     if 0 < words_split and words_split <= 10:
-                        acknowledgment_split = r'textwindow2s(regexpr("([\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|])", gt2, "\\\1"),0,'+str(words_split)+r',0)'
+                        acknowledgment_split = r'textwindow2s(gt2,0,'+str(words_split)+r',0)'
                     else:
-                        acknowledgment_split = r'"prev" as prev, regexpr("([\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|])", gt2, "\\\1") as middle, "next" as next'
+                        acknowledgment_split = r'"dummy" as prev, gt2 as middle, "dummy" as next'
+                    # ORIGINAL
+                    # if 0 < words_split and words_split <= 10:
+                    #     acknowledgment_split = r'textwindow2s(regexpr("([\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|])", gt2, "\\\1"),0,'+str(words_split)+r',0)'
+                    # else:
+                    #     acknowledgment_split = r'"dummy" as prev, regexpr("([\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|])", gt2, "\\\1") as middle, "dummy" as next'
+
                     # query0 = r"create temp table grants"+user_id+r' as select gt1 as g1, jmergeregexp(jgroup("(?<=[\s\b])"||middle||"(?=[\s\b])")) as g2 from '+r"(setschema 'gt1,prev,middle,next' select gt1, "+acknowledgment_split+r' from grantstemp'+user_id+r' where (gt1 or gt1!="") and gt2 not null) group by gt1 union all select distinct gt1 as g1, "(?!.*)" as g2 from grantstemp'+user_id+r" where (gt1 or gt1!='') and gt2 is null"
-                    query0 = r"create temp table grants"+user_id+r' as select gt1 as g1, jmergeregexp(jgroup(middle)) as g2 from '+r"(setschema 'gt1,prev,middle,next' select gt1, "+acknowledgment_split+r' from grantstemp'+user_id+r' where (gt1 or gt1!="") and gt2 not null) group by gt1 union all select distinct gt1 as g1, "(?!.*)" as g2 from grantstemp'+user_id+r" where (gt1 or gt1!='') and gt2 is null"
+                    query0 = r"create temp table grants"+user_id+r' as select gt1 as g1, jmergeregexp(jgroup(middle)) as g2 from '+r"(setschema 'gt1,prev,middle,next' select gt1, "+acknowledgment_split+r' from grantstemp'+user_id+r' where (gt1 or gt1!="") and gt2 != "") group by gt1 union all select distinct gt1 as g1, "(?!.*)" as g2 from grantstemp'+user_id+r" where (gt1 or gt1!='') and gt2 = ''"
                     cursor.execute(query0)
                     query0get = "select * from grants{0}".format(user_id)
                     results0get = [r for r in cursor.execute(query0get)]
                     print results0get
 
-                query2 = "select d1, g1, context, acknmatch, max(confidence) as confidence from (select d1, g1, regexpcountuniquematches(g2, j2s(prev,middle,next)) as confidence, j2s(prev,middle,next) as context, regexprfindall(g2, j2s(prev,middle,next)) as acknmatch {0} from (select d1, textwindow2s(d2,20,1,20) from (select * from docs{1})), (select g1, g2 from grants{1}) T where middle = T.g1 {2}) group by d1".format(conf, user_id, whr_conf)
+                # FOR EGI ONLY
+                query2 = r'select distinct d1, g1, extraprev, prev, middle, next, extranext, acknmatch, max(confidence) as confidence from (select d1, g1, regexpcountuniquematches(g2, '+j2scontext+r') as confidence, stripchars('+j2sextraprev+r') as extraprev, stripchars('+j2sprev+r') as prev, middle, stripchars('+j2snext+r') as next, stripchars('+j2sextranext+r') as extranext, '+j2scontext+r' as context, regexprfindall(g2, '+j2scontext+r') as acknmatch '+conf+r' from (select d1, textwindow(d2,'+str(extracontextprev+contextprev)+r','+str(extracontextnext+contextnext)+r','+str(contextmiddle)+r') from docs'+user_id+r'), (select g1, g2 from grants'+user_id+r') T where regexprmatches("(\b|\d|\W)"||T.g1||"(\b|\d|\W)",middle) '+whr_conf+r') group by d1'
+                # ORIGINAL
+                # query2 = "select d1, g1, context, acknmatch, max(confidence) as confidence from (select d1, g1, regexpcountuniquematches(g2, j2s(prev,middle,next)) as confidence, j2s(prev,middle,next) as context, regexprfindall(g2, j2s(prev,middle,next)) as acknmatch {0} from (select d1, textwindow2s(d2,20,{3},20) from docs{1}), (select g1, g2 from grants{1}) T where regexprmatches(T.g1,middle) {2}) group by d1".format(conf, user_id, whr_conf, contextmiddle)
+
+                # OLD ONE
                 # query2 = "select c1, c3 {0} from (select c1, textwindow2s(c2,10,1,5) from (select * from docs{1})), (select c3 from grants{1}) T where middle = T.c3 {2}".format(conf, user_id, whr_conf)
                 results = [r for r in cursor.execute(query2)]
                 print results
@@ -682,16 +804,16 @@ class configureProfileHandler(BaseHandler):
                 for r in results:
                     if r[0] not in doctitles:
                         doctitles[r[0]] = []
-                    doctitles[r[0]].append({"match": r[1], "context": r[2], "acknmatch": json.loads(r[3]), "confidence": r[4]})
+                    doctitles[r[0]].append({"match": r[1], "extraprev": r[2], "prev": r[3], "middle": r[4], "next":r[5],  "extranext":r[6], "acknmatch": json.loads(r[7]), "confidence": r[8]})
                 data['matches'] = doctitles
+                data['respond'] = "Matching results updated!"
                 self.write(json.dumps(data))
                 self.flush()
                 self.finish()
 
         except Exception as ints:
-            data = {}
-            data['error'] = "<b style=\"color: red\">Something went very very wrong!</b>"
-            self.write(json.dumps(data))
+            self.set_status(400)
+            self.write("A server error occurred, please contact administrator!")
             self.finish()
             print ints
 
@@ -759,7 +881,7 @@ class saveProfileHandler(BaseHandler):
                 cursor.execute("create table filters(c1,c2)", parse=False)
                 # Create grants table
                 cursor.execute("drop table if exists grants", parse=False)
-                cursor.execute("create table grants(c1)", parse=False)
+                cursor.execute("create table grants(c1,c2)", parse=False)
                 if 'poswords' in self.request.arguments and self.request.arguments['poswords'][0] != '{}':
                     # construct math string for positive words matching calculation with weights
                     pos_words = json.loads(self.request.arguments['poswords'][0])
@@ -785,7 +907,7 @@ class saveProfileHandler(BaseHandler):
                               )
                     )
                 if numberOfGrantsUploaded(user_id, self.get_secure_cookie('madgikmining_grantsuploaded')) != 0:
-                      cursor.execute("insert into grants select stripchars(c1) as c1 from (file '/tmp/p{0}.csv')".format(user_id))
+                      cursor.execute("insert into grants select stripchars(c1) as c1, stripchars(c2) as c2 from (file '/tmp/p{0}.tsv')".format(user_id))
                 cursor.close()
 
                 data = {}

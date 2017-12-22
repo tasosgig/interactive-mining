@@ -3,27 +3,36 @@
 {% block content %}
 <title>Save profile</title>
 
-<a href="/"><button id="cancel-main-btn" class="uk-close-large" type="button" uk-close></button></a>
-<div class="uk-container tm-toolbar custom-discover-toolbar uk-visible@m uk-container-small">
-    <div class="uk-flex uk-flex-middle">
-        <div class="uk-margin-auto-right">
-            <div class="uk-grid-medium uk-child-width-auto uk-flex-middle uk-grid uk-grid-stack" uk-grid="margin: uk-margin-small-top">
-                <div class="uk-first-column">
-                    <ul class="uk-subnav uk-subnav-line">
-                        <li><a href="upload-codes">Upload your project codes</a></li>
-                        <li><a href="configure-profile">Configure the matching proccess</a></li>
-                        <li class="custom-discover-li"><a class="router-link-active" href="save-profile">Save matching profile</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+<div class="uk-flex-inline cm-nav-container">
+    <div class="cm-left-box"><a href="/"><button id="cancel-main-btn" class="uk-close-large cm-close-btn" type="button" uk-close></button></a></div>
+    <div class="cm-navigation cm-nav-toolbar">
+        <ul class="uk-subnav uk-subnav-line">
+            <li class="cm-nav-li">
+                <a class="cm-nav-a" href="upload-codes">
+                    <div class="cm-nav-number-container"><span class="cm-nav-number uk-text-middle">1</span></div>
+                    <span class="cm-nav-title uk-text-middle">Matching context<br>definition</span>
+                </a>
+            </li>
+            <li class="cm-nav-li">
+                <a class="cm-nav-a" href="configure-profile">
+                    <div class="cm-nav-number-container"><span class="cm-nav-number uk-text-middle">2</span></div>
+                    <span class="cm-nav-title uk-text-middle">Matching proccess<br>configuration</span>
+                </a>
+            </li>
+            <li class="cm-nav-li cm-nav-active">
+                <a class="cm-nav-a">
+                    <div class="cm-nav-number-container"><span class="cm-nav-number uk-text-middle">3</span></div>
+                    <span class="cm-nav-title uk-text-middle">Save your<br>matching profile</span>
+                </a>
+            </li>
+        </ul>
     </div>
 </div>
 
 <div class="uk-section uk-section-default">
     <div class="uk-container uk-container-small">
 
-		<a id="save-profile-btn" class="test-upload uk-button uk-button-default uk-width-1-1 uk-button-large uk-text-center" href="save-profile?saveprofile=1">
+		<a class="test-upload uk-button uk-button-default uk-width-1-1 uk-button-large uk-text-center cm-main-button" href="save-profile?saveprofile=1">
 		    <span uk-icon="icon: download"></span>
 		    <span class="uk-text-middle">Download profile</span>
 		</a>

@@ -1,5 +1,5 @@
 /*ANIMATIONS*/
-tr.new-item {
+tr.new-item, li.new-item {
   opacity:0;
   -webkit-animation:fadeIn .1s linear forwards;
   -o-animation:fadeIn .1s linear forwards;
@@ -17,7 +17,7 @@ tr.new-item {
   }
 }
 
-tr.removed-item {
+tr.removed-item, li.removed-item {
   -webkit-animation: removed-item-animation .3s cubic-bezier(.55,-0.04,.91,.94) forwards;
   -o-animation: removed-item-animation .3s cubic-bezier(.55,-0.04,.91,.94) forwards;
   animation: removed-item-animation .3s cubic-bezier(.55,-0.04,.91,.94) forwards

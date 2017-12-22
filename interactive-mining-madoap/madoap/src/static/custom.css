@@ -6,6 +6,14 @@
 .tm-toolbar .uk-subnav-line .custom-discover-li  a{
   color:#05007A !important;
 }
+.tm-toolbar .uk-subnav-line .custom-connect-li {
+  color:#05007A !important;
+  background:#fff;
+  display: block;
+}
+.tm-toolbar .uk-subnav-line .custom-connect-li  a{
+  color:#05007A !important;
+}
 .custom-discover-toolbar   ul.uk-subnav.uk-subnav-line{
   background-color: #f25f30 !important;
   }
@@ -16,6 +24,17 @@
 
   .custom-discover-toolbar{
     border-top-color:#f25f30 !important;
+  }
+.custom-connect-toolbar   ul.uk-subnav.uk-subnav-line{
+  background-color: #ffc800 !important;
+  }
+
+  .custom-connect-toolbar .inner {
+       background-color: #ffc800 !important;
+  }
+
+  .custom-connect-toolbar{
+    border-top-color:#ffc800 !important;
   }
 .custom-footer{
    position:relative;
