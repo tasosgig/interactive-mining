@@ -1,0 +1,217 @@
+<div id="child1-inner" >
+  <div class="cm-easy-config-section">
+    <h4>Preconfigured rules <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></h4>
+    <div class="cm-config-options-container">
+      <div class="cm-config-options-connect-line"></div>
+      <div class="uk-child-width-expand@s uk-text-center" uk-grid uk-switcher="animation: uk-animation-fade">
+        <div>
+          <a class="cm-config-option cm-config-light" id="1-level" [ngClass]="{'active':precision===1}" (click)="precisionChange(1)">
+            <div class="cm-outer-circle-button">
+              <div class="cm-circle-button">
+                <div class="cm-circle-button-fill"><span uk-icon="icon: check" class="cm-config-option-check"></span></div>
+              </div>
+            </div>
+            <span>Loose</span>
+          </a>
+        </div>
+        <div>
+          <a class="cm-config-option cm-config-medium" id="2-level" [ngClass]="{'active':precision===2}" (click)="precisionChange(2)">
+            <div class="cm-outer-circle-button">
+              <div class="cm-circle-button">
+                <div class="cm-circle-button-fill"><span uk-icon="icon: check" class="cm-config-option-check"></span></div>
+              </div>
+            </div>
+            <span>Medium</span>
+          </a>
+        </div>
+        <div>
+          <a class="cm-config-option cm-config-hard" id="3-level" [ngClass]="{'active':precision===3}" (click)="precisionChange(3)">
+            <div class="cm-outer-circle-button">
+              <div class="cm-circle-button">
+                <div class="cm-circle-button-fill"><span uk-icon="icon: check" class="cm-config-option-check"></span></div>
+              </div>
+            </div>
+            <span>Tight</span>
+          </a>
+        </div>
+        <!-- <div>
+            <a class="cm-config-option cm-config-advance" id="c-level">
+                <div class="cm-circle-button">
+                    <div class="cm-circle-button-fill"></div>
+                </div>
+                <span>Advanced</span>
+            </a>
+        </div> -->
+      </div>
+      <ul class="uk-switcher uk-margin-small-top uk-text-small">
+        <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</li>
+        <li>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</li>
+        <li>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur, sed do eiusmod.</li>
+      </ul>
+    </div>
+  </div>
+  <hr>
+  <div class="cm-advanced-tools-section">
+    <label class="uk-form-label cm-advaned-tools-label" for="advaned-tools-label">
+      <input [checked]="precision===4" (click)="advancedCheckboxChange()"  id="advaned-tools-label" class="uk-checkbox" type="checkbox"> Customized rules <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span>
+    </label>
+    <div *ngIf="precision===4" id="advaned-tools" style="margin-top: 20px;">
+      <ul uk-accordion="multiple: true">
+        <li>
+          <h6 class="uk-accordion-title">Positive phrases</h6>
+          <div class="uk-accordion-content">
+            <p class="uk-text-small">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <div class="cm-phrases-container">
+              <header>
+                <form [formGroup]="positivePhraseForm" id="word-form-pos" class="uk-grid-collapse uk-child-width-expand@s uk-text-center" uk-grid (ngSubmit)="phraseSubmit(true)">
+                  <!-- <div class="cm-number-space uk-width-1-5@m">#</div> -->
+                  <input class="uk-width-expand uk-text-left cm-text-input cm-text-input-phrase" type="text" id="text-pos" placeholder="Phrase" formControlName="phrase"/>
+                  <input class="uk-width-1-5@m uk-text-left cm-text-input cm-text-input-weight" type="number" name="weight" min="0" max="100" id="weight-pos" placeholder="Weight" formControlName="weight"/>
+                  <input type="submit" class="btn uk-width-1-4@m cm-main-button cm-phrases-button" value="Add" [disabled]="!positivePhraseForm.valid"/>
+                </form>
+                <div class="scroll_holder">
+                  <div class="scroller"></div>
+                </div>
+              </header>
+              <div style="position: relative;"><!--
+                                      <div style="position: absolute; left: 0; top: 0; height: 100%; width: 40px; background-color: #fafafa; border-right: 1px solid #e8e8e8;"></div> -->
+                <ul id="word-pos">
+                  <li class="uk-grid-collapse uk-child-width-expand@s" uk-grid *ngFor="let phrase of positivePhrasesArray; let i = index" [ngClass]="{'editing':i===positiveSelectedRow}">
+                    <div class="uk-width-expand uk-text-left cm-text-input phrase">
+                      <input class="uk-textarea" style="word-break: break-word; width:100%" type="text" [(ngModel)]="phrase.phrase" (change)="phrasesChanged(true)" (focus)="selectPhraseRow(i, true)" (focusout)="unselectPhraseRow(true)">
+                    </div>
+                    <div class="uk-width-1-4@m uk-text-left cm-text-input weight">
+                      <input style="width:100%" type="number" min="0" max="100" [(ngModel)]="phrase.weight" (change)="phrasesChanged(true)" (focus)="selectPhraseRow(i, true)" (focusout)="unselectPhraseRow(true)">
+                    </div>
+                    <div class="uk-width-1-4@m uk-text-center erase"><a class="uk-icon-link" uk-icon="icon: trash" contenteditable="false" (click)="deletePhrase(i,true)"></a></div>
+                  </li>
+                </ul>
+              </div>
+              <footer class="positive">
+                <div class="uk-grid-collapse uk-child-width-expand@s" uk-grid>
+                  <div>
+                    <span class="count uk-text-middle" id="count-pos">{{positivePhrasesArray.length}}</span>
+                    <span class="uk-text-middle"> positive word{{positivePhrasesArray.length!==1 ? 's' : ''}}</span>
+                  </div>
+                </div>
+              </footer>
+            </div>
+          </div>
+        </li>
+        <li>
+          <h6 class="uk-accordion-title">Negative phrases</h6>
+          <div class="uk-accordion-content">
+            <p class="uk-text-small">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <div class="word-container">
+              <div class="cm-phrases-container">
+                <header>
+                  <form [formGroup]="negativePhraseForm" class="uk-grid-collapse uk-child-width-expand@s uk-text-center" id="word-form-neg" uk-grid (ngSubmit)="phraseSubmit(false)">
+                    <!-- <div class="cm-number-space uk-width-1-5@m">#</div> -->
+                    <input class="uk-width-expand uk-text-left cm-text-input cm-text-input-phrase" type="text" id="text-neg" placeholder="Phrase" formControlName="phrase"/>
+                    <input class="uk-width-1-5@m uk-text-left cm-text-input cm-text-input-weight" type="number" name="weight" min="0" max="100" id="weight-neg" placeholder="Weight" formControlName="weight"/>
+                    <input type="submit" class="btn uk-width-1-4@m cm-main-button cm-phrases-button" value="Add" [disabled]="!negativePhraseForm.valid"/>
+                  </form>
+                  <div class="scroll_holder">
+                    <div class="scroller"></div>
+                  </div>
+                </header>
+                <div style="position: relative;">
+                  <!-- <div style="position: absolute; left: 0; top: 0; height: 100%; width: 40px; background-color: #fafafa; border-right: 1px solid #e8e8e8;"></div> -->
+                  <ul id="word-neg">
+                    <li class="uk-grid-collapse uk-child-width-expand@s" uk-grid *ngFor="let phrase of negativePhrasesArray; let i = index" [ngClass]="{'editing':i===negativeSelectedRow}">
+                      <div class="uk-width-expand uk-text-left cm-text-input phrase">
+                        <input class="uk-textarea" style="word-break: break-word; width:100%" type="text" [(ngModel)]="phrase.phrase" (change)="phrasesChanged(false)" (focus)="selectPhraseRow(i, false)" (focusout)="unselectPhraseRow(false)">
+                      </div>
+                      <div class="uk-width-1-4@m uk-text-left cm-text-input weight">
+                        <input style="width:100%" type="number" min="0" max="100" [(ngModel)]="phrase.weight" (change)="phrasesChanged(false)" (focus)="selectPhraseRow(i, false)" (focusout)="unselectPhraseRow(false)">
+                      </div>
+                      <div class="uk-width-1-4@m uk-text-center erase"><a class="uk-icon-link" uk-icon="icon: trash" contenteditable="false" (click)="deletePhrase(i,false)"></a></div>
+                    </li>
+                  </ul>
+                </div>
+                <footer class="negative">
+                  <div class="uk-grid-collapse uk-child-width-expand@s" uk-grid>
+                    <div>
+                      <span class="count uk-text-middle" id="count-neg">{{negativePhrasesArray.length}}</span>
+                      <span class="uk-text-middle"> negative word{{negativePhrasesArray.length!==1 ? 's' : ''}}</span>
+                    </div>
+                    <div>
+                      <button class="cm-white-button cm-phrases-button uk-float-right uk-button uk-button-default" disabled id="clear-all-neg">Delete All</button>
+                    </div>
+                  </div>
+                </footer>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li>
+          <h6 class="uk-accordion-title">Acknowledgement statement proccess</h6>
+          <div class="uk-accordion-content">
+            <p class="uk-text-small">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <form class="uk-form-horizontal">
+              <div>
+                <label class="uk-form-label" for="word-split">Length of N-grams <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></label>
+                <div class="uk-form-controls">
+                  <input class="uk-input" type="number" name="word-split" min="0" max="10" id="word-split" placeholder="Word pairs" value="2" [value]="settings.wordssplitnum" (change)="wordssplitnumChange($event.target.value)"/>
+                </div>
+              </div>
+            </form>
+          </div>
+        </li>
+        <li>
+          <h6 class="uk-accordion-title">Matching area size</h6>
+          <div class="uk-accordion-content">
+            <p class="uk-text-small">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <form class="uk-form-horizontal">
+              <div class="cm-match-area left">
+                <label class="uk-form-label" for="context-prev-words">Words left of the match <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></label>
+                <div class="uk-form-controls">
+                  <input class="uk-input" type="number" name="context-prev-words" min="0" max="20" id="context-prev-words" placeholder="Prev words number" value="10" [value]="settings.contextprev" (change)="contextprevChange($event.target.value)"/>
+                </div>
+              </div>
+              <div class="cm-match-area right">
+                <label class="uk-form-label" for="context-next-words">Words right of the match <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></label>
+                <div class="uk-form-controls">
+                  <input class="uk-input" type="number" name="context-next-words" min="0" max="20" id="context-next-words" placeholder="Next words number" value="5" [value]="settings.contextnext" (change)="contextnextChange($event.target.value)"/>
+                </div>
+              </div>
+            </form>
+          </div>
+        </li>
+        <li>
+          <h6 class="uk-accordion-title">Text proccess</h6>
+          <div class="uk-accordion-content">
+            <p class="uk-text-small">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <form class="uk-form-stacked">
+              <div class="uk-margin">
+                <label class="uk-form-label" for="stop-words-filter"><input id="stop-words-filter" class="uk-checkbox" type="checkbox" [checked]="settings.stopwords===1" (change)="stopwordsCheckBoxChange($event.target.checked)"> Remove stop words <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></label>
+              </div>
+              <div class="uk-margin">
+                <label class="uk-form-label" for="punctuation-filter"><input id="punctuation-filter" class="uk-checkbox" type="checkbox" [checked]="settings.punctuation===1" (change)="punctuationCheckBoxChange($event.target.checked)"> Remove punctuation <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></label>
+              </div>
+            </form>
+          </div>
+        </li>
+        <li>
+          <h6 class="uk-accordion-title">Letter case</h6>
+          <div class="uk-accordion-content">
+            <p class="uk-text-small">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <div class="uk-form-controls" id="letter-case-radio">
+              <div *ngFor="let case of lettercases">
+                <label>
+                  <input class="uk-radio none" type="radio" name="letter-case" [checked]="case.value === settings.lettercase"  [value]="case.value" (change)="letterCaseChange(case.value)">
+                  {{case.display}}
+                </label>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <hr>
+  <div class="uk-flex uk-flex-center@m uk-flex-right@l uk-margin-top uk-margin-right cm-save-profile-step">
+    <span class="uk-text-primary uk-text-middle uk-text-middle">Satisfied with the results?</span>
+    <button id="next-button" class="uk-button uk-button-primary uk-margin-left" (click)="saveProfile()">Save your profile</button>
+  </div>
+</div>

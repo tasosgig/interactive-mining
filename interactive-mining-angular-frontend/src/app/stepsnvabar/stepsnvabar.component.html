@@ -1,0 +1,25 @@
+<div *ngIf="proccessStep>0" class="uk-flex-inline cm-nav-container">
+  <div class="cm-left-box"><a href="/manage-profiles"><button id="cancel-main-btn" class="uk-close-large cm-close-btn" type="button" uk-close></button></a></div>
+  <div class="cm-navigation cm-nav-toolbar">
+    <ul class="uk-subnav uk-subnav-line">
+      <li class="cm-nav-li" [ngClass]="{'cm-nav-active':proccessStep===1, 'cm-nav-disabled':proccessStep<1}">
+        <a class="cm-nav-a" [routerLink]="proccessStep>1 ? ['/upload-content'] : []">
+          <div class="cm-nav-number-container"><span class="cm-nav-number uk-text-middle">1</span></div>
+          <span class="cm-nav-title uk-text-middle">Matching context<br>definition</span>
+        </a>
+      </li>
+      <li class="cm-nav-li" [ngClass]="{'cm-nav-active':proccessStep===2, 'cm-nav-disabled':proccessStep<2}">
+        <a class="cm-nav-a" [routerLink]="proccessStep>2 ? ['/configure-profile'] : []">
+          <div class="cm-nav-number-container"><span class="cm-nav-number uk-text-middle">2</span></div>
+          <span class="cm-nav-title uk-text-middle">Matching proccess<br>configuration</span>
+        </a>
+      </li>
+      <li class="cm-nav-li" [ngClass]="{'cm-nav-active':proccessStep===3, 'cm-nav-disabled':proccessStep<3}">
+        <a class="cm-nav-a" [routerLink]="proccessStep>3 ? ['/save-profile'] : []">
+          <div class="cm-nav-number-container"><span class="cm-nav-number uk-text-middle">3</span></div>
+          <span class="cm-nav-title uk-text-middle">Save your<br>matching profile</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>

@@ -1,0 +1,8 @@
+<div class="uk-section uk-section-default uk-margin-medium-top uk-padding-remove-top">
+  <div class="uk-container uk-container-small">
+    <label for="profile-name" [ngClass]="{'uk-text-danger':!profileName}">Current name:</label>
+    <input [(ngModel)]="profileName" class="uk-input" [ngClass]="{'uk-form-danger':!profileName}" id="profile-name" type="text" autofocus="">
+    <span *ngIf="!profileName" class="uk-text-danger">Profile name cannot be empty!</span>
+    <button class="uk-button uk-button-default uk-margin-medium-top uk-width-1-1 uk-button-medium uk-text-center cm-main-button" [disabled]="!profileName" (click)="saveProfile()">Save profile to your account</button>
+  </div>
+</div>

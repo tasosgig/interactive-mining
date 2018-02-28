@@ -1,0 +1,62 @@
+<div class="cm-results-section">
+  <header id="cm-results-section-header" class="uk-container uk-container-expand">
+    <div class="cm-results-controls">
+      <div class="uk-margin">
+        <h4>Matching test area <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></h4>
+        <p class="uk-text-middle">Choose a document sample to test your matchin results!</p>
+        <div class="uk-grid-collapse uk-child-width-expand@s" uk-grid>
+          <form class="uk-search uk-search-default uk-width-1-5@m">
+            <span class="uk-search-icon-flip" uk-search-icon></span>
+            <input class="uk-search-input" type="search" placeholder="Search..." style="background-color:  white;">
+          </form>
+          <button *ngIf="documentsLoaded" class="uk-button uk-button-primary uk-width-auto cm-doc-selected" style="padding-left: 25px">{{docNameLoaded}}<span uk-icon="icon: check; ratio: 1"></span></button>
+          <div class="uk-width-expand" uk-slider>
+            <div class="uk-position-relative">
+              <div class="uk-slider-container">
+                <ul class="uk-slider-items uk-grid-small">
+                  <li *ngFor="let doc of docSamples">
+                    <button class="uk-button uk-button-primary" (click)="chooseSample(doc.name)">{{doc.name}}</button>
+                  </li>
+                </ul>
+              </div>
+              <div >
+                <a class="uk-position-center-left uk-position-small cm-slidenav cm-slidenav-left" href="#" uk-slidenav-previous uk-slider-item="previous"></a>
+                <a class="uk-position-center-right uk-position-small cm-slidenav cm-slidenav-right" href="#" uk-slidenav-next uk-slider-item="next"></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="uk-text-right uk-margin-small-top">
+          <span class="uk-text-middle">or</span>
+          <div uk-form-custom>
+            <input #docupload type="file" (change)="fileChangeUpload($event);docupload.value=''" accept=".txt,.pdf">
+            <span class="uk-link">Upload your documents</span>
+          </div>
+        </div>
+      </div>
+      <h4>Test results <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></h4>
+      <button id="run-mining-btn" class="uk-button uk-button-primary" [disabled]="!documentsLoaded" (click)="runMining()">Apply rules to sleected documents</button>
+    </div>
+    <div class="cm-results-count-section">
+      <div id="results-count">
+        <span id="results-number" class="uk-text-primary uk-margin-right">{{matches_number}}</span>
+        <span id="results-number-previous" class="cm-text-muted">{{prev_matches_number}}</span>
+      </div>
+    </div>
+  </header>
+  <div id="results-section" class="cm-results-rows">
+    <ul id="docs-results" uk-accordion="multiple: true">
+      <li *ngFor="let result of resultsArray;" class="uk-card uk-card-default uk-card-small uk-card-body uk-open">
+        <h3 class="uk-accordion-title">{{result.docTitle}}</h3>
+        <div class="uk-accordion-content" aria-hidden="false">
+          <div *ngFor="let match of result.matches">
+            <div class="match">Match 1: {{match.match}}</div>
+            <p class="cm-document-result">
+              {{match.extraprev}} <span class="textwindow" [innerHTML]="match.context"></span> {{match.extranext}}
+            </p>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
