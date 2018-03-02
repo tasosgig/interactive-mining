@@ -205,6 +205,7 @@ export class SettingsComponent implements OnInit {
       return;
     }
     localStorage.setItem('contextprev', value);
+    this.getSettingsFromLocalStorage();
   }
 
   contextnextChange(value): void {
@@ -212,6 +213,7 @@ export class SettingsComponent implements OnInit {
       return;
     }
     localStorage.setItem('contextnext', value);
+    this.getSettingsFromLocalStorage();
   }
 
   wordssplitnumChange(value): void {
@@ -219,6 +221,7 @@ export class SettingsComponent implements OnInit {
       return;
     }
     localStorage.setItem('wordssplitnum', value);
+    this.getSettingsFromLocalStorage();
   }
 
   stopwordsCheckBoxChange(value: boolean): void {

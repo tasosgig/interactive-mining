@@ -1272,6 +1272,14 @@ header.uk-sticky-fixed .cm-results-count-section {
   background-color: rgba(245, 245, 245, 0.8) !important;
   padding: 5px 20px 5px 20px;
 }
+#cm-run-test-section {
+  padding: 0px 20px 40px 20px;
+}
+#cm-run-test-section.uk-sticky-fixed {
+  padding: 20px 20px 20px 20px;
+  background-color: rgba(245, 245, 245, 0.9) !important;
+  box-shadow: rgba(0, 0, 0, 0.07) 0px 3px 0px;
+}
 .cm-text-muted {
   color: #737373 !important;
 }
@@ -1355,7 +1363,7 @@ header.uk-sticky-fixed .cm-results-count-section {
   color: #000;
   background-color: #FFFFFF;
   border: 2px solid #54c0ff;
-  margin: -2px 0px 0px 10px;
+  margin: -2px 0px 0px 0px;
 }
 .cm-doc-selected span {
   position: absolute;
@@ -1373,6 +1381,7 @@ header.uk-sticky-fixed .cm-results-count-section {
 .cm-slidenav-left {
   border-radius: 0px 25px 25px 0px;
   padding: 8px 8px 8px 4px;
+  /*margin-left: 0px;*/
 }
 .cm-slidenav-right {
   border-radius: 25px 0px 0px 25px;

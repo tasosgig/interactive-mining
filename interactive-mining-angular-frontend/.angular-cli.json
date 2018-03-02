@@ -24,7 +24,9 @@
       "scripts": [
         "../node_modules/jquery/dist/jquery.min.js",
         "../node_modules/uikit/dist/js/uikit.min.js",
-        "../node_modules/uikit/dist/js/uikit-icons.min.js"
+        "../node_modules/uikit/dist/js/uikit-icons.min.js",
+        "./assets/js/ResizeSensor.js",
+        "./assets/js/jquery.sticky-sidebar.js"
       ],
       "environmentSource": "environments/environment.ts",
       "environments": {

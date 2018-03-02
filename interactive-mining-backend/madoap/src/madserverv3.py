@@ -181,7 +181,8 @@ def loadProfileDocs(user_id, profile_id):
     # copy unique profile docs file to a general user docs file
     docs_file_name = "/tmp/docs{0}.json".format(user_id)
     unique_profile_docs_file_name = "/tmp/OAMiningDocs_{0}_{1}.json".format(user_id,profile_id)
-    copyfile(unique_profile_docs_file_name, docs_file_name)
+    if os.path.isfile(unique_profile_docs_file_name):
+        copyfile(unique_profile_docs_file_name, docs_file_name)
 
 def loadExampleDocs(user_id):
     sample_file = open("static/exampleDocs.txt", 'r')
@@ -452,7 +453,7 @@ class GetUserProfilesHandler(BaseHandler):
             # data to be sent
             data = {}
             user_profiles = []
-            for r in cursor.execute("SELECT id,name,datecreated,status,matches,docname FROM database"):
+            for r in cursor.execute("SELECT id,name,datecreated,status,matches,docname FROM database order by rowid desc"):
                 user_profiles.append({"id":r[0], "name": r[1], "datecreated": r[2], "status": r[3], "matches": r[4], "docname": r[5]})
                 data['profiles'] = user_profiles
             cursor.close()
@@ -667,6 +668,8 @@ class LoadExampleProfileHandler(BaseHandler):
             # load example data
             loadExampleDocs(user_id)
             data = loadExampleProfile(user_id)
+            data['docname'] = 'Example'
+            data['docsnumber'] = '26'
             self.set_secure_cookie('madgikmining_grantsuploaded', str(data['grants']))
             self.write(json.dumps(data))
             self.finish()
@@ -1139,6 +1142,7 @@ class RunMiningHandler(BaseHandler):
                 self.write("Missing cookie containing user's id...")
                 return
             request_arguments = json.loads(self.request.body)
+            print request_arguments
             # get the database cursor
             cursor=msettings.Connection.cursor()
             # data to be sent
@@ -1361,14 +1365,24 @@ class PrepareSavedProfileHandler(BaseHandler):
                                 (key, value,) for key, value in neg_words.iteritems()
                           )
                 )
-            if 'filters' in request_arguments and request_arguments['filters'] != '{}':
-                # construct math string for negative words matching calculation with weights
-                filters = json.loads(request_arguments['filters'])
-                cursor.executemany("insert into filters(c1,c2) values(?,?)",
-                          (
-                                (key, value,) for key, value in filters.iteritems()
-                          )
-                )
+            filters = {}
+            if 'contextprev' in request_arguments and request_arguments['contextprev'] != '':
+                filters['contextprev'] = request_arguments['contextprev']
+            if 'contextnext' in request_arguments and request_arguments['contextnext'] != '':
+                filters['contextnext'] = request_arguments['contextnext']
+            if 'lettercase' in request_arguments and request_arguments['lettercase'] != '':
+                filters['lettercase'] = request_arguments['lettercase']
+            if 'wordssplitnum' in request_arguments and request_arguments['wordssplitnum'] != '':
+                filters['wordssplitnum'] = request_arguments['wordssplitnum']
+            if 'stopwords' in request_arguments and request_arguments['stopwords'] != '':
+                filters['stopwords'] = request_arguments['stopwords']
+            if 'stopwords' in request_arguments and request_arguments['stopwords'] != '':
+                filters['punctuation'] = request_arguments['punctuation']
+            cursor.executemany("insert into filters(c1,c2) values(?,?)",
+                      (
+                            (key, value,) for key, value in filters.iteritems()
+                      )
+            )
             if numberOfGrantsUploaded(user_id, self.get_secure_cookie('madgikmining_grantsuploaded')) != 0:
                   cursor.execute("insert into grants select stripchars(c1) as c1, stripchars(c2) as c2 from (file '/tmp/p{0}.tsv')".format(user_id))
             cursor.close()
@@ -1438,7 +1452,7 @@ class SaveProfileToDatabaseHandler(BaseHandler):
             if old_profile:
                 query = 'UPDATE database set name="{1}", datecreated="{2}", status="{3}", matches="{4}", docname="{5}", docsnumber="{6}" where id="{0}"'.format(profile_id,profile_name,"24-03-2018","Ready","8/8",doc_name,docs_number)
             else:
-                query = 'INSERT INTO database VALUES("{0}","{1}","{2}","{3}","{4}","{5}","{6}")'.format(profile_id,profile_name,"24-03-2018","Ready","8/8",doc_name,docs_number)
+                query = 'INSERT INTO database VALUES("{0}","{1}","{2}","{3}","{4}","{5}","{6}")'.format(profile_id,profile_name,datetime.date.today().strftime("%B %d %Y"),"Saved","8/8",doc_name,docs_number)
             cursor.execute(query, parse=False)
             cursor.close()
             self.write(json.dumps({}))

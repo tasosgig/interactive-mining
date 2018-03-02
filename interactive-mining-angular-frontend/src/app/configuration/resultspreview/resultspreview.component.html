@@ -3,13 +3,13 @@
     <div class="cm-results-controls">
       <div class="uk-margin">
         <h4>Matching test area <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></h4>
-        <p class="uk-text-middle">Choose a document sample to test your matchin results!</p>
+        <p>Choose a document sample to test your matchin results!</p>
         <div class="uk-grid-collapse uk-child-width-expand@s" uk-grid>
-          <form class="uk-search uk-search-default uk-width-1-5@m">
-            <span class="uk-search-icon-flip" uk-search-icon></span>
-            <input class="uk-search-input" type="search" placeholder="Search..." style="background-color:  white;">
-          </form>
-          <button *ngIf="documentsLoaded" class="uk-button uk-button-primary uk-width-auto cm-doc-selected" style="padding-left: 25px">{{docNameLoaded}}<span uk-icon="icon: check; ratio: 1"></span></button>
+          <!--<form class="uk-search uk-search-default uk-width-1-5@m">-->
+            <!--<span class="uk-search-icon-flip" uk-search-icon></span>-->
+            <!--<input class="uk-search-input" type="search" placeholder="Search..." style="background-color:  white;">-->
+          <!--</form>-->
+          <button *ngIf="documentsLoaded>0" class="uk-button uk-button-primary uk-width-auto cm-doc-selected">{{docNameLoaded}}<span uk-icon="icon: check; ratio: 1"></span></button>
           <div class="uk-width-expand" uk-slider>
             <div class="uk-position-relative">
               <div class="uk-slider-container">
@@ -26,31 +26,36 @@
             </div>
           </div>
         </div>
-        <div class="uk-text-right uk-margin-small-top">
-          <span class="uk-text-middle">or</span>
-          <div uk-form-custom>
-            <input #docupload type="file" (change)="fileChangeUpload($event);docupload.value=''" accept=".txt,.pdf">
-            <span class="uk-link">Upload your documents</span>
+        <div class="uk-grid-collapse uk-child-width-expand@s" uk-grid>
+          <span *ngIf="documentsLoaded>0" class="uk-text uk-text-success" style="margin-top: 12px">{{documentsLoaded}} document{{documentsLoaded===1?'':'s'}} loaded</span>
+          <span *ngIf="documentsLoaded<1" class="uk-text uk-text-danger" style="margin-top: 12px">No documents selected</span>
+          <div class="uk-text-right uk-margin-small-top">
+            <span class="uk-text-middle">or</span>
+            <div uk-form-custom>
+              <input #docupload type="file" (change)="fileChangeUpload($event);docupload.value=''" accept=".txt,.pdf">
+              <span class="uk-link">Upload your documents</span>
+            </div>
           </div>
         </div>
-      </div>
-      <h4>Test results <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></h4>
-      <button id="run-mining-btn" class="uk-button uk-button-primary" [disabled]="!documentsLoaded" (click)="runMining()">Apply rules to sleected documents</button>
-    </div>
-    <div class="cm-results-count-section">
-      <div id="results-count">
-        <span id="results-number" class="uk-text-primary uk-margin-right">{{matches_number}}</span>
-        <span id="results-number-previous" class="cm-text-muted">{{prev_matches_number}}</span>
+
       </div>
     </div>
   </header>
+  <div id="cm-run-test-section">
+    <h4>Test results <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></h4>
+    <div class="uk-display-inline">
+      <button id="run-mining-btn" class="uk-button uk-button-primary" [disabled]="documentsLoaded<1" (click)="runMining()">Apply rules to sleected documents</button>
+      <span *ngIf="matches_number>0" id="results-number" class="uk-text-primary uk-margin-left uk-text-bottom">{{matches_number}} matche{{matches_number===1?'':'s'}} found</span>
+      <span *ngIf="prev_matches_number>0" id="results-number-previous" class="cm-text-muted uk-text-bottom">, {{prev_matches_number}} matche{{prev_matches_number===1?'':'s'}} found previously</span>
+    </div>
+  </div>
   <div id="results-section" class="cm-results-rows">
     <ul id="docs-results" uk-accordion="multiple: true">
       <li *ngFor="let result of resultsArray;" class="uk-card uk-card-default uk-card-small uk-card-body uk-open">
         <h3 class="uk-accordion-title">{{result.docTitle}}</h3>
         <div class="uk-accordion-content" aria-hidden="false">
           <div *ngFor="let match of result.matches">
-            <div class="match">Match 1: {{match.match}}</div>
+            <div class="match">Match {{match.matchcounter}}: {{match.match}}</div>
             <p class="cm-document-result">
               {{match.extraprev}} <span class="textwindow" [innerHTML]="match.context"></span> {{match.extranext}}
             </p>
@@ -58,5 +63,11 @@
         </div>
       </li>
     </ul>
+  </div>
+</div>
+
+<div id="wait-spinner-modal-center" class="uk-flex-top" esc-close="false" bg-close="false" uk-modal [ngClass]="{'uk-open':runingMining}" [style.display]="runingMining ? 'flex' : 'none'">
+  <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical">
+    <p class="uk-text-center uk-text-middle uk-text-large">Working on it, please wait... <span uk-spinner></span></p>
   </div>
 </div>

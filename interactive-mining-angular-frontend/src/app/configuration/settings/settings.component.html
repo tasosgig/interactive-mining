@@ -58,7 +58,10 @@
     <div *ngIf="precision===4" id="advaned-tools" style="margin-top: 20px;">
       <ul uk-accordion="multiple: true">
         <li>
-          <h6 class="uk-accordion-title">Positive phrases</h6>
+          <div class="uk-accordion-title">
+            <span class="uk-text-bold uk-text-uppercase">Positive phrases</span>
+            <span *ngIf="positivePhrasesArray.length > 0" class="uk-text-small uk-margin-small-left">{{positivePhrasesArray.length}} phrase{{positivePhrasesArray.length===1?'':'s'}}</span>
+          </div>
           <div class="uk-accordion-content">
             <p class="uk-text-small">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
             <div class="cm-phrases-container">
@@ -99,7 +102,10 @@
           </div>
         </li>
         <li>
-          <h6 class="uk-accordion-title">Negative phrases</h6>
+          <div class="uk-accordion-title">
+            <span class="uk-text-bold uk-text-uppercase">Negative phrases</span>
+            <span *ngIf="negativePhrasesArray.length > 0" class="uk-text-small uk-margin-small-left">{{negativePhrasesArray.length}} phrase{{negativePhrasesArray.length===1?'':'s'}}</span>
+          </div>
           <div class="uk-accordion-content">
             <p class="uk-text-small">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
             <div class="word-container">
@@ -145,7 +151,10 @@
           </div>
         </li>
         <li>
-          <h6 class="uk-accordion-title">Acknowledgement statement proccess</h6>
+          <div class="uk-accordion-title">
+            <span class="uk-text-bold uk-text-uppercase">Acknowledgement statement proccess</span>
+            <span *ngIf="settings.wordssplitnum > 0" class="uk-text-small uk-margin-small-left">{{settings.wordssplitnum}}</span>
+          </div>
           <div class="uk-accordion-content">
             <p class="uk-text-small">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
             <form class="uk-form-horizontal">
@@ -159,7 +168,11 @@
           </div>
         </li>
         <li>
-          <h6 class="uk-accordion-title">Matching area size</h6>
+          <div class="uk-accordion-title">
+            <span class="uk-text-bold uk-text-uppercase">Matching area size</span>
+            <span class="uk-text-small uk-margin-small-left">left: {{settings.contextprev}}</span>
+            <span class="uk-text-small uk-margin-small-left">right: {{settings.contextnext}}</span>
+          </div>
           <div class="uk-accordion-content">
             <p class="uk-text-small">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
             <form class="uk-form-horizontal">
@@ -179,7 +192,11 @@
           </div>
         </li>
         <li>
-          <h6 class="uk-accordion-title">Text proccess</h6>
+          <div class="uk-accordion-title">
+            <span class="uk-text-bold uk-text-uppercase">Text proccess</span>
+            <span *ngIf="settings.stopwords===1" class="uk-text-small uk-margin-small-left">stopwords</span>
+            <span *ngIf="settings.punctuation===1" class="uk-text-small uk-margin-small-left">punctuation</span>
+          </div>
           <div class="uk-accordion-content">
             <p class="uk-text-small">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
             <form class="uk-form-stacked">
@@ -193,7 +210,10 @@
           </div>
         </li>
         <li>
-          <h6 class="uk-accordion-title">Letter case</h6>
+          <div class="uk-accordion-title">
+            <span class="uk-text-bold uk-text-uppercase">Letter case</span>
+            <span *ngIf="settings.lettercase!='none'" class="uk-text-small uk-margin-small-left">{{settings.lettercase}}</span>
+          </div>
           <div class="uk-accordion-content">
             <p class="uk-text-small">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
             <div class="uk-form-controls" id="letter-case-radio">
@@ -211,7 +231,7 @@
   </div>
   <hr>
   <div class="uk-flex uk-flex-center@m uk-flex-right@l uk-margin-top uk-margin-right cm-save-profile-step">
-    <span class="uk-text-primary uk-text-middle uk-text-middle">Satisfied with the results?</span>
+    <!--<span class="uk-text-primary uk-text-middle uk-text-middle">Satisfied with the results?</span>-->
     <button id="next-button" class="uk-button uk-button-primary uk-margin-left" (click)="saveProfile()">Save your profile</button>
   </div>
 </div>

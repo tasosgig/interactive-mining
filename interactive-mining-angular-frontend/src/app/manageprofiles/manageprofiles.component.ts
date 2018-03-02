@@ -142,6 +142,8 @@ export class ManageprofilesComponent implements OnInit {
         console.log(res);
         localStorage.setItem('precision', res.precision);
         localStorage.setItem('concepts', res.concepts);
+        localStorage.setItem('docname', res.docname);
+        localStorage.setItem('docsnumber', res.docsnumber);
         localStorage.setItem('poswords', JSON.stringify(res.poswords));
         localStorage.setItem('negwords', JSON.stringify(res.negwords));
         localStorage.setItem('contextprev', res.contextprev);

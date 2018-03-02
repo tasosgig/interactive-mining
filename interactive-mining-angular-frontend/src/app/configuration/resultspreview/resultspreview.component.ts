@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {ConfigurationService} from '../configuration.service';
+import UIkit from 'uikit';
 import {Settings} from '../settings/settings';
 import {DocumentResult} from './document-result';
 import {Match} from './match';
@@ -15,6 +16,7 @@ export class ResultspreviewComponent implements OnInit {
   public docSamples: Array<DocSamplesMetadata> = [];
   public docNameLoaded = '';
   public documentsLoaded = 0;
+  public runingMining = false;
   public resultsArray: Array<DocumentResult> = [];
   public matches_number = '';
   public prev_matches_number = '';
@@ -129,10 +131,24 @@ export class ResultspreviewComponent implements OnInit {
 
   runMining(): void {
     if (this.documentsLoaded) {
+      // display wait message
+      this.runingMining = true;
+      // document.getElementById('wait-spinner-modal-center').addClass("uk-open");
       this.configurationService.runMining(JSON.stringify(this.getSettingsFromLocalStorage()))
         .subscribe( res => {
-          console.log(res.matches);
+          // hide wait message
+          this.runingMining = false;
+          UIkit.modal(document.getElementById('wait-spinner-modal-center')).hide();
+          // enable sticky
+          UIkit.sticky(document.getElementById("cm-run-test-section"), {
+            top: 25,
+            showOnUp: true,
+            animation: "uk-animation-slide-top",
+            bottom: ".cm-results-section"
+          });
+          console.log(res.matches.length);
           this.resultsArray.length = 0;
+          let matchcounter = 0;
           Object.entries(res.matches).forEach(
             ([title, matches]) => {
               let resultClass: DocumentResult = new DocumentResult();
@@ -162,9 +178,12 @@ export class ResultspreviewComponent implements OnInit {
                 }
                 context = this.highlightInElement(context, values.match);
                 match.context = context;
+                match.matchcounter = ++matchcounter;
                 matchesArray.push(match);
               }
               this.resultsArray.push(resultClass);
+              this.prev_matches_number = this.matches_number;
+              this.matches_number = matchcounter + '';
             });
         });
     }

@@ -1,11 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 
 @Component({
   selector: 'app-configuration',
   templateUrl: './configuration.component.html',
   styleUrls: ['./configuration.component.css']
 })
-export class ConfigurationComponent implements OnInit {
+export class ConfigurationComponent implements OnInit, AfterViewInit {
 
   constructor() { }
 
@@ -45,8 +45,18 @@ export class ConfigurationComponent implements OnInit {
       localStorage.setItem('stopwords', '0');
     }
     if (!localStorage.getItem('lettercase') || localStorage.getItem('lettercase') === 'undefined') {
-      localStorage.setItem('lettercase', 'None');
+      localStorage.setItem('lettercase', 'none');
     }
+  }
+
+  ngAfterViewInit() {
+    // $('#child1').stickySidebar();
+    if(document.getElementById("enableStickyBarScript"))
+      document.getElementById("enableStickyBarScript").remove();
+    var enableStickyBarScript = document.createElement("script");
+    enableStickyBarScript.setAttribute("id", "enableStickyBarScript");
+    enableStickyBarScript.setAttribute("src", "assets/js/enableStickyBar.js");
+    document.body.appendChild(enableStickyBarScript);
   }
 
 }
