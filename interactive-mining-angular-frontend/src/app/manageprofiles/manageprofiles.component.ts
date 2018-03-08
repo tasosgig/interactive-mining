@@ -33,9 +33,9 @@ export class ManageprofilesComponent implements OnInit {
   }
 
   getUserId(): void {
-    this.manageProfilesService.getUserIdToLocalStorage()
-      .subscribe(() => {
-        localStorage.setItem('user_id', this.cookieService.get('madgikmining'));
+    this.manageProfilesService.getUserId()
+      .subscribe(res => {
+        localStorage.setItem('user_id', res);
         this.getSavedProfiles();
         this.getExampleProfiles();
       });
@@ -43,7 +43,11 @@ export class ManageprofilesComponent implements OnInit {
 
   getSavedProfiles(): void {
     this.manageProfilesService.getSavedProfiles()
-      .subscribe(res => this.userSavedProfiles = res);
+      .subscribe(res => {
+        if (res) {
+          this.userSavedProfiles = res;
+        }
+      });
   }
 
   loadSavedProfile(id: string, name: string): void {

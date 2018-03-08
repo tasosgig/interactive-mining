@@ -879,6 +879,105 @@ background:rgba(255,255,255, 0.4);
 .cm-nav-disabled span.cm-nav-title {
   color: #91919d;
 }
+
+/* Custom Navigation V2
+ ========================================================================== */
+:root {
+  --cm-nav2-theme-1: #245bcc;
+  --cm-nav2-theme-2: #fff;
+  --cm-nav2-theme-3: #ffc800;
+  --cm-nav2-theme-4: #cbcbcb;
+  --cm-nav2-theme-5: #537fdf;
+}
+.cm-nav2 {
+  text-align: center;
+  display: inline-block;
+  overflow: hidden;
+  counter-reset: flag;
+}
+.cm-nav2-step {
+  text-decoration: none;
+  outline: none;
+  display: block;
+  float: left;
+  font-family: Roboto;
+  font-size: 15px;
+  line-height: 50px;
+  padding: 0 16px 0 60px;
+  position: relative;
+  background: var(--cm-nav2-theme-2);
+  color: var(--cm-nav2-theme-1);
+  transition: background 0.3s;
+  border: 2px solid var(--cm-nav2-theme-1);
+}
+.cm-nav2-step:first-child {
+  padding-left: 46px;
+  border-radius: 2px 0 0 2px;
+}
+.cm-nav2-step:first-child::before {
+  left: 14px;
+}
+.cm-nav2-step:last-child {
+  border-radius: 0 2px 2px 0;
+  padding-right: 20px;
+}
+.cm-nav2-step:last-child::after {
+  content: none;
+}
+.cm-nav2-step::before {
+  content: counter(flag);
+  counter-increment: flag;
+  width: 20px;
+  height: auto;
+  line-height: 32px;
+  margin: 8px 0;
+  position: absolute;
+  top: 0;
+  left: 30px;
+  font-size: 24px;
+  font-weight: bold;
+}
+.cm-nav2-step::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -25px;
+  width: 50px;
+  height: 50px;
+  transform: scale(0.707) rotate(45deg);
+  z-index: 1;
+  border-radius: 0 5px 0 50px;
+  background: var(--cm-nav2-theme-2);
+  transition: background 0.3s;
+  box-shadow: 2px -2px 0 1px var(--cm-nav2-theme-1);
+}
+.cm-nav2-step:hover,
+.cm-nav2-step-active,
+.cm-nav2-step:hover::after,
+.cm-nav2-step-active::after{
+  background: var(--cm-nav2-theme-5);
+  color: var(--cm-nav2-theme-2);
+}
+.cm-nav2-step:hover::before,
+.cm-nav2-step-active::before {
+  color: var(--cm-nav2-theme-2);
+}
+.cm-nav2-step-disabled,
+.cm-nav2-step-disabled:hover {
+  border: 2px solid var(--cm-nav2-theme-4);
+}
+.cm-nav2-step-disabled::after {
+  box-shadow: 2px -2px 0 1px var(--cm-nav2-theme-4);
+}
+.cm-nav2-step-disabled,
+.cm-nav2-step-disabled:hover,
+.cm-nav2-step-disabled:hover::before,
+.cm-nav2-step-disabled:hover::after {
+  background: var(--cm-nav2-theme-2);
+  color: var(--cm-nav2-theme-4);
+  cursor: default;
+}
+
 /* Custom File drop Area Upload
  ========================================================================== */
 .cm-file-drop-area {
@@ -910,14 +1009,14 @@ background:rgba(255,255,255, 0.4);
  ========================================================================== */
 .cm-table {
   border-collapse: collapse;
-  /*border-radius: 3px;*/
-  border-style: hidden; /* hide standard table (collapsed) border */
-  box-shadow: 0 0 0 1px #f7c800; /* this draws the table border  */
 }
 .cm-table th {
   padding: 16px 14px;
   -webkit-transition: color .1s linear;
   transition: color .1s linear;
+}
+.cm-table tbody tr, .cm-table tfoot tr {
+  border: 1px solid #cbcbcb;
 }
 .cm-table td {
   padding: 0px;
@@ -935,11 +1034,11 @@ background:rgba(255,255,255, 0.4);
   padding: 14px;
 }
 .cm-table td.keyword, .cm-table td.context, .cm-table td.delete, .cm-table td.edit, .cm-table-footer {
-  border-top: 1px solid #e8e8e8;
+  border-top: 1px solid #cbcbcb;
   font-weight: 400;
 }
 .cm-table td.keyword, .cm-table td.context {
-  border-right: 1px solid #e8e8e8;
+  border-right: 1px solid #cbcbcb;
 }
 .cm-table tr.editing td.keyword, .cm-table tr.editing td.context {
   background-color: #ffd149 !important;
@@ -971,9 +1070,6 @@ background:rgba(255,255,255, 0.4);
 /*.cm-table td.keyword:hover, .cm-table td.context:hover, .cm-table td.edit:hover a {*/
   /*color: #55546d;*/
 /*}*/
-.cm-table thead tr {
-  background-color: #fef4d7;
-}
 .cm-table tr th {
   color: #5b6065;
   font-weight: bold;
@@ -1004,7 +1100,7 @@ background:rgba(255,255,255, 0.4);
 
 }
 .cm-easy-config-section {
-  padding: 20px;
+  padding: 30px 20px 20px 20px;
 }
 .cm-config-options-container {
   display: block;
@@ -1116,7 +1212,7 @@ background:rgba(255,255,255, 0.4);
 }
 .cm-advanced-tools-section {
   padding: 0px 20px 20px 20px;
-  min-height: 296px;
+  min-height: 160px;
 }
 .cm-advanced-tools-section .uk-accordion-title {
   font-size: 16px;
@@ -1243,11 +1339,11 @@ background:rgba(255,255,255, 0.4);
 /* Custom Results Section
  ========================================================================== */
 .cm-results-section {
-  background-color: rgb(242, 242, 242);
-  min-height: 700px;
+  background-color: #f5f5f5;
+  min-height: 686px;
   position: relative;
-  border-bottom: 1px solid #f7c800;
-  border-left: 1px solid #f7c800;
+  border: 1px dashed #cbcbcb;
+  margin-left: 20px;
 }
 .cm-results-section header {
   padding: 0;
@@ -1259,7 +1355,7 @@ background:rgba(255,255,255, 0.4);
   box-shadow: rgba(0, 0, 0, 0.07) 0px 3px 0px;
 }
 .cm-results-controls {
-  padding: 40px 20px 20px 20px;
+  padding: 20px 20px 20px 20px;
 }
 header.uk-sticky-fixed .cm-results-controls {
   background-color: rgb(242, 242, 242) !important;
@@ -1423,7 +1519,6 @@ header.uk-sticky-fixed .cm-results-count-section {
   margin-bottom: 64px;
 }
 #child1 {
-  padding-top: 20px;
   -webkit-flex: 0.35;
   flex: 0.35;
   will-change: min-height;
@@ -1436,10 +1531,9 @@ header.uk-sticky-fixed .cm-results-count-section {
   transform: translate3d(0, 0, 0);
   will-change: position, transform;
   padding-bottom: 20px;
-  border-bottom: 1px solid #f7c800;
-  border-right: 1px solid #f7c800;
-  margin-right: -1px;
-  min-height: 640px;
+  /*border: 1px solid #f7c800;*/
+  /*padding-top: 20px;*/
+  min-height: 667px;
 }
 #child2 {
   position: relative;

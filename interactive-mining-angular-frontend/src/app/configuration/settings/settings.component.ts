@@ -221,7 +221,6 @@ export class SettingsComponent implements OnInit {
       return;
     }
     localStorage.setItem('wordssplitnum', value);
-    this.getSettingsFromLocalStorage();
   }
 
   stopwordsCheckBoxChange(value: boolean): void {

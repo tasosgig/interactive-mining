@@ -395,9 +395,10 @@ class GetUserIdHandler(BaseHandler):
         self.finish()
     def get(self):
         try:
-            # check if we already gave client a user_id
+            # check if we already gave client a user_id, and it exists on the server
             user_id = self.get_secure_cookie('madgikmining')
-            if not user_id:
+            database_file_name = "/tmp/OAMiningProfilesDatabase_{0}.db".format(user_id)
+            if user_id is None or not os.path.isfile(database_file_name):
                 # give him a unique user_id
                 user_id = getNewUserId()
                 self.set_secure_cookie('madgikmining', user_id)
@@ -412,7 +413,7 @@ class GetUserIdHandler(BaseHandler):
                 cursor.execute("drop table if exists database", parse=False)
                 cursor.execute("create table database(id,name,datecreated,status,matches,docname,docsnumber)", parse=False)
                 cursor.close()
-            self.write(json.dumps({}))
+            self.write({'user_id': user_id})
             self.finish()
         except Exception as ints:
             self.set_status(400)
@@ -448,6 +449,10 @@ class GetUserProfilesHandler(BaseHandler):
             import madis
             # database file name
             database_file_name = "/tmp/OAMiningProfilesDatabase_{0}.db".format(user_id)
+            if not os.path.isfile(database_file_name):
+                self.set_status(400)
+                self.write("Missing user\'s database")
+                return
             # get the database cursor
             cursor=madis.functions.Connection(database_file_name).cursor()
             # data to be sent
@@ -589,12 +594,6 @@ class GetExampleProfilesHandler(BaseHandler):
         self.finish()
     def get(self):
         try:
-            # get user id from cookie. Must have
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
-                self.set_status(400)
-                self.write("Missing cookie containing user's id...")
-                return
             data = {}
             example_profiles = []
             example_profiles.append({'name': 'Egi', 'contents': 25, 'documents': 104})

@@ -33,4 +33,8 @@ export class StepsnvabarComponent implements OnInit {
     }
   }
 
+  cancelHandle(): void {
+    this.router.navigate(['/manage-profiles']);
+  }
+
 }

@@ -24,8 +24,9 @@ export class ManageprofilesService {
 
   constructor(private http: HttpClient) { }
 
-  getUserIdToLocalStorage(): Observable<any> {
+  getUserId(): Observable<string> {
     return this.http.get(this.getUserIdUrl, { withCredentials: true })
+       .map(res => res['user_id'])
        .catch(this.util.handleError);
   }
 
