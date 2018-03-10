@@ -1,84 +1,87 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {ProfileData} from './profile-data';
 import {Util} from '../util';
 import {Observable} from 'rxjs/Observable';
 import {ProfileMetadata} from './profile-metadata';
 import {ExampleProfilesMetadata} from './example-profiles-metadata';
-import {RequestOptions, ResponseContentType} from '@angular/http';
 
 @Injectable()
 export class ManageprofilesService {
 
   private util: Util = new Util();
 
-  private getUserIdUrl = 'http://localhost:8080/getuserid';
-  private getSavedProfilesUrl = 'http://localhost:8080/getuserprofiles';
-  private downloadProfileUrl = 'http://localhost:8080/downloadprofile';
-  private DeleteuserProfileUrl = 'http://localhost:8080/deleteuserprofile';
-  private createNewProfileUrl = 'http://localhost:8080/createnewprofile';
-  private loadSavedProfileUrl = 'http://localhost:8080/loaduserprofile';
-  private getExampleProfilesUrl = 'http://localhost:8080/getexampleprofiles';
-  private loadExampleProfileUrl = 'http://localhost:8080/loadexampleprofile';
-  private uploadProfileUrl = 'http://localhost:8080/uploadprofile';
+  private userId = '';
+  private backendServerAddress = '';
 
-  constructor(private http: HttpClient) { }
+  private initServerHandshake = '/initialhandshake';
+  private getSavedProfilesUrl = '/getuserprofiles';
+  private downloadProfileUrl = '/downloadprofile';
+  private DeleteuserProfileUrl = '/deleteuserprofile';
+  private createNewProfileUrl = '/createnewprofile';
+  private loadSavedProfileUrl = '/loaduserprofile';
+  private getExampleProfilesUrl = '/getexampleprofiles';
+  private loadExampleProfileUrl = '/loadexampleprofile';
+  private uploadProfileUrl = '/uploadprofile';
 
-  getUserId(): Observable<string> {
-    return this.http.get(this.getUserIdUrl, { withCredentials: true })
-       .map(res => res['user_id'])
-       .catch(this.util.handleError);
+  constructor(private http: HttpClient) {
+    this.userId = this.util.getUserId();
+    this.backendServerAddress = this.util.getBackendServerAddress();
+  }
+
+  initialServerHandshake(): Observable<any> {
+    return this.http.get(this.backendServerAddress + this.initServerHandshake + `?user=${this.userId}`)
+      .catch(this.util.handleError);
   }
 
   downloadProfile(profileId: string): Observable<any> {
-    return this.http.post(this.downloadProfileUrl, {id: profileId}, { responseType: 'blob', withCredentials: true })
+    return this.http.post(this.backendServerAddress + this.downloadProfileUrl,
+      {user: this.userId, id: profileId}, {responseType: 'blob', withCredentials: true})
       .catch(this.util.handleError);
   }
 
   deleteProfile(profileId: string): Observable<any> {
-    return this.http.post(this.DeleteuserProfileUrl, {id: profileId}, { withCredentials: true })
+    return this.http.post(this.backendServerAddress + this.DeleteuserProfileUrl, {user: this.userId, id: profileId})
       .catch(this.util.handleError);
   }
 
   createNewProfile(): Observable<any> {
-    return this.http.get(this.createNewProfileUrl, { withCredentials: true })
+    return this.http.get(this.backendServerAddress + this.createNewProfileUrl + `?user=${this.userId}`)
       .catch(this.util.handleError);
   }
 
   loadSavedProfile(profileId: string): Observable<ProfileData> {
-    return this.http.post<ProfileData>(this.loadSavedProfileUrl, {
-      id: profileId
-    }, { withCredentials: true })
+    return this.http.post<ProfileData>(this.backendServerAddress + this.loadSavedProfileUrl, {user: this.userId, id: profileId})
       .catch(this.util.handleError);
   }
 
   loadExampleProfile(name: string): Observable<ProfileData> {
-    return this.http.get<ProfileData>(this.loadExampleProfileUrl, { withCredentials: true })
+    return this.http.get<ProfileData>(this.backendServerAddress + this.loadExampleProfileUrl + `?user=${this.userId}`)
       .catch(this.util.handleError);
   }
 
   uploadFile(file: File): Observable<ProfileData> {
     const formData: FormData = new FormData();
     formData.append('upload', file, file.name);
+    formData.append('user', this.userId);
     const params = new HttpParams();
     const options = {
       headers: new HttpHeaders().set('Accept', 'application/json').delete('Content-Type'),
       params: params,
-      reportProgress: true,
-      withCredentials: true,
+      reportProgress: true
     };
-    return this.http.post<ProfileData>(this.uploadProfileUrl, formData, options)
+    return this.http.post<ProfileData>(this.backendServerAddress + this.uploadProfileUrl, formData, options)
       .catch(this.util.handleError);
   }
 
   getSavedProfiles(): Observable<ProfileMetadata[]> {
-    return this.http.get(this.getSavedProfilesUrl, { withCredentials: true })
+    return this.http.get(this.backendServerAddress + this.getSavedProfilesUrl + `?user=${this.userId}`)
       .map(data => data['profiles'])
       .catch(this.util.handleError);
   }
 
   getExampleProfiles(): Observable<ExampleProfilesMetadata[]> {
-    return this.http.get(this.getExampleProfilesUrl, { withCredentials: true })
+    return this.http.get(this.backendServerAddress + this.getExampleProfilesUrl)
       .map(data => data['profiles'])
       .catch(this.util.handleError);
   }

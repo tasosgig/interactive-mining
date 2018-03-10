@@ -1,12 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ManageprofilesService} from './manageprofiles.service';
 import {Router} from '@angular/router';
 import UIkit from 'uikit';
-import {CookieService} from 'ngx-cookie-service';
 import {PaginationInstance} from 'ngx-pagination';
 import {ProfileMetadata} from './profile-metadata';
 import {ExampleProfilesMetadata} from './example-profiles-metadata';
-import {getFileNameFromResponseContentDisposition, saveFile} from '../util';
+import {saveFile} from '../util';
 
 @Component({
   selector: 'app-manageprofiles',
@@ -26,16 +25,16 @@ export class ManageprofilesComponent implements OnInit {
     currentPage: 1
   };
 
-  constructor(private manageProfilesService: ManageprofilesService, private router: Router, private cookieService: CookieService) { }
-
-  ngOnInit() {
-    this.getUserId();
+  constructor(private manageProfilesService: ManageprofilesService, private router: Router) {
   }
 
-  getUserId(): void {
-    this.manageProfilesService.getUserId()
-      .subscribe(res => {
-        localStorage.setItem('user_id', res);
+  ngOnInit() {
+    this.initialServerhandshake();
+  }
+
+  initialServerhandshake(): void {
+    this.manageProfilesService.initialServerHandshake()
+      .subscribe(() => {
         this.getSavedProfiles();
         this.getExampleProfiles();
       });
@@ -53,28 +52,26 @@ export class ManageprofilesComponent implements OnInit {
   loadSavedProfile(id: string, name: string): void {
     this.manageProfilesService.loadSavedProfile(id)
       .subscribe(res => {
-          console.log(res);
-          // backup user_id from localstorage and clear all storage data
-          const userId: string = localStorage.getItem('user_id');
-          localStorage.clear();
-          localStorage.setItem('user_id', userId);
-          // store to client all profile data
-          localStorage.setItem('profilename', name);
-          localStorage.setItem('profileid', id);
-          localStorage.setItem('docname', res.docname);
-          localStorage.setItem('docsnumber', res.docsnumber);
-          localStorage.setItem('precision', res.precision);
-          localStorage.setItem('concepts', res.concepts);
-          localStorage.setItem('poswords', JSON.stringify(res.poswords));
-          localStorage.setItem('negwords', JSON.stringify(res.negwords));
-          localStorage.setItem('contextprev', res.contextprev);
-          localStorage.setItem('contextmiddle', res.contextmiddle);
-          localStorage.setItem('contextnext', res.contextnext);
-          localStorage.setItem('wordssplitnum', res.wordssplitnum);
-          localStorage.setItem('punctuation', res.punctuation);
-          localStorage.setItem('stopwords', res.stopwords);
-          localStorage.setItem('lettercase', res.lettercase);
-          this.router.navigate(['/upload-content']);
+        console.log(res);
+        // clear localstorage values
+        this.clearLocalStorage();
+        // store to client all profile data
+        localStorage.setItem('profilename', name);
+        localStorage.setItem('profileid', id);
+        localStorage.setItem('docname', res.docname);
+        localStorage.setItem('docsnumber', res.docsnumber);
+        localStorage.setItem('precision', res.precision);
+        localStorage.setItem('concepts', res.concepts);
+        localStorage.setItem('poswords', JSON.stringify(res.poswords));
+        localStorage.setItem('negwords', JSON.stringify(res.negwords));
+        localStorage.setItem('contextprev', res.contextprev);
+        localStorage.setItem('contextmiddle', res.contextmiddle);
+        localStorage.setItem('contextnext', res.contextnext);
+        localStorage.setItem('wordssplitnum', res.wordssplitnum);
+        localStorage.setItem('punctuation', res.punctuation);
+        localStorage.setItem('stopwords', res.stopwords);
+        localStorage.setItem('lettercase', res.lettercase);
+        this.router.navigate(['/upload-content']);
       });
   }
 
@@ -88,25 +85,21 @@ export class ManageprofilesComponent implements OnInit {
   deleteProfilePrompt(index) {
     UIkit.modal.confirm('<span class="uk-text-bold uk-text-danger">' +
       'Are you sure you want to delete this profile? This action cannot be undone!</span>', {escClose: true}).then(() => {
-        this.manageProfilesService.deleteProfile(this.userSavedProfiles[index].id)
-          .subscribe(() => this.userSavedProfiles.splice(index, 1));
+      this.manageProfilesService.deleteProfile(this.userSavedProfiles[index].id)
+        .subscribe(() => this.userSavedProfiles.splice(index, 1));
     });
   }
 
   createNewProfile(): void {
-    // backup user_id from localstorage and clear all storage data
-    const userId: string = localStorage.getItem('user_id');
-    localStorage.clear();
-    localStorage.setItem('user_id', userId);
+    // clear localstorage values
+    this.clearLocalStorage();
     this.manageProfilesService.createNewProfile()
       .subscribe(() => this.router.navigate(['/upload-content']));
   }
 
   fileChangeUpload(event): void {
-    // backup user_id from localstorage and clear all storage data
-    const userId: string = localStorage.getItem('user_id');
-    localStorage.clear();
-    localStorage.setItem('user_id', userId);
+    // clear localstorage values
+    this.clearLocalStorage();
     const fileList: FileList = event.target.files;
     if (fileList && fileList.length === 1) {
       const file: File = fileList[0];
@@ -136,10 +129,8 @@ export class ManageprofilesComponent implements OnInit {
   }
 
   loadExampleProfile(name: string): void {
-    // backup user_id from localstorage and clear all storage data
-    const userId: string = localStorage.getItem('user_id');
-    localStorage.clear();
-    localStorage.setItem('user_id', userId);
+    // clear localstorage values
+    this.clearLocalStorage();
     // get new profile data
     this.manageProfilesService.loadExampleProfile(name)
       .subscribe(res => {
@@ -159,6 +150,26 @@ export class ManageprofilesComponent implements OnInit {
         localStorage.setItem('lettercase', res.lettercase);
         this.router.navigate(['/upload-content']);
       });
+  }
+
+  clearLocalStorage(): void {
+    // clear localstorage values
+    localStorage.removeItem('grants');
+    localStorage.removeItem('profilename');
+    localStorage.removeItem('profileid');
+    localStorage.removeItem('docname');
+    localStorage.removeItem('docsnumber');
+    localStorage.removeItem('precision');
+    localStorage.removeItem('concepts');
+    localStorage.removeItem('poswords');
+    localStorage.removeItem('negwords');
+    localStorage.removeItem('contextprev');
+    localStorage.removeItem('contextmiddle');
+    localStorage.removeItem('contextnext');
+    localStorage.removeItem('wordssplitnum');
+    localStorage.removeItem('punctuation');
+    localStorage.removeItem('stopwords');
+    localStorage.removeItem('lettercase');
   }
 
 }

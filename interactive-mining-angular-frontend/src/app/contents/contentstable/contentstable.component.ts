@@ -79,6 +79,7 @@ export class ContentstableComponent implements OnInit {
           .subscribe(contents => {
             if (contents.length !== 0) {
               this.contentArray = contents;
+              localStorage.setItem('concepts', contents.length.toString());
             }
           });
       } else {
@@ -94,7 +95,11 @@ export class ContentstableComponent implements OnInit {
   }
 
   saveAndContinue(): void {
-    this.contentsService.updateContent(this.contentArray).subscribe(value => this.router.navigate(['/configure-profile']));
+    this.contentsService.updateContent(this.contentArray)
+      .subscribe(value => {
+        localStorage.setItem('concepts', value);
+        this.router.navigate(['/configure-profile']);
+      });
   }
 
 }

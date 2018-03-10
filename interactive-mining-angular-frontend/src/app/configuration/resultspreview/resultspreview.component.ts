@@ -134,7 +134,7 @@ export class ResultspreviewComponent implements OnInit {
       // display wait message
       this.runingMining = true;
       // document.getElementById('wait-spinner-modal-center').addClass("uk-open");
-      this.configurationService.runMining(JSON.stringify(this.getSettingsFromLocalStorage()))
+      this.configurationService.runMining(this.getSettingsFromLocalStorage())
         .subscribe( res => {
           // hide wait message
           this.runingMining = false;
@@ -149,8 +149,9 @@ export class ResultspreviewComponent implements OnInit {
           console.log(res.matches.length);
           this.resultsArray.length = 0;
           let matchcounter = 0;
-          Object.entries(res.matches).forEach(
-            ([title, matches]) => {
+          for (let title in res.matches) {
+            if (title) {
+              const matches = res.matches[title];
               let resultClass: DocumentResult = new DocumentResult();
               resultClass.docTitle = title;
               let matchesArray: Array<Match> = [];
@@ -169,7 +170,7 @@ export class ResultspreviewComponent implements OnInit {
                 // hightlight acknowledgment keywords
                 for (let ackn of values.acknmatch) {
                   const search_regexp = new RegExp(ackn, 'g');
-                    context = context.replace(search_regexp, '<span class="positive">' + ackn + '</span>');
+                  context = context.replace(search_regexp, '<span class="positive">' + ackn + '</span>');
                 }
                 // hightlight negative words
                 for (let negword of JSON.parse(localStorage.getItem('negwords'))) {
@@ -184,7 +185,8 @@ export class ResultspreviewComponent implements OnInit {
               this.resultsArray.push(resultClass);
               this.prev_matches_number = this.matches_number;
               this.matches_number = matchcounter + '';
-            });
+            }
+          }
         });
     }
   }

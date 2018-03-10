@@ -1,8 +1,7 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Util} from '../util';
 import {Observable} from 'rxjs/Observable';
-import {ProfileData} from '../manageprofiles/profile-data';
 import {Settings} from './settings/settings';
 import {DocSamplesMetadata} from './doc-samples-metadata';
 
@@ -11,25 +10,23 @@ export class ConfigurationService {
 
   private util: Util = new Util();
 
-  private getDocSamplesUrl = 'http://localhost:8080/getdocsamples';
-  private uploadDocumentsUrl = 'http://localhost:8080/uploaddocuments';
-  private chooseSampleUrl = 'http://localhost:8080/choosedocsample';
-  private alreadyDocumentsUrl = 'http://localhost:8080/alreadydocuments';
-  private runMiningUrl = 'http://localhost:8080/runmining';
-  private prepareSavedProfileUrl = 'http://localhost:8080/preparesavedprofile';
+  private userId = '';
+  private backendServerAddress = '';
 
-  constructor(private http: HttpClient) { }
+  private getDocSamplesUrl = '/getdocsamples';
+  private uploadDocumentsUrl = '/uploaddocuments';
+  private chooseSampleUrl = '/choosedocsample';
+  private alreadyDocumentsUrl = '/alreadydocuments';
+  private runMiningUrl = '/runmining';
+  private prepareSavedProfileUrl = '/preparesavedprofile';
 
-  private _getHeaders(): Headers {
-    const header = new Headers({
-      'Content-Type': 'application/json'
-    });
-
-    return header;
+  constructor(private http: HttpClient) {
+    this.userId = this.util.getUserId();
+    this.backendServerAddress = this.util.getBackendServerAddress();
   }
 
   getDocSamples(): Observable<DocSamplesMetadata[]> {
-    return this.http.get(this.getDocSamplesUrl, { withCredentials: true })
+    return this.http.get(this.backendServerAddress + this.getDocSamplesUrl + `?user=${this.userId}`)
       .map(data => data['documents'])
       .catch(this.util.handleError);
   }
@@ -37,37 +34,39 @@ export class ConfigurationService {
   uploadDocuments(file: File): Observable<number> {
     const formData: FormData = new FormData();
     formData.append('upload', file, file.name);
+    formData.append('user', this.userId);
     const params = new HttpParams();
     const options = {
       headers: new HttpHeaders().set('Accept', 'application/json').delete('Content-Type'),
       params: params,
-      reportProgress: true,
-      withCredentials: true,
+      reportProgress: true
     };
-    return this.http.post(this.uploadDocumentsUrl, formData, options)
+    return this.http.post(this.backendServerAddress + this.uploadDocumentsUrl, formData, options)
       .map(res => res['data'])
       .catch(this.util.handleError);
   }
 
   chooseDocumentsSample(choise: string): Observable<number> {
-    return this.http.post(this.chooseSampleUrl, {docsample: choise}, { withCredentials: true })
+    return this.http.post(this.backendServerAddress + this.chooseSampleUrl, {user: this.userId, docsample: choise})
       .map(res => res['data'])
       .catch(this.util.handleError);
   }
 
   getLoadedDocumentsNumber(): Observable<any> {
-    return this.http.get(this.alreadyDocumentsUrl, { withCredentials: true })
+    return this.http.get(this.backendServerAddress + this.alreadyDocumentsUrl + `?user=${this.userId}`)
       .catch(this.util.handleError);
   }
 
-  runMining(parameters: string): Observable<any> {
-    return this.http.post(this.runMiningUrl,
-      parameters, { withCredentials: true })
+  runMining(parameters: Settings): Observable<any> {
+    return this.http.post(this.backendServerAddress + this.runMiningUrl,
+      {user: this.userId, parameters: parameters})
       .catch(this.util.handleError);
   }
 
   saveProfileParameters(parameters: Settings): Observable<any> {
-    return this.http.post(this.prepareSavedProfileUrl, parameters, { withCredentials: true })
+    const concepts = localStorage.getItem('concepts');
+    return this.http.post(this.backendServerAddress + this.prepareSavedProfileUrl,
+      {user: this.userId, concepts: concepts, parameters: parameters})
       .catch(this.util.handleError);
   }
 

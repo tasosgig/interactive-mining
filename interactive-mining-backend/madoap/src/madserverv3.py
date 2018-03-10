@@ -67,7 +67,7 @@ msettings.viswidgetmap=viswidgetmap
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
-            (r"/getuserid", GetUserIdHandler),
+            (r"/initialhandshake", InitialClientHandshakeHandler),
             (r"/getuserprofiles", GetUserProfilesHandler),
             (r"/loaduserprofile", LoadUserProfileHandler),
             (r"/deleteuserprofile", DeleteUserProfileHandler),
@@ -150,7 +150,7 @@ def loadProfile(profileLocation, user_id):
         file_name = "/tmp/p%s.tsv" % (user_id)
         if os.path.isfile(file_name):
             numberOfGrants = sum(1 for line in open(file_name))
-        data['grants'] = numberOfGrants
+        data['concepts'] = numberOfGrants
     # write to json the poswords
     if len([r for r in cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='poswords'")]):
         results = [r for r in cursor.execute("select c1, c2 from poswords")]
@@ -381,10 +381,10 @@ URIdemultiplex = {r"/" + msettings.APPDIRNAME + "/analyze":'projects'
              , r"/" + msettings.APPDIRNAME + "/interactivemining":'interactivemining'}
 
 
-class GetUserIdHandler(BaseHandler):
+class InitialClientHandshakeHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -395,25 +395,25 @@ class GetUserIdHandler(BaseHandler):
         self.finish()
     def get(self):
         try:
-            # check if we already gave client a user_id, and it exists on the server
-            user_id = self.get_secure_cookie('madgikmining')
-            database_file_name = "/tmp/OAMiningProfilesDatabase_{0}.db".format(user_id)
-            if user_id is None or not os.path.isfile(database_file_name):
-                # give him a unique user_id
-                user_id = getNewUserId()
-                self.set_secure_cookie('madgikmining', user_id)
-                # create a database where the user stores his profiles info
-                import sys
-                sys.path.append(msettings.MADIS_PATH)
-                import madis
-                # get the database cursor
+            if 'user' in self.request.arguments and self.request.arguments['user'][0] != '':
+                user_id = self.request.arguments['user'][0]
                 database_file_name = "/tmp/OAMiningProfilesDatabase_{0}.db".format(user_id)
-                cursor=madis.functions.Connection(database_file_name).cursor()
-                # Create database table
-                cursor.execute("drop table if exists database", parse=False)
-                cursor.execute("create table database(id,name,datecreated,status,matches,docname,docsnumber)", parse=False)
-                cursor.close()
-            self.write({'user_id': user_id})
+                if (not os.path.isfile(database_file_name)):
+                    # create a database where the user stores his profiles info
+                    import sys
+                    sys.path.append(msettings.MADIS_PATH)
+                    import madis
+                    # get the database cursor
+                    cursor=madis.functions.Connection(database_file_name).cursor()
+                    # Create database table
+                    cursor.execute("drop table if exists database", parse=False)
+                    cursor.execute("create table database(id,name,datecreated,status,matches,docname,docsnumber)", parse=False)
+                    cursor.close()
+            else:
+                self.set_status(400)
+                self.write("Missing cookie containing user's id...")
+                return
+            self.write({})
             self.finish()
         except Exception as ints:
             self.set_status(400)
@@ -426,7 +426,7 @@ class GetUserIdHandler(BaseHandler):
 class GetUserProfilesHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -437,12 +437,12 @@ class GetUserProfilesHandler(BaseHandler):
         self.finish()
     def get(self):
         try:
-            # get user id from cookie. Must have
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
+            # get user id from arguments. Must have
+            if 'user' not in self.request.arguments or self.request.arguments['user'][0] == '':
                 self.set_status(400)
-                self.write("Missing cookie containing user's id...")
+                self.write("Missing user's id parameter")
                 return
+            user_id = self.request.arguments['user'][0]
             # extract data from database
             import sys
             sys.path.append(msettings.MADIS_PATH)
@@ -475,7 +475,7 @@ class GetUserProfilesHandler(BaseHandler):
 class LoadUserProfileHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -486,14 +486,19 @@ class LoadUserProfileHandler(BaseHandler):
         self.finish()
     def post(self):
         try:
-            # get user id from cookie. Must have
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
+            # get user id from body. Must have
+            request_arguments = json.loads(self.request.body)
+            if 'user' not in request_arguments or request_arguments['user'] == '':
                 self.set_status(400)
-                self.write("Missing cookie containing user's id...")
+                self.write("Missing user's id argument")
                 return
+            user_id = request_arguments['user']
             # get data
-            profile_id = json.loads(self.request.body)['id']
+            if 'id' not in request_arguments or request_arguments['id'] == '':
+                self.set_status(400)
+                self.write("Missing profiles id argument")
+                return
+            profile_id = request_arguments['id']
             # delete profile from database
             import sys
             sys.path.append(msettings.MADIS_PATH)
@@ -522,7 +527,6 @@ class LoadUserProfileHandler(BaseHandler):
             data = loadProfile(file_name, user_id)
             data['docname'] = profile_data[0][0]
             data['docsnumber'] = profile_data[0][1]
-            self.set_secure_cookie('madgikmining_grantsuploaded', str(data['grants']))
             self.write(json.dumps(data))
             self.finish()
         except Exception as ints:
@@ -536,7 +540,7 @@ class LoadUserProfileHandler(BaseHandler):
 class DeleteUserProfileHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -547,14 +551,19 @@ class DeleteUserProfileHandler(BaseHandler):
         self.finish()
     def post(self):
         try:
-            # get user id from cookie. Must have
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
+            # get user id from body. Must have
+            request_arguments = json.loads(self.request.body)
+            if 'user' not in request_arguments or request_arguments['user'] == '':
                 self.set_status(400)
-                self.write("Missing cookie containing user's id...")
+                self.write("Missing user's id argument")
                 return
+            user_id = request_arguments['user']
             # get data
-            profile_id = json.loads(self.request.body)['id']
+            if 'id' not in request_arguments or request_arguments['id'] == '':
+                self.set_status(400)
+                self.write("Missing profiles id argument")
+                return
+            profile_id = request_arguments['id']
             # delete profile from database
             import sys
             sys.path.append(msettings.MADIS_PATH)
@@ -583,7 +592,7 @@ class DeleteUserProfileHandler(BaseHandler):
 class GetExampleProfilesHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -614,7 +623,7 @@ class GetExampleProfilesHandler(BaseHandler):
 class CreateNewProfileHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -625,12 +634,12 @@ class CreateNewProfileHandler(BaseHandler):
         self.finish()
     def get(self):
         try:
-            # get user id from cookie. Must have
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
+            # get user id from arguments. Must have
+            if 'user' not in self.request.arguments or self.request.arguments['user'][0] == '':
                 self.set_status(400)
-                self.write("Missing cookie containing user's id...")
+                self.write("Missing user's id parameter")
                 return
+            user_id = self.request.arguments['user'][0]
             deleteAllUserFiles(user_id)
             self.write(json.dumps({}))
             self.finish()
@@ -645,7 +654,7 @@ class CreateNewProfileHandler(BaseHandler):
 class LoadExampleProfileHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -656,12 +665,12 @@ class LoadExampleProfileHandler(BaseHandler):
         self.finish()
     def get(self):
         try:
-            # get user id from cookie. Must have
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
+            # get user id from arguments. Must have
+            if 'user' not in self.request.arguments or self.request.arguments['user'][0] == '':
                 self.set_status(400)
-                self.write("Missing cookie containing user's id...")
+                self.write("Missing user's id parameter")
                 return
+            user_id = self.request.arguments['user'][0]
             # reset everything
             deleteAllUserFiles(user_id)
             # load example data
@@ -669,7 +678,6 @@ class LoadExampleProfileHandler(BaseHandler):
             data = loadExampleProfile(user_id)
             data['docname'] = 'Example'
             data['docsnumber'] = '26'
-            self.set_secure_cookie('madgikmining_grantsuploaded', str(data['grants']))
             self.write(json.dumps(data))
             self.finish()
         except Exception as ints:
@@ -683,7 +691,7 @@ class LoadExampleProfileHandler(BaseHandler):
 class UploadProfileHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -694,12 +702,12 @@ class UploadProfileHandler(BaseHandler):
         self.finish()
     def post(self):
         try:
-            # get user id from cookie. Must have
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
+            # get user id from arguments. Must have
+            if 'user' not in self.request.arguments or self.request.arguments['user'][0] == '':
                 self.set_status(400)
-                self.write("Missing cookie containing user's id...")
+                self.write("Missing user's id parameter")
                 return
+            user_id = self.request.arguments['user'][0]
             # get file info and body from post data
             fileinfo = self.request.files['upload'][0]
             fname = fileinfo['filename']
@@ -714,7 +722,6 @@ class UploadProfileHandler(BaseHandler):
             fh.write(fileinfo['body'])
             fh.close()
             data = loadProfile(cname, user_id)
-            self.set_secure_cookie('madgikmining_grantsuploaded', str(data['grants']))
             self.write(json.dumps(data))
             self.finish()
         except Exception as ints:
@@ -728,7 +735,7 @@ class UploadProfileHandler(BaseHandler):
 class AlreadyConceptsHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -739,12 +746,12 @@ class AlreadyConceptsHandler(BaseHandler):
         self.finish()
     def get(self):
         try:
-            # get user id from cookie. Must have
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
+            # get user id from arguments. Must have
+            if 'user' not in self.request.arguments or self.request.arguments['user'][0] == '':
                 self.set_status(400)
-                self.write("Missing cookie containing user's id...")
+                self.write("Missing user's id parameter")
                 return
+            user_id = self.request.arguments['user'][0]
             data = {}
             data['data'] = {}
             file_name = "/tmp/p%s.tsv" % (user_id)
@@ -760,8 +767,8 @@ class AlreadyConceptsHandler(BaseHandler):
                     elif len(columns) == 1:
                         codes[columns[0]] = ''
                     num_lines += 1
-                cookie = self.get_secure_cookie('madgikmining_grantsuploaded')
-                if cookie and str(num_lines) == cookie:
+                # get user id from arguments. Must have
+                if 'concepts' in self.request.arguments and self.request.arguments['concepts'][0] == str(num_lines):
                     data['data'] = codes
             self.write(json.dumps(data))
             self.finish()
@@ -776,7 +783,7 @@ class AlreadyConceptsHandler(BaseHandler):
 class UploadContentFileHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -787,12 +794,12 @@ class UploadContentFileHandler(BaseHandler):
         self.finish()
     def post(self):
         try:
-            # get user id from cookie. Must have
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
+            # get user id from arguments. Must have
+            if 'user' not in self.request.arguments or self.request.arguments['user'][0] == '':
                 self.set_status(400)
-                self.write("Missing cookie containing user's id...")
+                self.write("Missing user's id parameter")
                 return
+            user_id = self.request.arguments['user'][0]
             # get file info and body from post data
             fileinfo = self.request.files['upload'][0]
             fname = fileinfo['filename']
@@ -819,7 +826,7 @@ class UploadContentFileHandler(BaseHandler):
             else:
                 data['data'] = codes
                 data['respond'] = "<b>{0} Codes</b> loaded successfully!".format(len(lines))
-                self.set_secure_cookie('madgikmining_grantsuploaded', str(len(lines)))
+                data['concepts'] = str(len(lines))
             self.write(json.dumps(data))
             self.finish()
         except Exception as ints:
@@ -833,7 +840,7 @@ class UploadContentFileHandler(BaseHandler):
 class UpdateConceptsHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -844,12 +851,13 @@ class UpdateConceptsHandler(BaseHandler):
         self.finish()
     def post(self):
         try:
-            # get user id from cookie. Must have
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
+            # get user id from body. Must have
+            request_arguments = json.loads(self.request.body)
+            if 'user' not in request_arguments or request_arguments['user'] == '':
                 self.set_status(400)
-                self.write("Missing cookie containing user's id...")
+                self.write("Missing user's id argument")
                 return
+            user_id = request_arguments['user']
             # get data
             concepts = json.loads(json.loads(self.request.body)['concepts'])
             # write data to physical file
@@ -870,7 +878,7 @@ class UpdateConceptsHandler(BaseHandler):
                 return
             else:
                 data['respond'] = "<b>{0} Codes</b> loaded successfully!".format(concepts_len)
-                self.set_secure_cookie('madgikmining_grantsuploaded', str(concepts_len))
+                data['concepts'] = str(concepts_len)
             self.write(json.dumps(data))
             self.finish()
         except Exception as ints:
@@ -884,7 +892,7 @@ class UpdateConceptsHandler(BaseHandler):
 class GetDocSamplesHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -895,12 +903,12 @@ class GetDocSamplesHandler(BaseHandler):
         self.finish()
     def get(self):
         try:
-            # get user id from cookie. Must have
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
+            # get user id from arguments. Must have
+            if 'user' not in self.request.arguments or self.request.arguments['user'][0] == '':
                 self.set_status(400)
-                self.write("Missing cookie containing user's id...")
+                self.write("Missing user's id parameter")
                 return
+            user_id = self.request.arguments['user'][0]
             data = {}
             doc_samples = []
             doc_samples.append({'name': 'Egi', 'documents': 104})
@@ -933,7 +941,7 @@ class GetDocSamplesHandler(BaseHandler):
 class UploadDocumentsHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -944,12 +952,12 @@ class UploadDocumentsHandler(BaseHandler):
         self.finish()
     def post(self):
         try:
-            # get user id from cookie. Must have
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
+            # get user id from arguments. Must have
+            if 'user' not in self.request.arguments or self.request.arguments['user'][0] == '':
                 self.set_status(400)
-                self.write("Missing cookie containing user's id...")
+                self.write("Missing user's id parameter")
                 return
+            user_id = self.request.arguments['user'][0]
             fileinfo = self.request.files['upload'][0]
             fname = fileinfo['filename']
             extn = os.path.splitext(fname)[1]
@@ -1017,7 +1025,7 @@ class UploadDocumentsHandler(BaseHandler):
 class ChooseDocSampleHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -1028,17 +1036,18 @@ class ChooseDocSampleHandler(BaseHandler):
         self.finish()
     def post(self):
         try:
-            # get user id from cookie. Must have
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
+            # get user id from body. Must have
+            request_arguments = json.loads(self.request.body)
+            if 'user' not in request_arguments or request_arguments['user'] == '':
                 self.set_status(400)
-                self.write("Missing cookie containing user's id...")
+                self.write("Missing user's id argument")
                 return
-            doc_sample = json.loads(self.request.body)['docsample']
-            if doc_sample == '':
+            user_id = request_arguments['user']
+            if 'docsample' not in request_arguments or request_arguments['docsample'] == '':
                 self.set_status(400)
                 self.write("A doc sample name must be provided")
                 return
+            user_id = request_arguments['docsample']
             sample_file_name = ""
             if doc_sample == "Egi":
                 sample_file_name = "static/egi_sample.tsv"
@@ -1084,7 +1093,7 @@ class ChooseDocSampleHandler(BaseHandler):
 class AlreadyDocumentsHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -1095,12 +1104,12 @@ class AlreadyDocumentsHandler(BaseHandler):
         self.finish()
     def get(self):
         try:
-            # get user id from cookie. Must have
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
+            # get user id from arguments. Must have
+            if 'user' not in self.request.arguments or self.request.arguments['user'][0] == '':
                 self.set_status(400)
-                self.write("Missing cookie containing user's id...")
+                self.write("Missing user's id parameter")
                 return
+            user_id = self.request.arguments['user'][0]
             data = {}
             if msettings.RESET_FIELDS == 1:
                 data['data'] = -1
@@ -1123,7 +1132,7 @@ class AlreadyDocumentsHandler(BaseHandler):
 class RunMiningHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -1134,14 +1143,14 @@ class RunMiningHandler(BaseHandler):
         self.finish()
     def post(self):
         try:
-            # get user id from cookie. Must have
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
-                self.set_status(400)
-                self.write("Missing cookie containing user's id...")
-                return
+            # get user id from body. Must have
             request_arguments = json.loads(self.request.body)
-            print request_arguments
+            if 'user' not in request_arguments or request_arguments['user'] == '':
+                self.set_status(400)
+                self.write("Missing user's id argument")
+                return
+            user_id = request_arguments['user']
+            mining_parameters = request_arguments['parameters']
             # get the database cursor
             cursor=msettings.Connection.cursor()
             # data to be sent
@@ -1154,14 +1163,14 @@ class RunMiningHandler(BaseHandler):
             # Automatically find middle size from grant codes white spaces
             querygrantsize = "select max(p1) from (select regexpcountwords('\s',stripchars(p1)) as p1 from (setschema 'p1,p2' file '/tmp/p{0}.tsv' dialect:tsv))".format(user_id)
             contextmiddle = [r for r in cursor.execute(querygrantsize)][0][0]+1
-            if 'contextprev' in request_arguments and request_arguments['contextprev'] != '':
-                contextprev = int(request_arguments['contextprev'])
+            if 'contextprev' in mining_parameters and mining_parameters['contextprev'] != '':
+                contextprev = int(mining_parameters['contextprev'])
                 if contextprev < 0 or contextprev > 20:
                     self.set_status(400)
                     self.write("Context size must be in its limits...")
                     return
-            if 'contextnext' in request_arguments and request_arguments['contextnext'] != '':
-                contextnext = int(request_arguments['contextnext'])
+            if 'contextnext' in mining_parameters and mining_parameters['contextnext'] != '':
+                contextnext = int(mining_parameters['contextnext'])
                 if contextnext < 0 or contextnext > 20:
                     self.set_status(400)
                     self.write("Context size must be in its limits...")
@@ -1199,10 +1208,10 @@ class RunMiningHandler(BaseHandler):
 
             # create positive and negative words weighted regex text
             pos_set = neg_set = conf = whr_conf = ''
-            if 'poswords' in request_arguments and request_arguments['poswords'] != '{}':
+            if 'poswords' in mining_parameters and mining_parameters['poswords'] != '{}':
                 data['poswords'] = []
                 # construct math string for positive words matching calculation with weights
-                pos_words = json.loads(request_arguments['poswords'])
+                pos_words = json.loads(mining_parameters['poswords'])
                 for key, value in pos_words.iteritems():
                     # MONO GIA TO EGI
                     pos_set += r'regexpcountuniquematches("%s",%s)*%s + ' % (key,j2scontext,value)
@@ -1210,10 +1219,10 @@ class RunMiningHandler(BaseHandler):
                     # pos_set += r'regexpcountuniquematches("(?:\b)%s(?:\b)",j2s(prev,middle,next))*%s + ' % (key,value)
                     data['poswords'].append(key)
                 pos_set += "0"
-            if 'negwords' in request_arguments and request_arguments['negwords'] != '{}':
+            if 'negwords' in mining_parameters and mining_parameters['negwords'] != '{}':
                 data['negwords'] = []
                 # construct math string for negative words matching calculation with weights
-                neg_words = json.loads(request_arguments['negwords'])
+                neg_words = json.loads(mining_parameters['negwords'])
                 for key, value in neg_words.iteritems():
                     # MONO GIA TO EGI
                     neg_set += r'regexpcountuniquematches("%s",%s)*%s + ' % (key,j2scontext,value)
@@ -1234,17 +1243,17 @@ class RunMiningHandler(BaseHandler):
             if numberOfDocsUploaded(user_id) != 0:
                 doc_filters = "comprspaces(regexpr('[\n|\r]',d2,' '))"
                 ackn_filters = "comprspaces(regexpr(\"\\'\", p2,''))"
-                if 'punctuation' in request_arguments and request_arguments['punctuation'] == "1":
+                if 'punctuation' in mining_parameters and mining_parameters['punctuation'] == "1":
                     doc_filters = 'keywords('+doc_filters+')'
                     ackn_filters = 'keywords('+ackn_filters+')'
-                if 'lettercase' in request_arguments and request_arguments['lettercase'] != '' and request_arguments['lettercase'] != 'none':
-                    if request_arguments['lettercase'] == 'lowercase':
+                if 'lettercase' in mining_parameters and mining_parameters['lettercase'] != '' and mining_parameters['lettercase'] != 'none':
+                    if mining_parameters['lettercase'] == 'lowercase':
                         doc_filters = 'lower('+doc_filters+')'
                         ackn_filters = 'lower('+ackn_filters+')'
-                    elif request_arguments['lettercase'] == 'uppercase':
+                    elif mining_parameters['lettercase'] == 'uppercase':
                         doc_filters = 'upper('+doc_filters+')'
                         ackn_filters = 'upper('+ackn_filters+')'
-                if 'stopwords' in request_arguments and request_arguments['stopwords'] == "1":
+                if 'stopwords' in mining_parameters and mining_parameters['stopwords'] == "1":
                     doc_filters = 'filterstopwords('+doc_filters+')'
                     ackn_filters = 'filterstopwords('+ackn_filters+')'
                 print "DOCCC", doc_filters
@@ -1261,8 +1270,8 @@ class RunMiningHandler(BaseHandler):
 
             list(cursor.execute("drop table if exists grants"+user_id, parse=False))
             # string concatenation workaround because of the special characters conflicts
-            if 'wordssplitnum' in request_arguments and request_arguments['wordssplitnum'] != '':
-                words_split = int(request_arguments['wordssplitnum'])
+            if 'wordssplitnum' in mining_parameters and mining_parameters['wordssplitnum'] != '':
+                words_split = int(mining_parameters['wordssplitnum'])
                 # MONO GIA TO EGI
                 if 0 < words_split and words_split <= 10:
                     acknowledgment_split = r'textwindow2s(gt2,0,'+str(words_split)+r',0)'
@@ -1311,7 +1320,7 @@ class RunMiningHandler(BaseHandler):
 class PrepareSavedProfileHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -1322,12 +1331,14 @@ class PrepareSavedProfileHandler(BaseHandler):
         self.finish()
     def post(self):
         try:
-            # get user id from cookie. Must have
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
+            # get user id from body. Must have
+            request_arguments = json.loads(self.request.body)
+            if 'user' not in request_arguments or request_arguments['user'] == '':
                 self.set_status(400)
-                self.write("Missing cookie containing user's id...")
+                self.write("Missing user's id argument")
                 return
+            user_id = request_arguments['user']
+            profile_parameters = request_arguments['parameters']
             import sys
             sys.path.append(msettings.MADIS_PATH)
             import madis
@@ -1347,42 +1358,41 @@ class PrepareSavedProfileHandler(BaseHandler):
             # Create grants table
             cursor.execute("drop table if exists grants", parse=False)
             cursor.execute("create table grants(c1,c2)", parse=False)
-            request_arguments = json.loads(self.request.body)
-            if 'poswords' in request_arguments and request_arguments['poswords'] != '{}':
+            if 'poswords' in profile_parameters and profile_parameters['poswords'] != '{}':
                 # construct math string for positive words matching calculation with weights
-                pos_words = json.loads(request_arguments['poswords'])
+                pos_words = json.loads(profile_parameters['poswords'])
                 cursor.executemany("insert into poswords(c1,c2) values(?,?)",
                           (
                                 (key, value,) for key, value in pos_words.iteritems()
                           )
                 )
-            if 'negwords' in request_arguments and request_arguments['negwords'] != '{}':
+            if 'negwords' in profile_parameters and profile_parameters['negwords'] != '{}':
                 # construct math string for negative words matching calculation with weights
-                neg_words = json.loads(request_arguments['negwords'])
+                neg_words = json.loads(profile_parameters['negwords'])
                 cursor.executemany("insert into negwords(c1,c2) values(?,?)",
                           (
                                 (key, value,) for key, value in neg_words.iteritems()
                           )
                 )
             filters = {}
-            if 'contextprev' in request_arguments and request_arguments['contextprev'] != '':
-                filters['contextprev'] = request_arguments['contextprev']
-            if 'contextnext' in request_arguments and request_arguments['contextnext'] != '':
-                filters['contextnext'] = request_arguments['contextnext']
-            if 'lettercase' in request_arguments and request_arguments['lettercase'] != '':
-                filters['lettercase'] = request_arguments['lettercase']
-            if 'wordssplitnum' in request_arguments and request_arguments['wordssplitnum'] != '':
-                filters['wordssplitnum'] = request_arguments['wordssplitnum']
-            if 'stopwords' in request_arguments and request_arguments['stopwords'] != '':
-                filters['stopwords'] = request_arguments['stopwords']
-            if 'stopwords' in request_arguments and request_arguments['stopwords'] != '':
-                filters['punctuation'] = request_arguments['punctuation']
+            if 'contextprev' in profile_parameters and profile_parameters['contextprev'] != '':
+                filters['contextprev'] = profile_parameters['contextprev']
+            if 'contextnext' in profile_parameters and profile_parameters['contextnext'] != '':
+                filters['contextnext'] = profile_parameters['contextnext']
+            if 'lettercase' in profile_parameters and profile_parameters['lettercase'] != '':
+                filters['lettercase'] = profile_parameters['lettercase']
+            if 'wordssplitnum' in profile_parameters and profile_parameters['wordssplitnum'] != '':
+                filters['wordssplitnum'] = profile_parameters['wordssplitnum']
+            if 'stopwords' in profile_parameters and profile_parameters['stopwords'] != '':
+                filters['stopwords'] = profile_parameters['stopwords']
+            if 'stopwords' in profile_parameters and profile_parameters['stopwords'] != '':
+                filters['punctuation'] = profile_parameters['punctuation']
             cursor.executemany("insert into filters(c1,c2) values(?,?)",
                       (
                             (key, value,) for key, value in filters.iteritems()
                       )
             )
-            if numberOfGrantsUploaded(user_id, self.get_secure_cookie('madgikmining_grantsuploaded')) != 0:
+            if numberOfGrantsUploaded(user_id, request_arguments['concepts']) != 0:
                   cursor.execute("insert into grants select stripchars(c1) as c1, stripchars(c2) as c2 from (file '/tmp/p{0}.tsv')".format(user_id))
             cursor.close()
 
@@ -1402,7 +1412,7 @@ class PrepareSavedProfileHandler(BaseHandler):
 class SaveProfileToDatabaseHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -1413,17 +1423,18 @@ class SaveProfileToDatabaseHandler(BaseHandler):
         self.finish()
     def post(self):
         try:
-            # get user id from cookie. Must have
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
+            # get user id from body. Must have
+            request_arguments = json.loads(self.request.body)
+            if 'user' not in request_arguments or request_arguments['user'] == '':
                 self.set_status(400)
-                self.write("Missing cookie containing user's id...")
+                self.write("Missing user's id argument")
                 return
+            user_id = request_arguments['user']
             # get data
-            profile_id = json.loads(self.request.body)['id']
-            profile_name = json.loads(self.request.body)['name']
-            doc_name = json.loads(self.request.body)['docname']
-            docs_number = json.loads(self.request.body)['docsnumber']
+            profile_id = request_arguments['id']
+            profile_name = request_arguments['name']
+            doc_name = request_arguments['docname']
+            docs_number = request_arguments['docsnumber']
             # copy profile file to a unique user profile file
             profile_file_name = "/tmp/OAMiningProfile_{0}.oamp".format(user_id)
             # check if profile has already an id
@@ -1467,7 +1478,7 @@ class SaveProfileToDatabaseHandler(BaseHandler):
 class DownloadProfileHandler(BaseHandler):
     passwordless=True
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://localhost:4200")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         self.set_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
@@ -1478,13 +1489,14 @@ class DownloadProfileHandler(BaseHandler):
         self.finish()
     def post(self):
         try:
-            # get user id from cookie. Must have
-            user_id = self.get_secure_cookie('madgikmining')
-            if user_id is None:
+            # get user id from body. Must have
+            request_arguments = json.loads(self.request.body)
+            if 'user' not in request_arguments or request_arguments['user'] == '':
                 self.set_status(400)
-                self.write("Missing cookie containing user's id...")
+                self.write("Missing user's id argument")
                 return
-            profile_id = json.loads(self.request.body)['id']
+            user_id = request_arguments['user']
+            profile_id = request_arguments['id']
             unique_profile_file_name = "/tmp/OAMiningProfile_{0}_{1}.oamp".format(user_id,profile_id)
             buf_size = 4096
             self.set_header('Content-Type', 'application/octet-stream')

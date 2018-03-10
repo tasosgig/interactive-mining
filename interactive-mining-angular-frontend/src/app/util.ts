@@ -3,15 +3,17 @@ import UIkit from 'uikit';
 import {HttpErrorResponse} from '@angular/common/http';
 import { saveAs } from 'file-saver/FileSaver';
 import { Response } from '@angular/http';
+import {ErrorObservable} from 'rxjs/observable/ErrorObservable';
 
 export class Util {
 
-  public handleError (err: HttpErrorResponse) {
+  public handleError (err: HttpErrorResponse): ErrorObservable {
     if (err.error instanceof Error) {
       console.error('Client-side error occured.');
     } else {
       console.error('Server-side error occured.');
     }
+    console.log(err);
     UIkit.notification({
       message: err.message,
       status: 'danger',
@@ -19,6 +21,14 @@ export class Util {
       timeout: 0
     });
     return Observable.throw(err  || 'Server error');
+  }
+
+  public getUserId(): string {
+    return localStorage.getItem('user_id');
+  }
+
+  public getBackendServerAddress(): string {
+    return localStorage.getItem('backendaddress');
   }
 }
 

@@ -1,0 +1,11 @@
+{
+  "$schema": "./node_modules/ng-packagr/ng-package.schema.json",
+  "name": "interactive-mining",
+  "ngPackage": {
+    "lib": {
+      "entryFile": "public_api.ts",
+      "comments" : "none"
+    },
+    "dest": "../../dist/interactive-mining-lib"
+  }
+}

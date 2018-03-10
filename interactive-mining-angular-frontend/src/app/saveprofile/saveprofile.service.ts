@@ -8,12 +8,19 @@ export class SaveprofileService {
 
   private util: Util = new Util();
 
-  private saveProfileUrl = 'http://localhost:8080/saveprofile';
+  private userId = '';
+  private backendServerAddress = '';
 
-  constructor(private http: HttpClient) { }
+  private saveProfileUrl = '/saveprofile';
+
+  constructor(private http: HttpClient) {
+    this.userId = this.util.getUserId();
+    this.backendServerAddress = this.util.getBackendServerAddress();
+  }
 
   saveProfile(name: string, id: string, docName: string, dosNumber: number): Observable<any> {
-      return this.http.post(this.saveProfileUrl, {name: name, id: id, docname: docName, docsnumber: dosNumber }, { withCredentials: true })
+      return this.http.post(this.backendServerAddress + this.saveProfileUrl,
+        {user: this.userId, name: name, id: id, docname: docName, docsnumber: dosNumber })
         .catch(this.util.handleError);
   }
 

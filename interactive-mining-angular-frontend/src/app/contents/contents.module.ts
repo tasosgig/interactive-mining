@@ -4,8 +4,8 @@ import { CommonModule } from '@angular/common';
 import { ContentstableComponent } from './contentstable/contentstable.component';
 import { ContentComponent } from './contents.component';
 import {ContentsService} from './contents.service';
-import { TextareaAutosizeModule } from 'ngx-textarea-autosize';
 import {FileUploadDirective} from '../file-upload.directive';
+import {AutosizeDirective} from './autosize.directive';
 
 @NgModule({
   exports: [
@@ -16,13 +16,13 @@ import {FileUploadDirective} from '../file-upload.directive';
   ],
   imports: [
     CommonModule,
-    FormsModule,
-    TextareaAutosizeModule
+    FormsModule
   ],
   declarations: [
     ContentstableComponent,
     ContentComponent,
-    FileUploadDirective
+    FileUploadDirective,
+    AutosizeDirective
   ]
 })
 export class ContentModule { }

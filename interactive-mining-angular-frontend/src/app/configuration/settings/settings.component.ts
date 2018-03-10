@@ -59,24 +59,26 @@ export class SettingsComponent implements OnInit {
     };
     // show positive phrases
     this.positivePhrasesArray.length = 0;
-    Object.entries(JSON.parse(localStorage.getItem('poswords'))).forEach(
-      ([key, value]) => {
+    const posphrases = JSON.parse(localStorage.getItem('poswords'));
+    for (let key in posphrases) {
+      if (key) {
         const content = new Phrase();
         content.phrase = key;
-        content.weight = value;
+        content.weight = posphrases[key];
         this.positivePhrasesArray.push(content);
       }
-    );
+    }
     // show negative phrases
     this.negativePhrasesArray.length = 0;
-    Object.entries(JSON.parse(localStorage.getItem('negwords'))).forEach(
-      ([key, value]) => {
+    const negphrases = JSON.parse(localStorage.getItem('negwords'));
+    for (let key in negphrases) {
+      if (key) {
         const content = new Phrase();
         content.phrase = key;
-        content.weight = value;
-        this.negativePhrasesArray.push(content);
+        content.weight = negphrases[key];
+        this.positivePhrasesArray.push(content);
       }
-    );
+    }
   }
 
   getSettingsFromLocalStorage(): Settings {
@@ -116,25 +118,27 @@ export class SettingsComponent implements OnInit {
     if (positive) {
       localStorage.setItem('poswords', phrases);
       this.positivePhrasesArray.length = 0;
-      Object.entries(JSON.parse(localStorage.getItem('poswords'))).forEach(
-        ([key, value]) => {
+      const posphrases = JSON.parse(localStorage.getItem('poswords'));
+      for (let key in posphrases) {
+        if (key) {
           const content = new Phrase();
           content.phrase = key;
-          content.weight = value;
+          content.weight = posphrases[key];
           this.positivePhrasesArray.push(content);
         }
-      );
+      }
     } else {
       localStorage.setItem('negwords', phrases);
       this.negativePhrasesArray.length = 0;
-      Object.entries(JSON.parse(localStorage.getItem('negwords'))).forEach(
-        ([key, value]) => {
+      const negphrases = JSON.parse(localStorage.getItem('negwords'));
+      for (let key in negphrases) {
+        if (key) {
           const content = new Phrase();
           content.phrase = key;
-          content.weight = value;
-          this.negativePhrasesArray.push(content);
+          content.weight = negphrases[key];
+          this.positivePhrasesArray.push(content);
         }
-      );
+      }
     }
   }
 
