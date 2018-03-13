@@ -40,33 +40,10 @@ from collections import OrderedDict
 
 define("port", default=msettings.WEB_SERVER_PORT, help="run on the given port", type=int)
 
-filteredapps=None
-filteredevals=None
-
-smallgif='GIF89a\1\0\1\0\x80\xff\0\xff\xff\xff\0\0\0,\0\0\0\0\1\0\1\0\0\2\2D\1\0;'
-
-viswidgetmap={
-'motionchart':'google.visualization.MotionChart',
-'table':'google.visualization.Table',
-'linechart':'google.visualization.LineChart',
-'piechart':'google.visualization.PieChart',
-'scatterchart':'google.visualization.ScatterChart',
-'intensitymap':'google.visualization.IntensityMap',
-'geomap':'google.visualization.GeoMap',
-'columnchart':'google.visualization.ColumnChart',
-'barchart':'google.visualization.BarChart',
-'areachart':'google.visualization.AreaChart',
-'annotatedtimeline':'google.visualization.AnnotatedTimeLine',
-'termcloud':'TermCloud',
-}
-
-queries = {}
-
-msettings.viswidgetmap=viswidgetmap
-
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
+            (r"/version", VersionHandler),
             (r"/initialhandshake", InitialClientHandshakeHandler),
             (r"/getuserprofiles", GetUserProfilesHandler),
             (r"/loaduserprofile", LoadUserProfileHandler),
@@ -85,10 +62,7 @@ class Application(tornado.web.Application):
             (r"/runmining", RunMiningHandler),
             (r"/preparesavedprofile", PrepareSavedProfileHandler),
             (r"/saveprofile", SaveProfileToDatabaseHandler),
-            (r"/downloadprofile", DownloadProfileHandler),
-            (r"/?$", madAppBarHandler),
-            (r"/[^/]+/?$", madAppHandler),
-            (r"/[^/]+/.+$", madAppDataHandler)
+            (r"/downloadprofile", DownloadProfileHandler)
         ]
            
 
@@ -118,7 +92,7 @@ def getNewProfileId():
 
 def numberOfGrantsUploaded(user_id, cookie_set):
     if cookie_set and user_id:
-        file_name = "/tmp/p%s.tsv" % (user_id)
+        file_name = "users_files/p%s.tsv" % (user_id)
         if os.path.isfile(file_name):
             num_lines = sum(1 for line in open(file_name))
             if str(num_lines) == cookie_set: 
@@ -127,7 +101,7 @@ def numberOfGrantsUploaded(user_id, cookie_set):
 
 def numberOfDocsUploaded(user_id):
     if user_id:
-        file_name = "/tmp/docs%s.json" % (user_id)
+        file_name = "users_files/docs%s.json" % (user_id)
         if os.path.isfile(file_name):
             num_lines = sum(1 for line in open(file_name))
             return num_lines
@@ -145,9 +119,9 @@ def loadProfile(profileLocation, user_id):
     data = {}
     # Write to csv file the grants ids
     if len([r for r in cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='grants'")]):
-        cursor.execute("output '/tmp/p{0}.tsv' select c1,c2 from grants".format(user_id))
+        cursor.execute("output 'users_files/p{0}.tsv' select c1,c2 from grants".format(user_id))
         # Get the number of grants uploaded
-        file_name = "/tmp/p%s.tsv" % (user_id)
+        file_name = "users_files/p%s.tsv" % (user_id)
         if os.path.isfile(file_name):
             numberOfGrants = sum(1 for line in open(file_name))
         data['concepts'] = numberOfGrants
@@ -170,24 +144,24 @@ def loadProfile(profileLocation, user_id):
 
 def deleteAllUserFiles(user_id):
     if user_id:
-        file_name = "/tmp/p%s.tsv" % (user_id)
+        file_name = "users_files/p%s.tsv" % (user_id)
         if os.path.isfile(file_name):
             os.remove(file_name)
-        file_name = "/tmp/docs%s.json" % (user_id)
+        file_name = "users_files/docs%s.json" % (user_id)
         if os.path.isfile(file_name):
             os.remove(file_name)
 
 def loadProfileDocs(user_id, profile_id):
     # copy unique profile docs file to a general user docs file
-    docs_file_name = "/tmp/docs{0}.json".format(user_id)
-    unique_profile_docs_file_name = "/tmp/OAMiningDocs_{0}_{1}.json".format(user_id,profile_id)
+    docs_file_name = "users_files/docs{0}.json".format(user_id)
+    unique_profile_docs_file_name = "users_files/OAMiningDocs_{0}_{1}.json".format(user_id,profile_id)
     if os.path.isfile(unique_profile_docs_file_name):
         copyfile(unique_profile_docs_file_name, docs_file_name)
 
 def loadExampleDocs(user_id):
     sample_file = open("static/exampleDocs.txt", 'r')
     # write data to physical file
-    cname = "/tmp/docs{0}.json".format(user_id)
+    cname = "users_files/docs{0}.json".format(user_id)
     fh = open(cname, 'w')
     while 1:
         copy_buffer = sample_file.read(1048576)
@@ -364,21 +338,30 @@ class BaseHandler(ozhandler.DjangoErrorMixin, ozhandler.BasicAuthMixin, tornado.
             self.write(file.read())
         finally:
             file.close()
-    
-class HomeHandler(BaseHandler):
-    def get(self):
-        self.render("home.html", settings=msettings)
 
-class madAppBarHandler(BaseHandler):
-    def get(self):
-        self.render('madappbar.html', apps=filteredapps, evals=filteredevals, settings=msettings)
 
-trueset = set([1 , 'on', 'true', 'TRUE'])
-URIdemultiplex = {r"/" + msettings.APPDIRNAME + "/analyze":'projects'
-             , r"/" + msettings.APPDIRNAME + "/datacitations":'datacitations'
-             , r"/" + msettings.APPDIRNAME + "/classifier":'classification'
-             , r"/" + msettings.APPDIRNAME + "/pdbs":'pdb'
-             , r"/" + msettings.APPDIRNAME + "/interactivemining":'interactivemining'}
+class VersionHandler(BaseHandler):
+    passwordless=True
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+        self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        self.set_header('Access-Control-Allow-Credentials', 'true')
+        self.set_header('Content-Type', 'application/json')
+    def options(self):
+        # no body
+        self.set_status(204)
+        self.finish()
+    def get(self):
+        try:
+            self.write({'version': 0.5})
+            self.finish()
+        except Exception as ints:
+            self.set_status(400)
+            self.write("A server error occurred, please contact administrator!")
+            self.finish()
+            print ints
+            return
 
 
 class InitialClientHandshakeHandler(BaseHandler):
@@ -397,7 +380,7 @@ class InitialClientHandshakeHandler(BaseHandler):
         try:
             if 'user' in self.request.arguments and self.request.arguments['user'][0] != '':
                 user_id = self.request.arguments['user'][0]
-                database_file_name = "/tmp/OAMiningProfilesDatabase_{0}.db".format(user_id)
+                database_file_name = "users_files/OAMiningProfilesDatabase_{0}.db".format(user_id)
                 if (not os.path.isfile(database_file_name)):
                     # create a database where the user stores his profiles info
                     import sys
@@ -448,7 +431,7 @@ class GetUserProfilesHandler(BaseHandler):
             sys.path.append(msettings.MADIS_PATH)
             import madis
             # database file name
-            database_file_name = "/tmp/OAMiningProfilesDatabase_{0}.db".format(user_id)
+            database_file_name = "users_files/OAMiningProfilesDatabase_{0}.db".format(user_id)
             if not os.path.isfile(database_file_name):
                 self.set_status(400)
                 self.write("Missing user\'s database")
@@ -504,7 +487,7 @@ class LoadUserProfileHandler(BaseHandler):
             sys.path.append(msettings.MADIS_PATH)
             import madis
             # database file name
-            database_file_name = "/tmp/OAMiningProfilesDatabase_{0}.db".format(user_id)
+            database_file_name = "users_files/OAMiningProfilesDatabase_{0}.db".format(user_id)
             # get the database cursor
             cursor=madis.functions.Connection(database_file_name).cursor()
             # check if this profile exists
@@ -516,7 +499,7 @@ class LoadUserProfileHandler(BaseHandler):
                 return
             cursor.close()
             # check if profile file exists on the disk
-            file_name = "/tmp/OAMiningProfile_%s_%s.oamp" % (user_id,profile_id)
+            file_name = "users_files/OAMiningProfile_%s_%s.oamp" % (user_id,profile_id)
             if not os.path.isfile(file_name):
                 self.set_status(400)
                 self.write("There is no profile file with this name")
@@ -569,14 +552,18 @@ class DeleteUserProfileHandler(BaseHandler):
             sys.path.append(msettings.MADIS_PATH)
             import madis
             # database file name
-            database_file_name = "/tmp/OAMiningProfilesDatabase_{0}.db".format(user_id)
+            database_file_name = "users_files/OAMiningProfilesDatabase_{0}.db".format(user_id)
             # get the database cursor
             cursor=madis.functions.Connection(database_file_name).cursor()
             # data to be sent
             cursor.execute('delete from database where id="{0}"'.format(profile_id), parse=False)
             cursor.close()
             # delete profile from disk
-            file_name = "/tmp/OAMiningProfile_%s_%s.oamp" % (user_id,profile_id)
+            file_name = "users_files/OAMiningProfile_%s_%s.oamp" % (user_id,profile_id)
+            if os.path.isfile(file_name):
+                os.remove(file_name)
+            # delete profile docs from disk
+            file_name = "users_files/OAMiningDocs_{0}_{1}.json".format(user_id,profile_id)
             if os.path.isfile(file_name):
                 os.remove(file_name)
             self.write(json.dumps({}))
@@ -717,7 +704,7 @@ class UploadProfileHandler(BaseHandler):
                 self.write(json.dumps({'respond': "<b style=\"color: red\">File must be .oamp compatible profile</b>"}))
                 return
             # write data to physical file
-            cname = "/tmp/profile{0}.oamp".format(user_id)
+            cname = "users_files/profile{0}.oamp".format(user_id)
             fh = open(cname, 'w')
             fh.write(fileinfo['body'])
             fh.close()
@@ -754,7 +741,7 @@ class AlreadyConceptsHandler(BaseHandler):
             user_id = self.request.arguments['user'][0]
             data = {}
             data['data'] = {}
-            file_name = "/tmp/p%s.tsv" % (user_id)
+            file_name = "users_files/p%s.tsv" % (user_id)
             if os.path.isfile(file_name):
                 codes = {}
                 num_lines = 0
@@ -861,7 +848,7 @@ class UpdateConceptsHandler(BaseHandler):
             # get data
             concepts = json.loads(json.loads(self.request.body)['concepts'])
             # write data to physical file
-            cname = "/tmp/p{0}.tsv".format(user_id)
+            cname = "users_files/p{0}.tsv".format(user_id)
             fh = open(cname, 'w')
             concepts_len = 0
             for key, value in concepts.iteritems():
@@ -970,7 +957,7 @@ class UploadDocumentsHandler(BaseHandler):
                 return
                 return
             # write data to physical file
-            cname = "/tmp/docs{0}{1}".format(user_id, extn)
+            cname = "users_files/docs{0}{1}".format(user_id, extn)
             fh = open(cname, 'w')
             fh.write(fileinfo['body'])
             fh.close()
@@ -984,14 +971,14 @@ class UploadDocumentsHandler(BaseHandler):
                     self.write("An error occurred when trying to convert .pdf to .txt...")
                     return
                 os.remove(cname)
-                cname = "/tmp/docs{0}.txt".format(user_id)
+                cname = "users_files/docs{0}.txt".format(user_id)
                 with open(cname, 'r') as fin:
                     docData=fin.read().replace('\n', ' ')
                     if len(docData)==0:
                         self.set_status(400)
                         self.write("An error occurred when trying to convert .pdf to text...")
                         return
-                with open("/tmp/docs{0}.json".format(user_id), "wb") as fout:
+                with open("users_files/docs{0}.json".format(user_id), "wb") as fout:
                     json.dump({"text":docData,"id":os.path.splitext(fname)[0]}, fout)
                 os.remove(cname)
             # else check if txt is in correct json format
@@ -1000,14 +987,14 @@ class UploadDocumentsHandler(BaseHandler):
                     jsonlist = []
                     for line in open(cname, 'r'):
                         jsonlist.append(json.loads(line))
-                    os.rename(cname, "/tmp/docs{0}.json".format(user_id))
+                    os.rename(cname, "users_files/docs{0}.json".format(user_id))
                 except ValueError, e:
                     self.set_status(400)
                     self.write("File is not in a valid json format...")
                     os.remove(cname)
                     print e
                     return
-            file_name = "/tmp/docs%s.json" % (user_id)
+            file_name = "users_files/docs%s.json" % (user_id)
             if os.path.isfile(file_name):
                 lines = sum(1 for line in open(file_name))
                 data['respond'] = "<b>{0} Documents</b> loaded successfully!".format(lines)
@@ -1047,7 +1034,7 @@ class ChooseDocSampleHandler(BaseHandler):
                 self.set_status(400)
                 self.write("A doc sample name must be provided")
                 return
-            user_id = request_arguments['docsample']
+            doc_sample = request_arguments['docsample']
             sample_file_name = ""
             if doc_sample == "Egi":
                 sample_file_name = "static/egi_sample.tsv"
@@ -1061,7 +1048,7 @@ class ChooseDocSampleHandler(BaseHandler):
                 return
             sample_file = open(sample_file_name, 'r')
             # write data to physical file
-            cname = "/tmp/docs{0}.json".format(user_id)
+            cname = "users_files/docs{0}.json".format(user_id)
             fh = open(cname, 'w')
             while 1:
                 copy_buffer = sample_file.read(1048576)
@@ -1115,7 +1102,7 @@ class AlreadyDocumentsHandler(BaseHandler):
                 data['data'] = -1
             else:
                 data['data'] = 0
-            file_name = "/tmp/docs%s.json" % (user_id)
+            file_name = "users_files/docs%s.json" % (user_id)
             if os.path.isfile(file_name):
                 data['data'] = sum(1 for line in open(file_name))
             msettings.RESET_FIELDS = 0
@@ -1161,7 +1148,7 @@ class RunMiningHandler(BaseHandler):
             contextprev = 10
             contextnext = 5
             # Automatically find middle size from grant codes white spaces
-            querygrantsize = "select max(p1) from (select regexpcountwords('\s',stripchars(p1)) as p1 from (setschema 'p1,p2' file '/tmp/p{0}.tsv' dialect:tsv))".format(user_id)
+            querygrantsize = "select max(p1) from (select regexpcountwords('\s',stripchars(p1)) as p1 from (setschema 'p1,p2' file 'users_files/p{0}.tsv' dialect:tsv))".format(user_id)
             contextmiddle = [r for r in cursor.execute(querygrantsize)][0][0]+1
             if 'contextprev' in mining_parameters and mining_parameters['contextprev'] != '':
                 contextprev = int(mining_parameters['contextprev'])
@@ -1258,10 +1245,10 @@ class RunMiningHandler(BaseHandler):
                     ackn_filters = 'filterstopwords('+ackn_filters+')'
                 print "DOCCC", doc_filters
                 list(cursor.execute("drop table if exists grantstemp"+user_id, parse=False))
-                query_pre_grants = "create temp table grantstemp{0} as select stripchars(p1) as gt1, case when p2 is null then null else {1} end as gt2 from (setschema 'p1,p2' file '/tmp/p{0}.tsv' dialect:tsv)".format(user_id, ackn_filters)
+                query_pre_grants = "create temp table grantstemp{0} as select stripchars(p1) as gt1, case when p2 is null then null else {1} end as gt2 from (setschema 'p1,p2' file 'users_files/p{0}.tsv' dialect:tsv)".format(user_id, ackn_filters)
                 cursor.execute(query_pre_grants)
                 list(cursor.execute("drop table if exists docs"+user_id, parse=False))
-                query1 = "create temp table docs{0} as select d1, {1} as d2 from (setschema 'd1,d2' select jsonpath(c1, '$.id', '$.text') from (file '/tmp/docs{0}.json'))".format(user_id, doc_filters)
+                query1 = "create temp table docs{0} as select d1, {1} as d2 from (setschema 'd1,d2' select jsonpath(c1, '$.id', '$.text') from (file 'users_files/docs{0}.json'))".format(user_id, doc_filters)
                 cursor.execute(query1)
             else:
                 self.set_status(400)
@@ -1344,7 +1331,7 @@ class PrepareSavedProfileHandler(BaseHandler):
             import madis
             # get the database cursor
             # profile file name
-            profile_file_name = "/tmp/OAMiningProfile_{0}.oamp".format(user_id)
+            profile_file_name = "users_files/OAMiningProfile_{0}.oamp".format(user_id)
             cursor=madis.functions.Connection(profile_file_name).cursor()
             # Create poswords table
             cursor.execute("drop table if exists poswords", parse=False)
@@ -1393,7 +1380,7 @@ class PrepareSavedProfileHandler(BaseHandler):
                       )
             )
             if numberOfGrantsUploaded(user_id, request_arguments['concepts']) != 0:
-                  cursor.execute("insert into grants select stripchars(c1) as c1, stripchars(c2) as c2 from (file '/tmp/p{0}.tsv')".format(user_id))
+                  cursor.execute("insert into grants select stripchars(c1) as c1, stripchars(c2) as c2 from (file 'users_files/p{0}.tsv')".format(user_id))
             cursor.close()
 
             data = {}
@@ -1436,26 +1423,26 @@ class SaveProfileToDatabaseHandler(BaseHandler):
             doc_name = request_arguments['docname']
             docs_number = request_arguments['docsnumber']
             # copy profile file to a unique user profile file
-            profile_file_name = "/tmp/OAMiningProfile_{0}.oamp".format(user_id)
+            profile_file_name = "users_files/OAMiningProfile_{0}.oamp".format(user_id)
             # check if profile has already an id
             old_profile = True
             if profile_id == '':
                 # get unique profile id
                 profile_id = getNewProfileId()
                 old_profile = False
-            unique_profile_file_name = "/tmp/OAMiningProfile_{0}_{1}.oamp".format(user_id,profile_id)
+            unique_profile_file_name = "users_files/OAMiningProfile_{0}_{1}.oamp".format(user_id,profile_id)
             copyfile(profile_file_name, unique_profile_file_name)
             # copy profile docs to unique profile docs
             if doc_name != '' and docs_number != 0:
-                docs_file_name = "/tmp/docs{0}.json".format(user_id)
-                unique_docs_file_name = "/tmp/OAMiningDocs_{0}_{1}.json".format(user_id,profile_id)
+                docs_file_name = "users_files/docs{0}.json".format(user_id)
+                unique_docs_file_name = "users_files/OAMiningDocs_{0}_{1}.json".format(user_id,profile_id)
                 copyfile(docs_file_name, unique_docs_file_name)
             # write new profile to database
             import sys
             sys.path.append(msettings.MADIS_PATH)
             import madis
             # database file name
-            database_file_name = "/tmp/OAMiningProfilesDatabase_{0}.db".format(user_id)
+            database_file_name = "users_files/OAMiningProfilesDatabase_{0}.db".format(user_id)
             # get the database cursor
             cursor=madis.functions.Connection(database_file_name).cursor()
             user_profiles = []
@@ -1497,7 +1484,7 @@ class DownloadProfileHandler(BaseHandler):
                 return
             user_id = request_arguments['user']
             profile_id = request_arguments['id']
-            unique_profile_file_name = "/tmp/OAMiningProfile_{0}_{1}.oamp".format(user_id,profile_id)
+            unique_profile_file_name = "users_files/OAMiningProfile_{0}_{1}.oamp".format(user_id,profile_id)
             buf_size = 4096
             self.set_header('Content-Type', 'application/octet-stream')
             self.set_header('Content-Disposition', 'attachment; filename=' + "OAMiningProfile_{0}_{1}.oamp".format(user_id,profile_id))
@@ -1517,57 +1504,7 @@ class DownloadProfileHandler(BaseHandler):
             return
 
 
-class madAppHandler(BaseHandler):
-    def get(self):
-        try:
-            appname=re.match(r'.+/([^/]+)/?$', self.request.uri).groups()[0].lower()
-        except AttributeError:
-            raise tornado.web.HTTPError(404)
-
-        appobj=None
-        for ap in madapps.apps:
-            if ap['link']==appname:
-                appobj=ap
-                break
-
-        if appobj==None:
-            raise tornado.web.HTTPError(404)
-
-        self.render('madappview.html', app=appobj, apps=filteredapps, evals=filteredevals, settings=msettings)
-
-class madAppDataHandler(BaseHandler):
-
-    @tornado.web.asynchronous
-    def post(self):
-        try:
-            appname, queryname=[x.lower() for x in re.match(r'.+/([^/]+)/(.+)$', self.request.uri).groups()]
-        except AttributeError:
-            raise tornado.web.HTTPError(404)
-
-        appobj=None
-        query=''
-        for ap in madapps.apps:
-            if ap['link']==appname:
-                if queryname in ap:
-                    appobj=ap
-                    if queryname=='query':
-                        query=appobj['query']
-                    else:
-                        query=appobj[queryname]['query']
-                break
-
-        if appobj==None:
-            raise tornado.web.HTTPError(404)
-
-        params=dict(((x.replace(' ','_'),y[0].replace('\n','')) for x,y in self.request.arguments.iteritems()) )
-        self.executequery(query, params)
-
-
-
-
 def main():
-    global filteredapps, filteredevals
-
     def getqtext(query,params):
         query=query.strip('\n \s')
         query=escape.xhtml_escape(query)
@@ -1578,18 +1515,7 @@ def main():
             query=re.sub('@'+i, '<b><i>'+escape.xhtml_escape(i)+'</i></b>', query)
         return query.replace("\n","<br/>")
 
-    if 'initial_queries' in queries:
-        try:
-            list(msettings.Connection.cursor().execute(queries['initial_queries']))
-        except Exception, e:
-            raise Exception("Error when executing DB_INITIAL_EXECUTE:\n"+queries['initial_queries']+"\nThe error was:\n"+ str(e))
-    
     tornado.options.parse_command_line()
-    
-    logging.info('Completed madApp startup scripts')
-
-    filteredapps=filter(lambda x:("eval" not in x),madapps.apps)
-    filteredevals=filter(lambda x:("eval" in x),madapps.apps)
 
     if not msettings.DEBUG:
         sockets = tornado.netutil.bind_sockets(options.port)
