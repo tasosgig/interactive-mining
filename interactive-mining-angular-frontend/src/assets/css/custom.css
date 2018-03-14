@@ -88,18 +88,18 @@
   line-height: 18px;
 }
 .OPEN {
-    background: rgba(0, 0, 0, 0) url("/static/openAccess.png") no-repeat scroll right center;
+    background: rgba(0, 0, 0, 0) url("/assets/openAccess.png") no-repeat scroll right center;
     padding-right: 18px;
     min-height: 18px;
 }
 
 .EMBARGO, .CLOSED, .RESTRICTED {
-    background: rgba(0, 0, 0, 0) url("/static/closedAccess.png") no-repeat scroll right center;
+    background: rgba(0, 0, 0, 0) url("/assets/closedAccess.png") no-repeat scroll right center;
     padding-right: 18px;
 }
 
 .sc39 {
-    background: rgba(0, 0, 0, 0) url("/static/sc39.png") no-repeat scroll right center;
+    background: rgba(0, 0, 0, 0) url("/assets/sc39.png") no-repeat scroll right center;
     padding-right: 24px;
 }
 

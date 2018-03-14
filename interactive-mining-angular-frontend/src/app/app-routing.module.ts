@@ -5,7 +5,7 @@ import {ConfigurationComponent} from './configuration/configuration.component';
 import {SaveprofileComponent} from './saveprofile/saveprofile.component';
 import {ManageprofilesComponent} from './manageprofiles/manageprofiles.component';
 
-const routes: Routes = [
+export const InteractiveMiningRoutes: Routes = [
   { path: '', redirectTo: '/manage-profiles', pathMatch: 'full' },
   { path: 'manage-profiles', component: ManageprofilesComponent },
   { path: 'upload-content', component: ContentComponent },
@@ -14,7 +14,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [ RouterModule.forRoot(routes) ],
+  imports: [ RouterModule.forRoot(InteractiveMiningRoutes) ],
   exports: [ RouterModule ]
 })
 export class AppRoutingModule { }

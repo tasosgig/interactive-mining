@@ -55,7 +55,7 @@ export class ConfigurationComponent implements OnInit, AfterViewInit {
       document.getElementById("enableStickyBarScript").remove();
     var enableStickyBarScript = document.createElement("script");
     enableStickyBarScript.setAttribute("id", "enableStickyBarScript");
-    enableStickyBarScript.setAttribute("src", "assets/js/enableStickyBar.js");
+    enableStickyBarScript.innerHTML = "$(\"#child1\").stickySidebar();\n";
     document.body.appendChild(enableStickyBarScript);
   }
 

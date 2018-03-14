@@ -1,1 +1,0 @@
-$("#child1").stickySidebar();

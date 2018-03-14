@@ -225,18 +225,22 @@ export class SettingsComponent implements OnInit {
       return;
     }
     localStorage.setItem('wordssplitnum', value);
+    this.settings.wordssplitnum = value;
   }
 
   stopwordsCheckBoxChange(value: boolean): void {
     localStorage.setItem('stopwords', value ? '1' : '0');
+    this.settings.stopwords = value ? 1 : 0;
   }
 
   punctuationCheckBoxChange(value: boolean): void {
     localStorage.setItem('punctuation', value ? '1' : '0');
+    this.settings.punctuation = value ? 1 : 0;
   }
 
   letterCaseChange(lettercase): void {
     localStorage.setItem('lettercase', lettercase);
+    this.settings.lettercase = lettercase;
   }
 
   saveProfile(): void {
