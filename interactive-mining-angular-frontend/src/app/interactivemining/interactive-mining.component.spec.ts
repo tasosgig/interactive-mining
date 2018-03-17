@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { InteractiveminingComponent } from './interactivemining.component';
+import { InteractiveMiningComponent } from './interactive-mining.component';
 
-describe('InteractiveminingComponent', () => {
-  let component: InteractiveminingComponent;
-  let fixture: ComponentFixture<InteractiveminingComponent>;
+describe('InteractiveMiningComponent', () => {
+  let component: InteractiveMiningComponent;
+  let fixture: ComponentFixture<InteractiveMiningComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ InteractiveminingComponent ]
+      declarations: [ InteractiveMiningComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(InteractiveminingComponent);
+    fixture = TestBed.createComponent(InteractiveMiningComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import UIkit from 'uikit';
 import {SaveprofileService} from './saveprofile.service';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-saveprofile',
@@ -14,7 +14,7 @@ export class SaveprofileComponent implements OnInit {
   public docnName = '';
   public docsNumber = 0;
 
-  constructor(private saveprofileService: SaveprofileService, private router: Router) { }
+  constructor(private saveprofileService: SaveprofileService, private route: ActivatedRoute, private router: Router) { }
 
   ngOnInit() {
     if (localStorage.getItem('profilename') && localStorage.getItem('profilename') !== 'undefined') {
@@ -39,7 +39,7 @@ export class SaveprofileComponent implements OnInit {
       return;
     } else {
       this.saveprofileService.saveProfile(this.profileName, localStorage.getItem('profileid'), this.docnName, this.docsNumber)
-        .subscribe(() => this.router.navigate(['/manage-profiles']));
+        .subscribe(() => this.router.navigate(['../manage-profiles'], {relativeTo: this.route}));
     }
   }
 

@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ManageprofilesService} from './manageprofiles.service';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import UIkit from 'uikit';
 import {PaginationInstance} from 'ngx-pagination';
 import {ProfileMetadata} from './profile-metadata';
@@ -25,7 +25,7 @@ export class ManageprofilesComponent implements OnInit {
     currentPage: 1
   };
 
-  constructor(private manageProfilesService: ManageprofilesService, private router: Router) {
+  constructor(private manageProfilesService: ManageprofilesService, private route: ActivatedRoute, private router: Router) {
   }
 
   ngOnInit() {
@@ -71,7 +71,7 @@ export class ManageprofilesComponent implements OnInit {
         localStorage.setItem('punctuation', res.punctuation);
         localStorage.setItem('stopwords', res.stopwords);
         localStorage.setItem('lettercase', res.lettercase);
-        this.router.navigate(['/upload-content']);
+        this.router.navigate(['../upload-content'], {relativeTo: this.route});
       });
   }
 
@@ -94,7 +94,7 @@ export class ManageprofilesComponent implements OnInit {
     // clear localstorage values
     this.clearLocalStorage();
     this.manageProfilesService.createNewProfile()
-      .subscribe(() => this.router.navigate(['/upload-content']));
+      .subscribe(() => this.router.navigate(['../upload-content'], {relativeTo: this.route}));
   }
 
   fileChangeUpload(event): void {
@@ -118,7 +118,7 @@ export class ManageprofilesComponent implements OnInit {
           localStorage.setItem('punctuation', res.punctuation);
           localStorage.setItem('stopwords', res.stopwords);
           localStorage.setItem('lettercase', res.lettercase);
-          this.router.navigate(['/upload-content']);
+          this.router.navigate(['../upload-content'], {relativeTo: this.route});
         });
     }
   }
@@ -148,7 +148,7 @@ export class ManageprofilesComponent implements OnInit {
         localStorage.setItem('punctuation', res.punctuation);
         localStorage.setItem('stopwords', res.stopwords);
         localStorage.setItem('lettercase', res.lettercase);
-        this.router.navigate(['/upload-content']);
+        this.router.navigate(['../upload-content'], {relativeTo: this.route});
       });
   }
 

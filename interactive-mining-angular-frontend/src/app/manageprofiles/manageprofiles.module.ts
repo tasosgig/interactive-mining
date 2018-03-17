@@ -4,12 +4,14 @@ import { CommonModule } from '@angular/common';
 import { ManageprofilesComponent } from './manageprofiles.component';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { ManageprofilesService } from './manageprofiles.service';
+import {StepsnavbarModule} from '../stepsnvabar/stepsnavbar.module';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
-    NgxPaginationModule
+    NgxPaginationModule,
+    StepsnavbarModule
   ],
   exports: [
     ManageprofilesComponent
@@ -19,4 +21,4 @@ import { ManageprofilesService } from './manageprofiles.service';
   ],
   declarations: [ManageprofilesComponent]
 })
-export class ManagprofilesModule { }
+export class ManageprofilesModule { }

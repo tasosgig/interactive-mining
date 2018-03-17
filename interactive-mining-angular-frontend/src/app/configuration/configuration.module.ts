@@ -5,12 +5,14 @@ import { ConfigurationComponent } from './configuration.component';
 import { SettingsComponent } from './settings/settings.component';
 import { ResultspreviewComponent } from './resultspreview/resultspreview.component';
 import {ConfigurationService} from './configuration.service';
+import {StepsnavbarModule} from '../stepsnvabar/stepsnavbar.module';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    StepsnavbarModule
   ],
   exports: [
     ConfigurationComponent

@@ -3,7 +3,7 @@ import {Settings} from './settings';
 import {Phrase} from './phrase';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {ConfigurationService} from '../configuration.service';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-settings',
@@ -31,7 +31,7 @@ export class SettingsComponent implements OnInit {
     { value: 'lowercase', display: ' lowercase' }
   ];
 
-  constructor(private formBuilder: FormBuilder, private router: Router, private configurationService: ConfigurationService) { }
+  constructor(private formBuilder: FormBuilder, private route: ActivatedRoute, private router: Router, private configurationService: ConfigurationService) { }
 
   ngOnInit() {
     this.positivePhraseForm = this.formBuilder.group({
@@ -245,7 +245,7 @@ export class SettingsComponent implements OnInit {
 
   saveProfile(): void {
     this.configurationService.saveProfileParameters(this.getSettingsFromLocalStorage())
-      .subscribe(() => this.router.navigate(['/save-profile']));
+      .subscribe(() => this.router.navigate(['../save-profile'], {relativeTo: this.route}));
   }
 
 }

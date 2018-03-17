@@ -36,7 +36,7 @@ export class ManageprofilesService {
 
   downloadProfile(profileId: string): Observable<any> {
     return this.http.post(this.backendServerAddress + this.downloadProfileUrl,
-      {user: this.userId, id: profileId}, {responseType: 'blob', withCredentials: true})
+      {user: this.userId, id: profileId}, {responseType: 'blob'})
       .catch(this.util.handleError);
   }
 

@@ -1,32 +1,30 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {InteractiveminingComponent} from './interactivemining.component';
 import {ConfigurationModule} from '../configuration/configuration.module';
-import {ManagprofilesModule} from '../manageprofiles/manageprofiles.module';
+import {ManageprofilesModule} from '../manageprofiles/manageprofiles.module';
 import {SaveprofileModule} from '../saveprofile/saveprofile.module';
-import {BrowserModule} from '@angular/platform-browser';
 import {ContentModule} from '../contents/contents.module';
-import {AppRoutingModule} from '../app-routing.module';
 import {HttpClientModule} from '@angular/common/http';
-import {StepsnvabarComponent} from '../stepsnvabar/stepsnvabar.component';
+import {AppRoutingModule} from '../app-routing.module';
+import {InteractiveMiningRoutingModule} from './interactive-mining-routing.module';
+import {InteractiveMiningComponent} from './interactive-mining.component';
 
 @NgModule({
   imports: [
     CommonModule,
-    BrowserModule,
-    ManagprofilesModule,
+    InteractiveMiningRoutingModule,
+    ManageprofilesModule,
     ContentModule,
     ConfigurationModule,
     SaveprofileModule,
     HttpClientModule,
-    AppRoutingModule
-  ],
-  exports: [
-    InteractiveminingComponent
+    AppRoutingModule,
   ],
   declarations: [
-    InteractiveminingComponent,
-    StepsnvabarComponent
+    InteractiveMiningComponent
+  ],
+  exports: [
+    InteractiveMiningComponent
   ]
 })
 export class InteractiveMiningModule {

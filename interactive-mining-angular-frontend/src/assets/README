@@ -1,0 +1,15 @@
+HOW TO INSTALL
+
+Put these in .angular-cli.json
+
+      "styles": [
+        "../node_modules/interactiveminingv3/assets/css/interactive-mining.css",
+        "../node_modules/interactiveminingv3/assets/css/animations.css"
+      ]
+      "scripts": [
+        "../node_modules/jquery/dist/jquery.min.js",
+        "../node_modules/uikit/dist/js/uikit.min.js",
+        "../node_modules/uikit/dist/js/uikit-icons.min.js",
+        "../node_modules/interactiveminingv3/assets/js/ResizeSensor.js",
+        "../node_modules/interactiveminingv3/assets/js/jquery.sticky-sidebar.js"
+      ]

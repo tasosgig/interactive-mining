@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChildren} from '@angular/core';
 import { Content } from '../content';
 import {ContentsService} from '../contents.service';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-contentstable',
@@ -16,7 +16,7 @@ export class ContentstableComponent implements OnInit {
   results = '';
   @ViewChildren('focusOnNew') focusOnNewInputs;
 
-  constructor(private contentsService: ContentsService, private router: Router) { }
+  constructor(private contentsService: ContentsService, private route: ActivatedRoute, private router: Router) { }
 
   ngOnInit() {
     this.getContent();
@@ -98,7 +98,7 @@ export class ContentstableComponent implements OnInit {
     this.contentsService.updateContent(this.contentArray)
       .subscribe(value => {
         localStorage.setItem('concepts', value);
-        this.router.navigate(['/configure-profile']);
+        this.router.navigate(['../configure-profile'], {relativeTo: this.route});
       });
   }
 

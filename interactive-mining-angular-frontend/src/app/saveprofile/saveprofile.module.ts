@@ -3,11 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SaveprofileComponent } from './saveprofile.component';
 import {SaveprofileService} from './saveprofile.service';
+import {StepsnavbarModule} from '../stepsnvabar/stepsnavbar.module';
 
 @NgModule({
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    StepsnavbarModule
   ],
   exports: [
     SaveprofileComponent

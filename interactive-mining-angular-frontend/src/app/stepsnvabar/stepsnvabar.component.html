@@ -30,9 +30,9 @@
 
 <div *ngIf="proccessStep>0" class="uk-grid-collapse uk-child-width-expand" uk-grid>
   <div class="cm-nav2 uk-width-expand">
-    <a class="cm-nav2-step" [ngClass]="{'cm-nav2-step-active':proccessStep===1, 'cm-nav2-step-disabled':proccessStep<1}" [routerLink]="proccessStep>1 ? ['/upload-content'] : []">Matching context definition</a>
-    <a class="cm-nav2-step" [ngClass]="{'cm-nav2-step-active':proccessStep===2, 'cm-nav2-step-disabled':proccessStep<2}" [routerLink]="proccessStep>2 ? ['/configure-profile'] : []">Matching proccess configuration</a>
-    <a class="cm-nav2-step" [ngClass]="{'cm-nav2-step-active':proccessStep===3, 'cm-nav2-step-disabled':proccessStep<3}" [routerLink]="proccessStep>3 ? ['/save-profile'] : []">Save your matching profile</a>
+    <a class="cm-nav2-step" [ngClass]="{'cm-nav2-step-active':proccessStep===1, 'cm-nav2-step-disabled':proccessStep<1}" [routerLink]="proccessStep>1 ? ['upload-content'] : []">Matching context definition</a>
+    <a class="cm-nav2-step" [ngClass]="{'cm-nav2-step-active':proccessStep===2, 'cm-nav2-step-disabled':proccessStep<2}" [routerLink]="proccessStep>2 ? ['configure-profile'] : []">Matching proccess configuration</a>
+    <a class="cm-nav2-step" [ngClass]="{'cm-nav2-step-active':proccessStep===3, 'cm-nav2-step-disabled':proccessStep<3}" [routerLink]="proccessStep>3 ? ['save-profile'] : []">Save your matching profile</a>
   </div>
   <a class="uk-width-auto uk-float-right uk-link-muted" (click)="cancelHandle()" style="line-height: 52px;">
     <span class="uk-icon uk-margin-small-right" uk-icon="icon: close"></span>

@@ -28,7 +28,7 @@ export class Util {
   }
 
   public getBackendServerAddress(): string {
-    return localStorage.getItem('backendaddress');
+    return localStorage.getItem('mining_backend_address');
   }
 }
 

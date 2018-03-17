@@ -1,1 +1,1 @@
-export * from './src/app/interactivemining/interactivemining.module';
+export * from './src/app/interactivemining/interactive-mining.module';
