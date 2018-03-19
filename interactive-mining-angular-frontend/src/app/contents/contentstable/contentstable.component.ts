@@ -1,4 +1,5 @@
 import {Component, OnInit, ViewChildren} from '@angular/core';
+import UIkit from 'uikit';
 import { Content } from '../content';
 import {ContentsService} from '../contents.service';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -69,6 +70,14 @@ export class ContentstableComponent implements OnInit {
     }
   }
 
+  deleteAllFields() {
+    UIkit.modal.confirm('<span class="uk-text-bold">' +
+      'Are you sure you want to delete all your content?</span>', {escClose: true}).then(() => {
+      this.contentArray.length = 0;
+      this.addRow();
+    });
+  }
+
   onFilesChange(file: File) {
     if (file !== null && file !== undefined) {
       console.log(file);
@@ -98,7 +107,7 @@ export class ContentstableComponent implements OnInit {
     this.contentsService.updateContent(this.contentArray)
       .subscribe(value => {
         localStorage.setItem('concepts', value);
-        this.router.navigate(['../configure-profile'], {relativeTo: this.route});
+        this.router.navigate(['../configure-profile'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
       });
   }
 

@@ -50,7 +50,6 @@
       </ul>
     </div>
   </div>
-  <hr>
   <div class="cm-advanced-tools-section">
     <label class="uk-form-label cm-advaned-tools-label" for="advaned-tools-label">
       <input [checked]="precision===4" (click)="advancedCheckboxChange()"  id="advaned-tools-label" class="uk-checkbox" type="checkbox"> Customized rules <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span>
@@ -158,7 +157,7 @@
           <div class="uk-accordion-content">
             <p class="uk-text-small">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
             <form class="uk-form-horizontal">
-              <div>
+              <div class="cm-margin-medium-bottom">
                 <label class="uk-form-label" for="word-split">Length of N-grams <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></label>
                 <div class="uk-form-controls">
                   <input class="uk-input" type="number" name="word-split" min="0" max="10" id="word-split" placeholder="Word pairs" value="2" [value]="settings.wordssplitnum" (change)="wordssplitnumChange($event.target.value)"/>
@@ -182,7 +181,7 @@
                   <input class="uk-input" type="number" name="context-prev-words" min="0" max="20" id="context-prev-words" placeholder="Prev words number" value="10" [value]="settings.contextprev" (change)="contextprevChange($event.target.value)"/>
                 </div>
               </div>
-              <div class="cm-match-area right">
+              <div class="cm-match-area right cm-margin-medium-bottom">
                 <label class="uk-form-label" for="context-next-words">Words right of the match <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></label>
                 <div class="uk-form-controls">
                   <input class="uk-input" type="number" name="context-next-words" min="0" max="20" id="context-next-words" placeholder="Next words number" value="5" [value]="settings.contextnext" (change)="contextnextChange($event.target.value)"/>
@@ -230,5 +229,5 @@
     </div>
   </div>
   <hr>
-  <button id="next-button" class="uk-button uk-button-primary uk-margin-small-left" (click)="saveProfile()">Save this profile</button>
+  <button id="next-button" class="uk-button uk-button-primary uk-margin-small-top" (click)="saveProfile()">Save this profile</button>
 </div>

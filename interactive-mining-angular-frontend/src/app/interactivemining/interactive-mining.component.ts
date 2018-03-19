@@ -11,7 +11,7 @@ export class InteractiveMiningComponent implements OnInit {
   constructor(private route: ActivatedRoute, private router: Router) { }
 
   ngOnInit() {
-    this.router.navigate(['manage-profiles'], {relativeTo: this.route});
+    this.router.navigate(['manage-profiles'], {relativeTo: this.route, queryParamsHandling: 'preserve' });
   }
 
 }

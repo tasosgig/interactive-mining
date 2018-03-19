@@ -71,7 +71,7 @@ export class ManageprofilesComponent implements OnInit {
         localStorage.setItem('punctuation', res.punctuation);
         localStorage.setItem('stopwords', res.stopwords);
         localStorage.setItem('lettercase', res.lettercase);
-        this.router.navigate(['../upload-content'], {relativeTo: this.route});
+        this.router.navigate(['../upload-content'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
       });
   }
 
@@ -94,7 +94,7 @@ export class ManageprofilesComponent implements OnInit {
     // clear localstorage values
     this.clearLocalStorage();
     this.manageProfilesService.createNewProfile()
-      .subscribe(() => this.router.navigate(['../upload-content'], {relativeTo: this.route}));
+      .subscribe(() => this.router.navigate(['../upload-content'], {relativeTo: this.route, queryParamsHandling: 'preserve'}));
   }
 
   fileChangeUpload(event): void {
@@ -118,7 +118,7 @@ export class ManageprofilesComponent implements OnInit {
           localStorage.setItem('punctuation', res.punctuation);
           localStorage.setItem('stopwords', res.stopwords);
           localStorage.setItem('lettercase', res.lettercase);
-          this.router.navigate(['../upload-content'], {relativeTo: this.route});
+          this.router.navigate(['../upload-content'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
         });
     }
   }
@@ -148,7 +148,7 @@ export class ManageprofilesComponent implements OnInit {
         localStorage.setItem('punctuation', res.punctuation);
         localStorage.setItem('stopwords', res.stopwords);
         localStorage.setItem('lettercase', res.lettercase);
-        this.router.navigate(['../upload-content'], {relativeTo: this.route});
+        this.router.navigate(['../upload-content'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
       });
   }
 

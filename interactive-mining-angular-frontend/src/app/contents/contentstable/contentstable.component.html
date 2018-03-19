@@ -4,7 +4,7 @@
     <!-- <th class="uk-table-shrink cm-table-number">#</th> -->
     <th class="uk-width-small">Keyword</th>
     <th class="uk-table-expand">Context</th>
-    <th class="uk-table-shrink"></th>
+    <th class="uk-table-shrink"><a class="uk-icon-link uk-icon" uk-icon="icon: trash" contenteditable="false" (click)="deleteAllFields()"></a></th>
   </tr>
   </thead>
   <tbody>
@@ -41,7 +41,7 @@
             </div>
             <div>
               <span class="cm-label">TSV</span>
-              <span class="uk-text uk-text-small">file type, maximum 50kB</span>
+              <span class="uk-text uk-text-small cm-coloured-text-meta">file type, maximum 50kB</span>
               <span class="cm-tooltip" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom" uk-icon="icon: info"></span>
             </div>
           </div>
@@ -57,4 +57,4 @@
   </tfoot>
 </table>
 
-<button id="next-button" class="uk-button uk-button-primary uk-margin-small-top" [disabled]="!isAnyContent()" (click)="saveAndContinue()">Continue</button>
+<button id="next-button" class="uk-button uk-button-primary cm-margin-medium-top" [disabled]="!isAnyContent()" (click)="saveAndContinue()">Continue</button>

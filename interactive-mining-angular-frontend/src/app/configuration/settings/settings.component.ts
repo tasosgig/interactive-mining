@@ -245,7 +245,7 @@ export class SettingsComponent implements OnInit {
 
   saveProfile(): void {
     this.configurationService.saveProfileParameters(this.getSettingsFromLocalStorage())
-      .subscribe(() => this.router.navigate(['../save-profile'], {relativeTo: this.route}));
+      .subscribe(() => this.router.navigate(['../save-profile'], {relativeTo: this.route, queryParamsHandling: 'preserve'}));
   }
 
 }

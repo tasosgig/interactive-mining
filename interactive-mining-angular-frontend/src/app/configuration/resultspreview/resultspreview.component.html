@@ -1,9 +1,9 @@
+<h4 class="cm-margin-medium-left">Test area <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></h4>
 <div class="cm-results-section">
   <header id="cm-results-section-header" class="uk-container uk-container-expand">
     <div class="cm-results-controls">
       <div class="uk-margin">
-        <h4>Test area <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></h4>
-        <p>Choose a document sample to test your matchin results!</p>
+        <p>Choose a document sample to test your matching results</p>
         <div class="uk-grid-collapse uk-child-width-expand" uk-grid>
           <!--<form class="uk-search uk-search-default uk-width-1-5@m">-->
             <!--<span class="uk-search-icon-flip" uk-search-icon></span>-->
@@ -15,7 +15,7 @@
               <div class="uk-slider-container">
                 <ul class="uk-slider-items uk-grid-small">
                   <li *ngFor="let doc of docSamples">
-                    <button class="uk-button uk-button-primary" (click)="chooseSample(doc.name)">{{doc.name}}</button>
+                    <button class="uk-button cm-button-examples" (click)="chooseSample(doc.name)">{{doc.name}}</button>
                   </li>
                 </ul>
               </div>
@@ -42,10 +42,10 @@
     </div>
   </header>
   <div id="cm-run-test-section">
-    <h4>Test results <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></h4>
+    <p>Test your rules to the selected documents <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></p>
     <div class="uk-display-inline">
-      <button id="run-mining-btn" class="uk-button uk-button-primary" [disabled]="documentsLoaded<1" (click)="runMining()">Test rules on the selected documents</button>
-      <span *ngIf="matches_number>0" id="results-number" class="uk-text-primary uk-margin-left uk-text-bottom">{{matches_number}} matche{{matches_number===1?'':'s'}} found</span>
+      <button id="run-mining-btn" class="uk-button cm-run-test-button" [disabled]="documentsLoaded<1" (click)="runMining()">Run rules test</button>
+      <span *ngIf="matches_number>0" id="results-number" class="cm-coloured-text uk-margin-left uk-text-bottom">{{matches_number}} matche{{matches_number===1?'':'s'}} found</span>
       <span *ngIf="prev_matches_number>0" id="results-number-previous" class="cm-text-muted uk-text-bottom">, {{prev_matches_number}} matche{{prev_matches_number===1?'':'s'}} found previously</span>
     </div>
   </div>

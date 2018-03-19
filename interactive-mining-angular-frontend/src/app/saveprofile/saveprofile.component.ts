@@ -39,7 +39,7 @@ export class SaveprofileComponent implements OnInit {
       return;
     } else {
       this.saveprofileService.saveProfile(this.profileName, localStorage.getItem('profileid'), this.docnName, this.docsNumber)
-        .subscribe(() => this.router.navigate(['../manage-profiles'], {relativeTo: this.route}));
+        .subscribe(() => this.router.navigate(['../manage-profiles'], {relativeTo: this.route, queryParamsHandling: 'preserve'}));
     }
   }
 
