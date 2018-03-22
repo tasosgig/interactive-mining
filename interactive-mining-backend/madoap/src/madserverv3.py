@@ -1201,7 +1201,10 @@ class RunMiningHandler(BaseHandler):
                 pos_words = json.loads(mining_parameters['poswords'])
                 for key, value in pos_words.iteritems():
                     # MONO GIA TO EGI
-                    pos_set += r'regexpcountuniquematches("%s",%s)*%s + ' % (key,j2scontext,value)
+                    if 'lowercase' in mining_parameters and mining_parameters['lowercase'] == "1":
+                        pos_set += r'regexpcountuniquematches("%s",%s)*%s + ' % (key.decode('utf-8').lower(),j2scontext,value)
+                    else:
+                        pos_set += r'regexpcountuniquematches("%s",%s)*%s + ' % (key,j2scontext,value)
                     # ORIGINAL
                     # pos_set += r'regexpcountuniquematches("(?:\b)%s(?:\b)",j2s(prev,middle,next))*%s + ' % (key,value)
                     data['poswords'].append(key)
@@ -1212,7 +1215,10 @@ class RunMiningHandler(BaseHandler):
                 neg_words = json.loads(mining_parameters['negwords'])
                 for key, value in neg_words.iteritems():
                     # MONO GIA TO EGI
-                    neg_set += r'regexpcountuniquematches("%s",%s)*%s + ' % (key,j2scontext,value)
+                    if 'lowercase' in mining_parameters and mining_parameters['lowercase'] == "1":
+                        neg_set += r'regexpcountuniquematches("%s",%s)*%s + ' % (key.decode('utf-8').lower(),j2scontext,value)
+                    else:
+                        neg_set += r'regexpcountuniquematches("%s",%s)*%s + ' % (key,j2scontext,value)
                     # ORIGINAL
                     # neg_set += r'regexpcountuniquematches("(?:\b)%s(?:\b)",j2s(prev,middle,next))*%s - ' % (key,value)
                     data['negwords'].append(key)
@@ -1233,13 +1239,9 @@ class RunMiningHandler(BaseHandler):
                 if 'punctuation' in mining_parameters and mining_parameters['punctuation'] == "1":
                     doc_filters = 'keywords('+doc_filters+')'
                     ackn_filters = 'keywords('+ackn_filters+')'
-                if 'lettercase' in mining_parameters and mining_parameters['lettercase'] != '' and mining_parameters['lettercase'] != 'none':
-                    if mining_parameters['lettercase'] == 'lowercase':
-                        doc_filters = 'lower('+doc_filters+')'
-                        ackn_filters = 'lower('+ackn_filters+')'
-                    elif mining_parameters['lettercase'] == 'uppercase':
-                        doc_filters = 'upper('+doc_filters+')'
-                        ackn_filters = 'upper('+ackn_filters+')'
+                if 'lowercase' in mining_parameters and mining_parameters['lowercase'] == "1":
+                    doc_filters = 'lower('+doc_filters+')'
+                    ackn_filters = 'lower('+ackn_filters+')'
                 if 'stopwords' in mining_parameters and mining_parameters['stopwords'] == "1":
                     doc_filters = 'filterstopwords('+doc_filters+')'
                     ackn_filters = 'filterstopwords('+ackn_filters+')'
@@ -1259,13 +1261,16 @@ class RunMiningHandler(BaseHandler):
             # string concatenation workaround because of the special characters conflicts
             if 'wordssplitnum' in mining_parameters and mining_parameters['wordssplitnum'] != '':
                 words_split = int(mining_parameters['wordssplitnum'])
+                gt2 = 'gt2'
+                if 'lowercase' in mining_parameters and mining_parameters['lowercase'] == "1":
+                    gt2 = 'lower('+gt2+')'
                 # MONO GIA TO EGI
-                if 0 < words_split and words_split <= 10:
-                    acknowledgment_split = r'textwindow2s(gt2,0,'+str(words_split)+r',0)'
+                if 0 < words_split and words_split <= 20:
+                    acknowledgment_split = r'textwindow2s('+gt2+',0,'+str(words_split)+r',0)'
                 else:
-                    acknowledgment_split = r'"dummy" as prev, gt2 as middle, "dummy" as next'
+                    acknowledgment_split = r'"dummy" as prev, '+gt2+' as middle, "dummy" as next'
                 # ORIGINAL
-                # if 0 < words_split and words_split <= 10:
+                # if 0 < words_split and words_split <= 20:
                 #     acknowledgment_split = r'textwindow2s(regexpr("([\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|])", gt2, "\\\1"),0,'+str(words_split)+r',0)'
                 # else:
                 #     acknowledgment_split = r'"dummy" as prev, regexpr("([\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|])", gt2, "\\\1") as middle, "dummy" as next'
@@ -1447,7 +1452,7 @@ class SaveProfileToDatabaseHandler(BaseHandler):
             cursor=madis.functions.Connection(database_file_name).cursor()
             user_profiles = []
             if old_profile:
-                query = 'UPDATE database set name="{1}", datecreated="{2}", status="{3}", matches="{4}", docname="{5}", docsnumber="{6}" where id="{0}"'.format(profile_id,profile_name,"24-03-2018","Ready","8/8",doc_name,docs_number)
+                query = 'UPDATE database set name="{1}", datecreated="{2}", status="{3}", matches="{4}", docname="{5}", docsnumber="{6}" where id="{0}"'.format(profile_id,profile_name,datetime.date.today(),"Ready","8/8",doc_name,docs_number)
             else:
                 query = 'INSERT INTO database VALUES("{0}","{1}","{2}","{3}","{4}","{5}","{6}")'.format(profile_id,profile_name,datetime.date.today().strftime("%B %d %Y"),"Saved","8/8",doc_name,docs_number)
             cursor.execute(query, parse=False)

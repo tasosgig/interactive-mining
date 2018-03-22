@@ -22,8 +22,6 @@ export class StepsnvabarComponent implements OnInit {
   ngOnInit() {}
 
   changeStep(url: string): void {
-    console.log(url);
-    console.log(this.router.routerState.snapshot.toString());
     if (url.indexOf('mining/upload-content') >= 0) {
       this.proccessStep = 1;
     } else if (url.indexOf('mining/configure-profile') >= 0) {

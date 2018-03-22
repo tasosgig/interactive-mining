@@ -1,7 +1,6 @@
 export interface ProfileData {
   docname: string;
   docsnumber: string;
-  precision: string;
   concepts: string;
   poswords: string;
   negwords: string;
@@ -11,5 +10,5 @@ export interface ProfileData {
   wordssplitnum: string;
   punctuation: string;
   stopwords: string;
-  lettercase: string;
+  lowercase: string;
 }

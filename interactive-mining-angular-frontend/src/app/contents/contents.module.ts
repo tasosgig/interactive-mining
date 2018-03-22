@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { ContentstableComponent } from './contentstable/contentstable.component';
 import { ContentComponent } from './contents.component';
 import {ContentsService} from './contents.service';
 import {FileUploadDirective} from '../file-upload.directive';
@@ -21,7 +20,6 @@ import {StepsnavbarModule} from '../stepsnvabar/stepsnavbar.module';
     StepsnavbarModule
   ],
   declarations: [
-    ContentstableComponent,
     ContentComponent,
     FileUploadDirective,
     AutosizeDirective

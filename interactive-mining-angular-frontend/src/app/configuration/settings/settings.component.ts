@@ -12,8 +12,24 @@ import {ActivatedRoute, Router} from '@angular/router';
 })
 export class SettingsComponent implements OnInit {
 
-  private oldPrecision = 1;
-  public precision = 1;
+  public sliderValue = 0;
+  public sliderConfig: any = {
+    connect: [true, false],
+    tooltips: [ true ],
+    step: 1,
+    range: {
+      min: 1,
+      max: 20
+    },
+    pips: {
+      mode: 'count',
+      density: 5,
+      values: 5,
+      stepped: true
+    }
+  };
+
+  public customRulesOpen = false;
 
   public positivePhrasesArray: Array<Phrase> = [];
   public negativePhrasesArray: Array<Phrase> = [];
@@ -25,13 +41,11 @@ export class SettingsComponent implements OnInit {
 
   public settings: Settings;
 
-  public lettercases = [
-    { value: 'none', display: ' As it is' },
-    { value: 'uppercase', display: ' UPPERCASE' },
-    { value: 'lowercase', display: ' lowercase' }
-  ];
-
-  constructor(private formBuilder: FormBuilder, private route: ActivatedRoute, private router: Router, private configurationService: ConfigurationService) { }
+  constructor(private formBuilder: FormBuilder,
+              private route: ActivatedRoute,
+              private router: Router,
+              private configurationService: ConfigurationService) {
+  }
 
   ngOnInit() {
     this.positivePhraseForm = this.formBuilder.group({
@@ -42,12 +56,10 @@ export class SettingsComponent implements OnInit {
       phrase: [null, Validators.required],
       weight: [null, [Validators.required, Validators.min(0), Validators.max(100)]],
     });
-    this.precision = Number.parseInt(localStorage.getItem('precision'));
     this.settings = {
       docname: localStorage.getItem('docname'),
       docsnumber: Number.parseInt(localStorage.getItem('docsnumber')),
       profileid: localStorage.getItem('profileid'),
-      precision: Number.parseInt(localStorage.getItem('precision')),
       poswords: localStorage.getItem('poswords'),
       negwords: localStorage.getItem('negwords'),
       contextprev: Number.parseInt(localStorage.getItem('contextprev')),
@@ -55,7 +67,7 @@ export class SettingsComponent implements OnInit {
       wordssplitnum: Number.parseInt(localStorage.getItem('wordssplitnum')),
       punctuation: Number.parseInt(localStorage.getItem('punctuation')),
       stopwords: Number.parseInt(localStorage.getItem('stopwords')),
-      lettercase: localStorage.getItem('lettercase')
+      lowercase: Number.parseInt(localStorage.getItem('lowercase')),
     };
     // show positive phrases
     this.positivePhrasesArray.length = 0;
@@ -81,21 +93,18 @@ export class SettingsComponent implements OnInit {
     }
   }
 
-  getSettingsFromLocalStorage(): Settings {
-    return this.settings = {
-      docname: localStorage.getItem('docname'),
-      docsnumber: Number.parseInt(localStorage.getItem('docsnumber')),
-      profileid: localStorage.getItem('profileid'),
-      precision: Number.parseInt(localStorage.getItem('precision')),
-      poswords: localStorage.getItem('poswords'),
-      negwords: localStorage.getItem('negwords'),
-      contextprev: Number.parseInt(localStorage.getItem('contextprev')),
-      contextnext: Number.parseInt(localStorage.getItem('contextnext')),
-      wordssplitnum: Number.parseInt(localStorage.getItem('wordssplitnum')),
-      punctuation: Number.parseInt(localStorage.getItem('punctuation')),
-      stopwords: Number.parseInt(localStorage.getItem('stopwords')),
-      lettercase: localStorage.getItem('lettercase')
-    };
+  onSliderChange(value: number): void {
+    value = value + 1;
+    localStorage.setItem('wordssplitnum', value.toString());
+    this.settings.wordssplitnum = value;
+  }
+
+  advancedCheckboxChange() {
+    if (this.customRulesOpen) {
+      this.customRulesOpen = false;
+    } else {
+      this.customRulesOpen = true;
+    }
   }
 
   phraseSubmit(positive: boolean): void {
@@ -182,28 +191,6 @@ export class SettingsComponent implements OnInit {
     }
   }
 
-  precisionChange(precision: number) {
-    this.precision = precision;
-    localStorage.setItem('precision', this.precision.toString());
-    this.oldPrecision = precision;
-    if (this.precision === 1) {
-      this.bulkPutPrhases('{"European Grid Initiative":"1","European Grid Infrastructure":"1","EGI":"1"}', true);
-    } else if (this.precision === 2) {
-      this.bulkPutPrhases('{}', true);
-    } else if (this.precision === 3) {
-      this.bulkPutPrhases('{}', true);
-    }
-  }
-
-  advancedCheckboxChange(): void {
-    if (this.precision === 4) {
-      this.precision = this.oldPrecision;
-    } else {
-      this.precision = 4;
-    }
-    localStorage.setItem('precision', this.precision.toString());
-  }
-
   contextprevChange(value): void {
     if (value < 0 || value > 20) {
       return;
@@ -238,9 +225,25 @@ export class SettingsComponent implements OnInit {
     this.settings.punctuation = value ? 1 : 0;
   }
 
-  letterCaseChange(lettercase): void {
-    localStorage.setItem('lettercase', lettercase);
-    this.settings.lettercase = lettercase;
+  lowercaseCheckBoxChange(value: boolean): void {
+    localStorage.setItem('lowercase', value ? '1' : '0');
+    this.settings.lowercase = value ? 1 : 0;
+  }
+
+  getSettingsFromLocalStorage(): Settings {
+    return this.settings = {
+      docname: localStorage.getItem('docname'),
+      docsnumber: Number.parseInt(localStorage.getItem('docsnumber')),
+      profileid: localStorage.getItem('profileid'),
+      poswords: localStorage.getItem('poswords'),
+      negwords: localStorage.getItem('negwords'),
+      contextprev: Number.parseInt(localStorage.getItem('contextprev')),
+      contextnext: Number.parseInt(localStorage.getItem('contextnext')),
+      wordssplitnum: Number.parseInt(localStorage.getItem('wordssplitnum')),
+      punctuation: Number.parseInt(localStorage.getItem('punctuation')),
+      stopwords: Number.parseInt(localStorage.getItem('stopwords')),
+      lowercase: Number.parseInt(localStorage.getItem('lowercase')),
+    };
   }
 
   saveProfile(): void {

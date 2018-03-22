@@ -5,7 +5,6 @@ import {ManageprofilesModule} from '../manageprofiles/manageprofiles.module';
 import {SaveprofileModule} from '../saveprofile/saveprofile.module';
 import {ContentModule} from '../contents/contents.module';
 import {HttpClientModule} from '@angular/common/http';
-import {AppRoutingModule} from '../app-routing.module';
 import {InteractiveMiningRoutingModule} from './interactive-mining-routing.module';
 import {InteractiveMiningComponent} from './interactive-mining.component';
 
@@ -17,8 +16,7 @@ import {InteractiveMiningComponent} from './interactive-mining.component';
     ContentModule,
     ConfigurationModule,
     SaveprofileModule,
-    HttpClientModule,
-    AppRoutingModule,
+    HttpClientModule
   ],
   declarations: [
     InteractiveMiningComponent

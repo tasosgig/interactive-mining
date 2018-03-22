@@ -60,7 +60,6 @@ export class ManageprofilesComponent implements OnInit {
         localStorage.setItem('profileid', id);
         localStorage.setItem('docname', res.docname);
         localStorage.setItem('docsnumber', res.docsnumber);
-        localStorage.setItem('precision', res.precision);
         localStorage.setItem('concepts', res.concepts);
         localStorage.setItem('poswords', JSON.stringify(res.poswords));
         localStorage.setItem('negwords', JSON.stringify(res.negwords));
@@ -70,7 +69,7 @@ export class ManageprofilesComponent implements OnInit {
         localStorage.setItem('wordssplitnum', res.wordssplitnum);
         localStorage.setItem('punctuation', res.punctuation);
         localStorage.setItem('stopwords', res.stopwords);
-        localStorage.setItem('lettercase', res.lettercase);
+        localStorage.setItem('lowercase', res.lowercase);
         this.router.navigate(['../upload-content'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
       });
   }
@@ -107,7 +106,6 @@ export class ManageprofilesComponent implements OnInit {
       this.manageProfilesService.uploadFile(file)
         .subscribe(res => {
           console.log(res);
-          localStorage.setItem('precision', res.precision);
           localStorage.setItem('concepts', res.concepts);
           localStorage.setItem('poswords', JSON.stringify(res.poswords));
           localStorage.setItem('negwords', JSON.stringify(res.negwords));
@@ -117,7 +115,7 @@ export class ManageprofilesComponent implements OnInit {
           localStorage.setItem('wordssplitnum', res.wordssplitnum);
           localStorage.setItem('punctuation', res.punctuation);
           localStorage.setItem('stopwords', res.stopwords);
-          localStorage.setItem('lettercase', res.lettercase);
+          localStorage.setItem('lowercase', res.lowercase);
           this.router.navigate(['../upload-content'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
         });
     }
@@ -135,7 +133,6 @@ export class ManageprofilesComponent implements OnInit {
     this.manageProfilesService.loadExampleProfile(name)
       .subscribe(res => {
         console.log(res);
-        localStorage.setItem('precision', res.precision);
         localStorage.setItem('concepts', res.concepts);
         localStorage.setItem('docname', res.docname);
         localStorage.setItem('docsnumber', res.docsnumber);
@@ -147,7 +144,7 @@ export class ManageprofilesComponent implements OnInit {
         localStorage.setItem('wordssplitnum', res.wordssplitnum);
         localStorage.setItem('punctuation', res.punctuation);
         localStorage.setItem('stopwords', res.stopwords);
-        localStorage.setItem('lettercase', res.lettercase);
+        localStorage.setItem('lowercase', res.lowercase);
         this.router.navigate(['../upload-content'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
       });
   }
@@ -159,7 +156,6 @@ export class ManageprofilesComponent implements OnInit {
     localStorage.removeItem('profileid');
     localStorage.removeItem('docname');
     localStorage.removeItem('docsnumber');
-    localStorage.removeItem('precision');
     localStorage.removeItem('concepts');
     localStorage.removeItem('poswords');
     localStorage.removeItem('negwords');
@@ -169,7 +165,7 @@ export class ManageprofilesComponent implements OnInit {
     localStorage.removeItem('wordssplitnum');
     localStorage.removeItem('punctuation');
     localStorage.removeItem('stopwords');
-    localStorage.removeItem('lettercase');
+    localStorage.removeItem('lowercase');
   }
 
 }

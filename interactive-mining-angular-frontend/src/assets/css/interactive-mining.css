@@ -1,3 +1,16 @@
+/* UiKit Extras */
+.uk-position-small[class*='uk-position-center-left'],.uk-position-small[class*='uk-position-center-right']{transform:translateY(-50%) translateY(-15px)}
+[class*='uk-position-center-left'],[class*='uk-position-center-right']{top:50%;transform:translateY(-50%)}.uk-position-small[class*='uk-position-center-left'],.uk-position-small[class*='uk-position-center-right']{transform:translateY(-50%) translateY(-15px)}
+.uk-position-center-left-out{right:100%;width:max-content}.uk-position-center-right-out{left:100%;width:max-content}
+.uk-slider{-webkit-tap-highlight-color:transparent;}.uk-slider-container{overflow:hidden;}.uk-slider-items{will-change:transform;position:relative}.uk-slider-items:not(.uk-grid){display:flex;margin:0;padding:0;list-style:none;-webkit-touch-callout:none}.uk-slider-items.uk-grid{flex-wrap:nowrap;}.uk-slider-items>*{flex:none;position:relative;touch-action:pan-y}
+
+.uk-pagination>.uk-active>* {
+  color: #999999 !important;
+  background-color: #FFF !important;
+}
+
+@import "~nouislider/distribute/nouislider.min.css";
+
 /* COLOR PALETTE */
 :root {
   --cm-theme-1: #333333;
@@ -100,6 +113,14 @@
   color: var(--cm-theme-1);
   box-shadow: 0 6px 50px rgba(0,0,0,0.08);
 }
+.cm-button-primary {
+  background-color: var(--cm-theme-6);
+  color: var(--cm-theme-12);
+}
+.cm-button-primary:hover:not([disabled]) {
+  background-color: #008EC5;
+  color: var(--cm-theme-12);
+}
 .cm-phrases-button {
   padding: 0px;
   margin: 6px;
@@ -111,7 +132,7 @@
   background-color: var(--cm-theme-7);
   color: var(--cm-theme-12);
 }
-.cm-run-test-button {
+.cm-run-test-button:not([disabled]) {
   background-color: var(--cm-theme-1);
   color: var(--cm-theme-12);
 }
@@ -308,6 +329,39 @@
   overflow: hidden;
   counter-reset: flag;
 }
+.cm-nav2-home {
+  text-decoration: none;
+  outline: none;
+  display: block;
+  float: left;
+  font-size: 15px;
+  line-height: 50px;
+  padding: 0 16px 0 24px;
+  position: relative;
+  background: var(--cm-theme-12);
+  color: var(--cm-theme-5);
+  transition: background 0.3s;
+  border: 2px solid var(--cm-theme-5);
+}
+.cm-nav2-home::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -25px;
+  width: 50px;
+  height: 50px;
+  transform: scale(0.707) rotate(45deg);
+  z-index: 1;
+  border-radius: 0 5px 0 50px;
+  background: var(--cm-theme-12);
+  transition: background 0.3s;
+  box-shadow: 2px -2px 0 1px var(--cm-theme-5);
+}
+.cm-nav2-home:hover,
+.cm-nav2-home:hover::after{
+  background: #008EC5;
+  color: var(--cm-theme-12);
+}
 .cm-nav2-step {
   text-decoration: none;
   outline: none;
@@ -364,11 +418,14 @@
   transition: background 0.3s;
   box-shadow: 2px -2px 0 1px var(--cm-theme-5);
 }
-.cm-nav2-step:hover,
 .cm-nav2-step-active,
-.cm-nav2-step:hover::after,
 .cm-nav2-step-active::after{
   background: var(--cm-theme-6);
+  color: var(--cm-theme-12);
+}
+.cm-nav2-step:hover,
+.cm-nav2-step:hover::after{
+  background: #008EC5;
   color: var(--cm-theme-12);
 }
 .cm-nav2-step:hover::before,
@@ -448,6 +505,7 @@
 }
 .cm-table td.delete {
   padding: 14px;
+  text-align: center !important;
 }
 .cm-table td.keyword, .cm-table td.context, .cm-table td.delete, .cm-table td.edit, .cm-table-footer {
   border-top: 1px solid var(--cm-theme-4);
@@ -502,6 +560,14 @@
   width: 15px;
   display: inline-flex;
 }
+.uk-tooltip {
+  padding: 5px 10px;
+  background: var(--cm-theme-12);
+  border: 1px solid var(--cm-theme-6);
+  border-radius: 4px;
+  color: var(--cm-theme-1);
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 8px 3px;
+}
 /* Custom config section
  ========================================================================== */
 .cm-config-settings-section {
@@ -516,7 +582,7 @@
 
 }
 .cm-easy-config-section {
-  padding: 30px 0px 40px 0px;
+  padding: 30px 0px 60px 0px;
 }
 .cm-config-options-container {
   display: block;
@@ -626,6 +692,48 @@
 .cm-config-option.active .cm-config-option-check {
   display: block;
 }
+/* NoUISlider Custom CSS */
+.ng2-nouislider {
+  margin-top: 0px !important;
+  padding: 48px 16px !important;
+}
+.noUi-connect {
+  background: var(--cm-theme-6);
+}
+.noUi-target {
+  border-radius: 2px;
+}
+.noUi-horizontal {
+  height: 10px;
+}
+.noUi-marker-horizontal.noUi-marker-large {
+  height: 10px;
+}
+.noUi-marker-horizontal.noUi-marker {
+  width: 1px;
+}
+html:not([dir=rtl]) .noUi-horizontal .noUi-handle {
+  right: -15px;
+}
+
+.noUi-horizontal .noUi-handle {
+  width: 30px;
+  height: 25px;
+  top: -10px;
+}
+.noUi-handle:after {
+  left: 15px !important;
+}
+.noUi-handle:after, .noUi-handle:before {
+  left: 12px;
+  top: 4px;
+}
+.noUi-handle {
+  cursor: pointer;
+}
+
+
+
 .cm-margin-medium {
   margin: 20px;
 }
@@ -976,4 +1084,5 @@ header.uk-sticky-fixed .cm-results-count-section {
   -webkit-flex: 1;
   flex: 1;
   right: 0;
+  padding-top: 10px;
 }

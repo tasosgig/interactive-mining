@@ -5,15 +5,23 @@ import {ConfigurationComponent} from '../configuration/configuration.component';
 import {ContentComponent} from '../contents/contents.component';
 import {ManageprofilesComponent} from '../manageprofiles/manageprofiles.component';
 import {InteractiveMiningComponent} from './interactive-mining.component';
+import {SaveProfileGuard, UploadContentGuard} from './save-profile-guard';
 
 const interactiveMiningRoutes: Routes = [
+  {path: 'mining', redirectTo: '/mining/manage-profiles', pathMatch: 'full'},
   {
     path: 'mining',
-    component: InteractiveMiningComponent,
+    // component: InteractiveMiningComponent,
     children: [
       { path: 'manage-profiles', component: ManageprofilesComponent },
-      { path: 'upload-content', component: ContentComponent },
-      { path: 'configure-profile', component: ConfigurationComponent },
+      { path: 'upload-content',
+        component: ContentComponent,
+        canDeactivate: [UploadContentGuard]
+      },
+      { path: 'configure-profile',
+        component: ConfigurationComponent,
+        canDeactivate: [SaveProfileGuard]
+      },
       { path: 'save-profile', component: SaveprofileComponent }
     ]
   }
@@ -25,6 +33,10 @@ const interactiveMiningRoutes: Routes = [
   ],
   exports: [
     RouterModule
+  ],
+  providers: [
+    UploadContentGuard,
+    SaveProfileGuard
   ]
 })
 export class InteractiveMiningRoutingModule { }

@@ -1,15 +1,20 @@
-<h4 class="cm-margin-medium-left">Test area <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></h4>
+<div class="uk-grid-collapse uk-child-width-expand uk-text-middle" uk-grid>
+  <h4 class="cm-margin-medium">Test area</h4>
+  <div class="uk-text-right">
+    <button id="next-button" class="uk-button cm-button-primary uk-margin-small-top" (click)="saveProfile()">Save profile</button>
+  </div>
+</div>
 <div class="cm-results-section">
   <header id="cm-results-section-header" class="uk-container uk-container-expand">
     <div class="cm-results-controls">
       <div class="uk-margin">
-        <p>Choose a document sample to test your matching results</p>
+        <p>Select or upload a dataset to test the mining algorithm. Each dataset contains documents from various sources according to its title.</p>
         <div class="uk-grid-collapse uk-child-width-expand" uk-grid>
           <!--<form class="uk-search uk-search-default uk-width-1-5@m">-->
             <!--<span class="uk-search-icon-flip" uk-search-icon></span>-->
             <!--<input class="uk-search-input" type="search" placeholder="Search..." style="background-color:  white;">-->
           <!--</form>-->
-          <button *ngIf="documentsLoaded>0" class="uk-button uk-button-primary uk-width-auto cm-doc-selected">{{docNameLoaded}}<span uk-icon="icon: check; ratio: 1"></span></button>
+          <button *ngIf="documentsLoaded>0" class="uk-button cm-button-primary uk-width-auto cm-doc-selected">{{docNameLoaded}}<span uk-icon="icon: check; ratio: 1"></span></button>
           <div class="uk-width-expand" uk-slider>
             <div class="uk-position-relative">
               <div class="uk-slider-container">
@@ -33,7 +38,7 @@
             <span class="uk-text-middle">or</span>
             <div uk-form-custom>
               <input #docupload type="file" (change)="fileChangeUpload($event);docupload.value=''" accept=".txt,.pdf">
-              <span class="uk-link">Upload your documents</span>
+              <span class="uk-link">Upload your documents <span class="cm-tooltip" uk-icon="icon: info" title="Upload either <b>1 single PDF</b> or <b>1 single TXT</b> file or a valid <b>JSON file with two keys (id, text)</b> JSON files are necessary when you want to test the algorithm in many publications."></span></span>
             </div>
           </div>
         </div>
@@ -42,7 +47,6 @@
     </div>
   </header>
   <div id="cm-run-test-section">
-    <p>Test your rules to the selected documents <span class="cm-tooltip" uk-icon="icon: info" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom"></span></p>
     <div class="uk-display-inline">
       <button id="run-mining-btn" class="uk-button cm-run-test-button" [disabled]="documentsLoaded<1" (click)="runMining()">Run rules test</button>
       <span *ngIf="matches_number>0" id="results-number" class="cm-coloured-text uk-margin-left uk-text-bottom">{{matches_number}} matche{{matches_number===1?'':'s'}} found</span>

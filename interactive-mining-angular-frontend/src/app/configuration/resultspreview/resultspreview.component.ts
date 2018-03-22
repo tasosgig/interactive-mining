@@ -5,6 +5,7 @@ import {Settings} from '../settings/settings';
 import {DocumentResult} from './document-result';
 import {Match} from './match';
 import {DocSamplesMetadata} from '../doc-samples-metadata';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-resultspreview',
@@ -21,7 +22,7 @@ export class ResultspreviewComponent implements OnInit {
   public matches_number = '';
   public prev_matches_number = '';
 
-  constructor(private configurationService: ConfigurationService) { }
+  constructor(private route: ActivatedRoute, private router: Router, private configurationService: ConfigurationService) { }
 
   ngOnInit() {
     this.getDocSamples();
@@ -74,7 +75,6 @@ export class ResultspreviewComponent implements OnInit {
 
   getSettingsFromLocalStorage(): Settings {
     return {
-      precision: 4,
       docname: localStorage.getItem('docname'),
       docsnumber: Number.parseInt(localStorage.getItem('docsnumber')),
       profileid: localStorage.getItem('profileid'),
@@ -85,8 +85,13 @@ export class ResultspreviewComponent implements OnInit {
       wordssplitnum: Number.parseInt(localStorage.getItem('wordssplitnum')),
       punctuation: Number.parseInt(localStorage.getItem('punctuation')),
       stopwords: Number.parseInt(localStorage.getItem('stopwords')),
-      lettercase: localStorage.getItem('lettercase')
+      lowercase: Number.parseInt(localStorage.getItem('lowercase')),
     };
+  }
+
+  saveProfile(): void {
+    this.configurationService.saveProfileParameters(this.getSettingsFromLocalStorage())
+      .subscribe(() => this.router.navigate(['../save-profile'], {relativeTo: this.route, queryParamsHandling: 'preserve'}));
   }
 
   highlightInElement(element: string, text: string): string {

@@ -1,8 +1,74 @@
 <app-stepsnvabar></app-stepsnvabar>
-<div class="uk-section uk-section-default uk-margin-medium-top uk-padding-remove-top">
-  <div class="uk-container">
-    <!--<h4>Content to match</h4>-->
-    <p class="uk-margin-small-left">Fill the table below, with your content you want to match!</p>
-  <app-contentstable></app-contentstable>
+<div class="uk-section uk-section-default" style="padding-top: 20px;">
+  <div class="uk-container uk-container-expand">
+    <div class="uk-grid-collapse uk-child-width-expand uk-text-middle" uk-grid>
+      <p class="uk-margin-small-left">Use the table or the upload form to add your concepts <span class="cm-tooltip" uk-icon="icon: info" title="Provide <b>two columns</b> of data. The first column is a keywords that must be found in a publications’ fulltext. Such <b>keyword</b> may be a concept name, the name of an initiative of a community etc.<br>The second column provide a context. The <b>context</b> may be an acknowledgement statement or other phrase that is expected to be found when the concept in the first column is acknowledged." uk-tooltip="pos: right"></span></p>
+      <div class="uk-text-right">
+        <button class="uk-button cm-button-primary" [disabled]="!isAnyContent()" (click)="saveAndContinue()">Continue</button>
+      </div>
+    </div>
+    <table id="data-table" class="uk-table uk-table-hover cm-table">
+      <thead>
+      <tr>
+        <!-- <th class="uk-table-shrink cm-table-number">#</th> -->
+        <th class="uk-width-small cm-text-muted">Keyword</th>
+        <th class="uk-table-expand cm-text-muted">Context</th>
+        <th class="uk-table-shrink" style="width: 100px;">
+          <a class="uk-icon-link" (click)="deleteAllFields()">
+            <span contenteditable="false" class="uk-icon" uk-icon="icon: trash"></span>
+            <span class="uk-text-middle">Delete All</span>
+          </a>
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let field of contentArray; let i = index" [ngClass]="{'editing':i===selectedRow}">
+        <td class="keyword" [ngClass]="{'editing':i===selectedRow && 0===selectedCollumn}">
+          <input #focusOnNew [(ngModel)]="field.keyword" class="form-control" type="text" style="width:100%" (focus)="selectRowColumn(i, 0)" (focusout)="unselectRow()"/>
+        </td>
+        <td class="context" [ngClass]="{'editing':i===selectedRow && 1===selectedCollumn}">
+        <textarea autosize [(ngModel)]="field.context" class="form-control uk-textarea" data-min-rows='3' type="text" (focus)="selectRowColumn(i, 1)" (focusout)="unselectRow()">
+        </textarea>
+        </td>
+        <td class="delete">
+          <a class="uk-icon-link uk-icon" uk-icon="icon: trash" contenteditable="false" (click)="deleteFieldValue(i)"></a>
+        </td>
+      </tr>
+      </tbody>
+      <tfoot>
+      <tr>
+        <!-- <td class="cm-table-number"></td> -->
+        <td colspan="3" class="cm-table-footer">
+          <button (click)="addRow()" [disabled]="!isAnyContent()" id="add-row-below" class="uk-button uk-button-default uk-width-1-1 uk-text-center">
+            <span class="uk-text-middle"><span uk-icon="icon: plus-circle"></span> Add row</span>
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="contentArray.length<2 && !isAnyContent()">
+        <td colspan="3" class="cm-table-footer" style="padding: 70px 80px 50px;">
+          <div appDropFileUpload (filesChange)="onFilesChange($event)" (filesInvalid)="onFileInvalid($event)" [allowedExtensions]="['tsv', 'txt']" [maxFileSize]="51200" class="uk-placeholder cm-file-drop-area cm-coloured-text">
+            <div class="uk-flex uk-flex-middle uk-grid-collapse uk-child-width-expand@s" uk-grid>
+              <div>
+                <div class="cm-coloured-text">
+                  <span uk-icon="icon: cloud-upload"></span>
+                  <span class="uk-text-middle"> Drop file with content here to fill the table!</span>
+                </div>
+                <div>
+                  <span class="cm-label">TSV</span>
+                  <span class="uk-text uk-text-small cm-coloured-text-meta">file type, maximum 50kB</span>
+                  <span class="cm-tooltip" title="If you want the tooltip to appear with a little delay, just add the delay option to the uk-tooltip attribute with your value in milliseconds." uk-tooltip="pos: bottom" uk-icon="icon: info"></span>
+                </div>
+              </div>
+              <div uk-form-custom>
+                <input type="file" name="upload" id="codes-file-input" class="inputfile" (change)="onFilesChange($event.srcElement.files[0])" />
+                <button class="uk-button uk-button-default cm-main-button" type="button" tabindex="-1">Choose file</button>
+              </div>
+            </div>
+          </div>
+          <progress id="js-progressbar" class="uk-progress" value="0" max="100" hidden></progress>
+        </td>
+      </tr>
+      </tfoot>
+    </table>
   </div>
 </div>

@@ -2,7 +2,6 @@ export interface Settings {
   docname: string;
   docsnumber: number;
   profileid: string;
-  precision: number;
   poswords: string;
   negwords: string;
   contextprev: number;
@@ -10,5 +9,5 @@ export interface Settings {
   wordssplitnum: number;
   punctuation: number;
   stopwords: number;
-  lettercase: string;
+  lowercase: number;
 }

@@ -1,4 +1,6 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
+import UIkit from 'uikit';
+import {Observable} from 'rxjs/Observable';
 
 @Component({
   selector: 'app-configuration',
@@ -20,9 +22,6 @@ export class ConfigurationComponent implements OnInit, AfterViewInit {
     if (!localStorage.getItem('profileid') || localStorage.getItem('profileid') === 'undefined') {
       localStorage.setItem('profileid', '');
     }
-    if (!localStorage.getItem('precision') || localStorage.getItem('precision') === 'undefined') {
-      localStorage.setItem('precision', '1');
-    }
     if (!localStorage.getItem('poswords') || localStorage.getItem('poswords') === 'undefined') {
       localStorage.setItem('poswords', '{}');
     }
@@ -36,7 +35,7 @@ export class ConfigurationComponent implements OnInit, AfterViewInit {
       localStorage.setItem('contextnext', '5');
     }
     if (!localStorage.getItem('wordssplitnum') || localStorage.getItem('wordssplitnum') === 'undefined') {
-      localStorage.setItem('wordssplitnum', '2');
+      localStorage.setItem('wordssplitnum', '1');
     }
     if (!localStorage.getItem('punctuation') || localStorage.getItem('punctuation') === 'undefined') {
       localStorage.setItem('punctuation', '0');
@@ -44,18 +43,28 @@ export class ConfigurationComponent implements OnInit, AfterViewInit {
     if (!localStorage.getItem('stopwords') || localStorage.getItem('stopwords') === 'undefined') {
       localStorage.setItem('stopwords', '0');
     }
-    if (!localStorage.getItem('lettercase') || localStorage.getItem('lettercase') === 'undefined') {
-      localStorage.setItem('lettercase', 'none');
+  }
+
+  promptToLeave(nextUrl: string): boolean {
+    console.log(nextUrl);
+    if (nextUrl.indexOf('upload-content') >= 0 || nextUrl.indexOf('configure-profile') >= 0 || nextUrl.indexOf('save-profile') >= 0) {
+      return true;
+    } else {
+      return UIkit.modal.confirm('<span class="uk-text-bold">' +
+        'Your changes have not been saved to your Profile!<br>Are you sure you want to leave?</span>', {escClose: true}).then(() => {
+        return true;
+      }, () => false);
     }
   }
 
   ngAfterViewInit() {
     // $('#child1').stickySidebar();
-    if(document.getElementById("enableStickyBarScript"))
-      document.getElementById("enableStickyBarScript").remove();
-    var enableStickyBarScript = document.createElement("script");
-    enableStickyBarScript.setAttribute("id", "enableStickyBarScript");
-    enableStickyBarScript.innerHTML = "$(\"#child1\").stickySidebar();\n";
+    if (document.getElementById('enableStickyBarScript')) {
+      document.getElementById('enableStickyBarScript').remove();
+    }
+    const enableStickyBarScript = document.createElement('script');
+    enableStickyBarScript.setAttribute('id', 'enableStickyBarScript');
+    enableStickyBarScript.innerHTML = '$(\"#child1\").stickySidebar();\n';
     document.body.appendChild(enableStickyBarScript);
   }
 
