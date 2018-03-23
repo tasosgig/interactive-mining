@@ -43,10 +43,15 @@ export class ConfigurationComponent implements OnInit, AfterViewInit {
     if (!localStorage.getItem('stopwords') || localStorage.getItem('stopwords') === 'undefined') {
       localStorage.setItem('stopwords', '0');
     }
+    if (!localStorage.getItem('lowercase') || localStorage.getItem('lowercase') === 'undefined') {
+      localStorage.setItem('lowercase', '0');
+    }
+    if (!localStorage.getItem('stemming') || localStorage.getItem('stemming') === 'undefined') {
+      localStorage.setItem('stemming', '0');
+    }
   }
 
   promptToLeave(nextUrl: string): boolean {
-    console.log(nextUrl);
     if (nextUrl.indexOf('upload-content') >= 0 || nextUrl.indexOf('configure-profile') >= 0 || nextUrl.indexOf('save-profile') >= 0) {
       return true;
     } else {

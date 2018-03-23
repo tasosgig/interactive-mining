@@ -1,7 +1,7 @@
 <div class="uk-grid-collapse uk-child-width-expand uk-text-middle" uk-grid>
   <h4 class="cm-margin-medium">Test area</h4>
   <div class="uk-text-right">
-    <button id="next-button" class="uk-button cm-button-primary uk-margin-small-top" (click)="saveProfile()">Save profile</button>
+    <button id="next-button" class="uk-button cm-button-primary uk-margin-small-top" (click)="saveProfile()">Continue</button>
   </div>
 </div>
 <div class="cm-results-section">
@@ -38,8 +38,9 @@
             <span class="uk-text-middle">or</span>
             <div uk-form-custom>
               <input #docupload type="file" (change)="fileChangeUpload($event);docupload.value=''" accept=".txt,.pdf">
-              <span class="uk-link">Upload your documents <span class="cm-tooltip" uk-icon="icon: info" title="Upload either <b>1 single PDF</b> or <b>1 single TXT</b> file or a valid <b>JSON file with two keys (id, text)</b> JSON files are necessary when you want to test the algorithm in many publications."></span></span>
+              <span class="uk-link">Upload your documents</span>
             </div>
+            <span class="cm-tooltip" uk-icon="icon: info" title="Upload either <b>1 single PDF</b> or <b>1 single TXT</b> file or a valid <b>JSON file with two keys (id, text)</b> JSON files are necessary when you want to test the algorithm in <b>many publications.</b>" uk-tooltip="pos: right"></span>
           </div>
         </div>
 

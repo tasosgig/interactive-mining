@@ -86,6 +86,7 @@ export class ResultspreviewComponent implements OnInit {
       punctuation: Number.parseInt(localStorage.getItem('punctuation')),
       stopwords: Number.parseInt(localStorage.getItem('stopwords')),
       lowercase: Number.parseInt(localStorage.getItem('lowercase')),
+      stemming: Number.parseInt(localStorage.getItem('stemming')),
     };
   }
 

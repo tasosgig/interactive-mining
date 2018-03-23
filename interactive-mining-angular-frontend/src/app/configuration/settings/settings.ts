@@ -10,4 +10,5 @@ export interface Settings {
   punctuation: number;
   stopwords: number;
   lowercase: number;
+  stemming: number;
 }

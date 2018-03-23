@@ -12,7 +12,6 @@ import {ActivatedRoute, Router} from '@angular/router';
 })
 export class SettingsComponent implements OnInit {
 
-  public sliderValue = 0;
   public sliderConfig: any = {
     connect: [true, false],
     tooltips: [ true ],
@@ -68,6 +67,7 @@ export class SettingsComponent implements OnInit {
       punctuation: Number.parseInt(localStorage.getItem('punctuation')),
       stopwords: Number.parseInt(localStorage.getItem('stopwords')),
       lowercase: Number.parseInt(localStorage.getItem('lowercase')),
+      stemming: Number.parseInt(localStorage.getItem('stemming')),
     };
     // show positive phrases
     this.positivePhrasesArray.length = 0;
@@ -88,15 +88,13 @@ export class SettingsComponent implements OnInit {
         const content = new Phrase();
         content.phrase = key;
         content.weight = negphrases[key];
-        this.positivePhrasesArray.push(content);
+        this.negativePhrasesArray.push(content);
       }
     }
   }
 
   onSliderChange(value: number): void {
-    value = value + 1;
     localStorage.setItem('wordssplitnum', value.toString());
-    this.settings.wordssplitnum = value;
   }
 
   advancedCheckboxChange() {
@@ -207,14 +205,6 @@ export class SettingsComponent implements OnInit {
     this.getSettingsFromLocalStorage();
   }
 
-  wordssplitnumChange(value): void {
-    if (value < 0 || value > 10) {
-      return;
-    }
-    localStorage.setItem('wordssplitnum', value);
-    this.settings.wordssplitnum = value;
-  }
-
   stopwordsCheckBoxChange(value: boolean): void {
     localStorage.setItem('stopwords', value ? '1' : '0');
     this.settings.stopwords = value ? 1 : 0;
@@ -230,6 +220,11 @@ export class SettingsComponent implements OnInit {
     this.settings.lowercase = value ? 1 : 0;
   }
 
+  stemmingCheckBoxChange(value: boolean): void {
+    localStorage.setItem('stemming', value ? '1' : '0');
+    this.settings.stemming = value ? 1 : 0;
+  }
+
   getSettingsFromLocalStorage(): Settings {
     return this.settings = {
       docname: localStorage.getItem('docname'),
@@ -243,6 +238,7 @@ export class SettingsComponent implements OnInit {
       punctuation: Number.parseInt(localStorage.getItem('punctuation')),
       stopwords: Number.parseInt(localStorage.getItem('stopwords')),
       lowercase: Number.parseInt(localStorage.getItem('lowercase')),
+      stemming: Number.parseInt(localStorage.getItem('stemming')),
     };
   }
 

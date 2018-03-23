@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 export const AppRoutes: Routes = [
-  { path: '', redirectTo: '/mining', pathMatch: 'full' }
+  { path: '', redirectTo: '/mining/manage-profiles', pathMatch: 'full' }
 ];
 
 @NgModule({

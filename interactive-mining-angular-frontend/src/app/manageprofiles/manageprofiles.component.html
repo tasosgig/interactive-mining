@@ -1,7 +1,7 @@
 <app-stepsnvabar></app-stepsnvabar>
 <div class="uk-section uk-section-default">
   <div class="uk-container uk-container-expand">
-    <h4>Your mining profiles <span class="cm-tooltip" uk-icon="icon: info" title="Each <b>mining profile</b> consists of the data and the rules used to define a <b>mining procedure</b>." uk-tooltip="pos: right"></span></h4>
+    <h4>Your mining profiles <span class="cm-tooltip" uk-icon="icon: info" title="Each <b>mining profile</b> consists of the data and the rules used to define a <b>mining procedure</b>.<br>Click the profile to <b>edit</b>." uk-tooltip="pos: right"></span></h4>
     <!--<div uk-grid>-->
       <!--<div class="uk-width-expand@m">-->
         <div class="uk-overflow-auto">
@@ -50,7 +50,7 @@
             </tr>
             </tbody>
           </table>
-          <pagination-template #p="paginationApi"
+          <pagination-template *ngIf="userSavedProfiles.length" #p="paginationApi"
                                [id]="config.id"
                                (pageChange)="config.currentPage = $event">
             <ul class="uk-pagination uk-flex-center" uk-margin>

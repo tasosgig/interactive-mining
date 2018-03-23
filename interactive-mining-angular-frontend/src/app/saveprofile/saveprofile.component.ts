@@ -10,6 +10,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 })
 export class SaveprofileComponent implements OnInit {
 
+  public profileId = '';
   public profileName = 'New profile name';
   public docnName = '';
   public docsNumber = 0;
@@ -17,9 +18,12 @@ export class SaveprofileComponent implements OnInit {
   constructor(private saveprofileService: SaveprofileService, private route: ActivatedRoute, private router: Router) { }
 
   ngOnInit() {
-    if (localStorage.getItem('profilename') && localStorage.getItem('profilename') !== 'undefined') {
-      this.profileName = localStorage.getItem('profilename');
+    if (localStorage.getItem('profileid') && localStorage.getItem('profileid') !== 'undefined') {
+      this.profileId = localStorage.getItem('profileid');
     }
+    // if (localStorage.getItem('profilename') && localStorage.getItem('profilename') !== 'undefined') {
+    //   this.profileName = localStorage.getItem('profilename');
+    // }
     if (localStorage.getItem('docname') && localStorage.getItem('docname') !== 'undefined') {
       this.docnName = localStorage.getItem('docname');
     }
@@ -28,7 +32,12 @@ export class SaveprofileComponent implements OnInit {
     }
   }
 
-  saveProfile(): void {
+  saveCurrentProfile(): void {
+    this.saveprofileService.saveProfile(this.profileName, this.profileId, this.docnName, this.docsNumber)
+      .subscribe(() => this.router.navigate(['../manage-profiles'], {relativeTo: this.route, queryParamsHandling: 'preserve'}));
+  }
+
+  saveNewProfile(): void {
     if (this.profileName === '') {
       UIkit.notification({
         message: 'You have to provide a name to your new profile',
@@ -38,7 +47,7 @@ export class SaveprofileComponent implements OnInit {
       });
       return;
     } else {
-      this.saveprofileService.saveProfile(this.profileName, localStorage.getItem('profileid'), this.docnName, this.docsNumber)
+      this.saveprofileService.saveProfile(this.profileName, '', this.docnName, this.docsNumber)
         .subscribe(() => this.router.navigate(['../manage-profiles'], {relativeTo: this.route, queryParamsHandling: 'preserve'}));
     }
   }

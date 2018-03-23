@@ -11,4 +11,5 @@ export interface ProfileData {
   punctuation: string;
   stopwords: string;
   lowercase: string;
+  stemming: string;
 }

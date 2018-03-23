@@ -70,6 +70,7 @@ export class ManageprofilesComponent implements OnInit {
         localStorage.setItem('punctuation', res.punctuation);
         localStorage.setItem('stopwords', res.stopwords);
         localStorage.setItem('lowercase', res.lowercase);
+        localStorage.setItem('stemming', res.stemming);
         this.router.navigate(['../upload-content'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
       });
   }
@@ -116,6 +117,7 @@ export class ManageprofilesComponent implements OnInit {
           localStorage.setItem('punctuation', res.punctuation);
           localStorage.setItem('stopwords', res.stopwords);
           localStorage.setItem('lowercase', res.lowercase);
+          localStorage.setItem('stemming', res.stemming);
           this.router.navigate(['../upload-content'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
         });
     }
@@ -145,6 +147,7 @@ export class ManageprofilesComponent implements OnInit {
         localStorage.setItem('punctuation', res.punctuation);
         localStorage.setItem('stopwords', res.stopwords);
         localStorage.setItem('lowercase', res.lowercase);
+        localStorage.setItem('stemming', res.stemming);
         this.router.navigate(['../upload-content'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
       });
   }
@@ -166,6 +169,7 @@ export class ManageprofilesComponent implements OnInit {
     localStorage.removeItem('punctuation');
     localStorage.removeItem('stopwords');
     localStorage.removeItem('lowercase');
+    localStorage.removeItem('stemming');
   }
 
 }

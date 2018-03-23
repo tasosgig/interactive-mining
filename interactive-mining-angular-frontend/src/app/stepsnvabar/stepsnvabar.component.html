@@ -31,7 +31,7 @@
   <div class="uk-container uk-container-large">
     <div class="uk-grid-collapse uk-child-width-expand" uk-grid>
       <div class="cm-nav2 uk-width-expand">
-        <a class="cm-nav2-home" routerLink='../manage-profiles' queryParamsHandling="preserve"><span class="uk-icon" uk-icon="icon: home"></span></a>
+        <a class="cm-nav2-home" (click)="cancelHandle(proccessStep)"><span class="uk-icon" uk-icon="icon: home"></span></a>
         <a class="cm-nav2-step" [ngClass]="{'cm-nav2-step-active':proccessStep===1, 'cm-nav2-step-disabled':proccessStep<1}" [routerLink]="proccessStep>1 ? ['../upload-content'] : []" queryParamsHandling="preserve">Add concepts</a>
         <a class="cm-nav2-step" [ngClass]="{'cm-nav2-step-active':proccessStep===2, 'cm-nav2-step-disabled':proccessStep<2}" [routerLink]="proccessStep>2 ? ['../configure-profile'] : []" queryParamsHandling="preserve">Configure matching proccess</a>
         <a class="cm-nav2-step" [ngClass]="{'cm-nav2-step-active':proccessStep===3, 'cm-nav2-step-disabled':proccessStep<3}" [routerLink]="proccessStep>3 ? ['../save-profile'] : []" queryParamsHandling="preserve">Save matching profile</a>

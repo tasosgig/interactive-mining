@@ -1202,9 +1202,10 @@ class RunMiningHandler(BaseHandler):
                 for key, value in pos_words.iteritems():
                     # MONO GIA TO EGI
                     if 'lowercase' in mining_parameters and mining_parameters['lowercase'] == "1":
-                        pos_set += r'regexpcountuniquematches("%s",%s)*%s + ' % (key.decode('utf-8').lower(),j2scontext,value)
-                    else:
-                        pos_set += r'regexpcountuniquematches("%s",%s)*%s + ' % (key,j2scontext,value)
+                        key = key.decode('utf-8').lower()
+                    if 'stemming' in mining_parameters and mining_parameters['stemming'] == "1":
+                        key = 'stem('+key+')'
+                    pos_set += r'regexpcountuniquematches("%s",%s)*%s + ' % (key,j2scontext,value)
                     # ORIGINAL
                     # pos_set += r'regexpcountuniquematches("(?:\b)%s(?:\b)",j2s(prev,middle,next))*%s + ' % (key,value)
                     data['poswords'].append(key)
@@ -1216,9 +1217,10 @@ class RunMiningHandler(BaseHandler):
                 for key, value in neg_words.iteritems():
                     # MONO GIA TO EGI
                     if 'lowercase' in mining_parameters and mining_parameters['lowercase'] == "1":
-                        neg_set += r'regexpcountuniquematches("%s",%s)*%s + ' % (key.decode('utf-8').lower(),j2scontext,value)
-                    else:
-                        neg_set += r'regexpcountuniquematches("%s",%s)*%s + ' % (key,j2scontext,value)
+                        key = key.decode('utf-8').lower()
+                    if 'stemming' in mining_parameters and mining_parameters['stemming'] == "1":
+                        key = 'stem('+key+')'
+                    neg_set += r'regexpcountuniquematches("%s",%s)*%s + ' % (key,j2scontext,value)
                     # ORIGINAL
                     # neg_set += r'regexpcountuniquematches("(?:\b)%s(?:\b)",j2s(prev,middle,next))*%s - ' % (key,value)
                     data['negwords'].append(key)
@@ -1245,7 +1247,9 @@ class RunMiningHandler(BaseHandler):
                 if 'stopwords' in mining_parameters and mining_parameters['stopwords'] == "1":
                     doc_filters = 'filterstopwords('+doc_filters+')'
                     ackn_filters = 'filterstopwords('+ackn_filters+')'
-                print "DOCCC", doc_filters
+                if 'stemming' in mining_parameters and mining_parameters['stemming'] == "1":
+                    doc_filters = 'stem('+doc_filters+')'
+                    ackn_filters = 'stem('+ackn_filters+')'
                 list(cursor.execute("drop table if exists grantstemp"+user_id, parse=False))
                 query_pre_grants = "create temp table grantstemp{0} as select stripchars(p1) as gt1, case when p2 is null then null else {1} end as gt2 from (setschema 'p1,p2' file 'users_files/p{0}.tsv' dialect:tsv)".format(user_id, ackn_filters)
                 cursor.execute(query_pre_grants)
@@ -1261,9 +1265,13 @@ class RunMiningHandler(BaseHandler):
             # string concatenation workaround because of the special characters conflicts
             if 'wordssplitnum' in mining_parameters and mining_parameters['wordssplitnum'] != '':
                 words_split = int(mining_parameters['wordssplitnum'])
+                # TODO must correct this!!!
+                words_split = words_split + 1
                 gt2 = 'gt2'
                 if 'lowercase' in mining_parameters and mining_parameters['lowercase'] == "1":
                     gt2 = 'lower('+gt2+')'
+                if 'stemming' in mining_parameters and mining_parameters['stemming'] == "1":
+                    gt2 = 'stem('+gt2+')'
                 # MONO GIA TO EGI
                 if 0 < words_split and words_split <= 20:
                     acknowledgment_split = r'textwindow2s('+gt2+',0,'+str(words_split)+r',0)'
@@ -1371,14 +1379,16 @@ class PrepareSavedProfileHandler(BaseHandler):
                 filters['contextprev'] = profile_parameters['contextprev']
             if 'contextnext' in profile_parameters and profile_parameters['contextnext'] != '':
                 filters['contextnext'] = profile_parameters['contextnext']
-            if 'lettercase' in profile_parameters and profile_parameters['lettercase'] != '':
-                filters['lettercase'] = profile_parameters['lettercase']
+            if 'lowercase' in profile_parameters and profile_parameters['lowercase'] != '':
+                filters['lowercase'] = profile_parameters['lowercase']
             if 'wordssplitnum' in profile_parameters and profile_parameters['wordssplitnum'] != '':
                 filters['wordssplitnum'] = profile_parameters['wordssplitnum']
             if 'stopwords' in profile_parameters and profile_parameters['stopwords'] != '':
                 filters['stopwords'] = profile_parameters['stopwords']
-            if 'stopwords' in profile_parameters and profile_parameters['stopwords'] != '':
+            if 'punctuation' in profile_parameters and profile_parameters['punctuation'] != '':
                 filters['punctuation'] = profile_parameters['punctuation']
+            if 'stemming' in profile_parameters and profile_parameters['stemming'] != '':
+                filters['stemming'] = profile_parameters['stemming']
             cursor.executemany("insert into filters(c1,c2) values(?,?)",
                       (
                             (key, value,) for key, value in filters.iteritems()
@@ -1452,7 +1462,7 @@ class SaveProfileToDatabaseHandler(BaseHandler):
             cursor=madis.functions.Connection(database_file_name).cursor()
             user_profiles = []
             if old_profile:
-                query = 'UPDATE database set name="{1}", datecreated="{2}", status="{3}", matches="{4}", docname="{5}", docsnumber="{6}" where id="{0}"'.format(profile_id,profile_name,datetime.date.today(),"Ready","8/8",doc_name,docs_number)
+                query = 'UPDATE database set datecreated="{2}", status="{3}", matches="{4}", docname="{5}", docsnumber="{6}" where id="{0}"'.format(profile_id,profile_name,datetime.date.today().strftime("%B %d %Y"),"Ready","8/8",doc_name,docs_number)
             else:
                 query = 'INSERT INTO database VALUES("{0}","{1}","{2}","{3}","{4}","{5}","{6}")'.format(profile_id,profile_name,datetime.date.today().strftime("%B %d %Y"),"Saved","8/8",doc_name,docs_number)
             cursor.execute(query, parse=False)

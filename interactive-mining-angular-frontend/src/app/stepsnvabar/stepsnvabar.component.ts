@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import UIkit from 'uikit';
 
 @Component({
   selector: 'app-stepsnvabar',
@@ -8,7 +9,7 @@ import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 })
 export class StepsnvabarComponent implements OnInit {
 
-  private proccessStep = 0;
+  public proccessStep = 0;
 
   constructor(private route: ActivatedRoute, private router: Router) {
     router.events.subscribe((val) => {
@@ -33,8 +34,15 @@ export class StepsnvabarComponent implements OnInit {
     }
   }
 
-  cancelHandle(): void {
-    this.router.navigate(['../manage-profiles'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
+  cancelHandle(proccessStep: number): void {
+    if (proccessStep === 3) {
+      UIkit.modal.confirm('<span class="uk-text-bold">' +
+        'Your changes have not been saved to your Profile!<br>Are you sure you want to leave?</span>', {escClose: true}).then(() => {
+        this.router.navigate(['../manage-profiles'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
+      }, () => false);
+    } else {
+      this.router.navigate(['../manage-profiles'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
+    }
   }
 
 }
