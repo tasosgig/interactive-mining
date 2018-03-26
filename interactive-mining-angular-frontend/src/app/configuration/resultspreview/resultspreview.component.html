@@ -50,8 +50,8 @@
   <div id="cm-run-test-section">
     <div class="uk-display-inline">
       <button id="run-mining-btn" class="uk-button cm-run-test-button" [disabled]="documentsLoaded<1" (click)="runMining()">Run rules test</button>
-      <span *ngIf="matches_number>0" id="results-number" class="cm-coloured-text uk-margin-left uk-text-bottom">{{matches_number}} matche{{matches_number===1?'':'s'}} found</span>
-      <span *ngIf="prev_matches_number>0" id="results-number-previous" class="cm-text-muted uk-text-bottom">, {{prev_matches_number}} matche{{prev_matches_number===1?'':'s'}} found previously</span>
+      <span *ngIf="matches_number !== ''" id="results-number" class="cm-coloured-text uk-margin-left uk-text-bottom">{{matches_number}} matche{{matches_number===1?'':'s'}} found</span>
+      <span *ngIf="prev_matches_number !== ''" id="results-number-previous" class="cm-text-muted uk-text-bottom">, {{prev_matches_number}} matche{{prev_matches_number===1?'':'s'}} found previously</span>
     </div>
   </div>
   <div id="results-section" class="cm-results-rows">

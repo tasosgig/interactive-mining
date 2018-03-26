@@ -21,9 +21,9 @@ export class SettingsComponent implements OnInit {
       max: 20
     },
     pips: {
-      mode: 'count',
+      mode: 'positions',
+      values: [0, 45, 100],
       density: 5,
-      values: 5,
       stepped: true
     }
   };

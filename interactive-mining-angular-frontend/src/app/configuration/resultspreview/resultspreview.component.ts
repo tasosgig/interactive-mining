@@ -152,7 +152,6 @@ export class ResultspreviewComponent implements OnInit {
             animation: "uk-animation-slide-top",
             bottom: ".cm-results-section"
           });
-          console.log(res.matches.length);
           this.resultsArray.length = 0;
           let matchcounter = 0;
           for (let title in res.matches) {
@@ -169,17 +168,17 @@ export class ResultspreviewComponent implements OnInit {
                 match.extranext = values.extranext;
                 let context = values.prev + ' ' + values.middle + ' ' + values.next;
                 // hightlight positive words
-                for (let posword of JSON.parse(localStorage.getItem('poswords'))) {
+                for (let posword in JSON.parse(localStorage.getItem('poswords'))) {
                   const search_regexp = new RegExp(posword, 'g');
                   context = context.replace(search_regexp, '<span class="positive">' + posword + '</span>');
                 }
                 // hightlight acknowledgment keywords
                 for (let ackn of values.acknmatch) {
-                  const search_regexp = new RegExp(ackn, 'g');
+                  const search_regexp = new RegExp(ackn.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&'), 'g');
                   context = context.replace(search_regexp, '<span class="positive">' + ackn + '</span>');
                 }
                 // hightlight negative words
-                for (let negword of JSON.parse(localStorage.getItem('negwords'))) {
+                for (let negword in JSON.parse(localStorage.getItem('negwords'))) {
                   const search_regexp = new RegExp(negword, 'g');
                   context = context.replace(search_regexp, '<span class="negative">' + negword + '</span>');
                 }
@@ -189,10 +188,10 @@ export class ResultspreviewComponent implements OnInit {
                 matchesArray.push(match);
               }
               this.resultsArray.push(resultClass);
-              this.prev_matches_number = this.matches_number;
-              this.matches_number = matchcounter + '';
             }
           }
+          this.prev_matches_number = this.matches_number;
+          this.matches_number = matchcounter + '';
         });
     }
   }

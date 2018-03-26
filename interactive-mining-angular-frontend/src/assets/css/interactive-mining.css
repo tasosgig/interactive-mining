@@ -113,7 +113,7 @@
   color: var(--cm-theme-1);
   box-shadow: 0 6px 50px rgba(0,0,0,0.08);
 }
-.cm-button-primary {
+.cm-button-primary:not([disabled]) {
   background-color: var(--cm-theme-6);
   color: var(--cm-theme-12);
 }
@@ -132,12 +132,15 @@
   background-color: var(--cm-theme-7);
   color: var(--cm-theme-12);
 }
+.cm-button-examples:hover {
+  background-color: #85c8e2;
+}
 .cm-run-test-button:not([disabled]) {
-  background-color: var(--cm-theme-1);
+  background-color: #8B9FA6;
   color: var(--cm-theme-12);
 }
 .cm-run-test-button:hover:not([disabled]) {
-  background-color: #222;
+  background-color: #667880;
   color: var(--cm-theme-12);
   box-shadow: 0 6px 50px rgba(0,0,0,0.08);
 }
@@ -893,7 +896,7 @@ html:not([dir=rtl]) .noUi-horizontal .noUi-handle {
 /* Custom Results Section
  ========================================================================== */
 .cm-results-section {
-  background-color: #f5f5f5;
+  background-color: #fafafa;
   min-height: 686px;
   position: relative;
   border: 1px dashed var(--cm-theme-4);
@@ -1008,10 +1011,11 @@ header.uk-sticky-fixed .cm-results-count-section {
   cursor: default;
   position: relative;
   padding: 0px 35px 0px 25px;
-  color: var(--cm-theme-1);
-  background-color: var(--cm-theme-12);
+  color: var(--cm-theme-1) !important;;
+  background-color: transparent !important;
   border: 2px solid var(--cm-theme-7);
   margin: -2px 0px 0px 0px;
+  border-radius: 2px;
 }
 .cm-doc-selected span {
   position: absolute;

@@ -592,10 +592,10 @@ class GetExampleProfilesHandler(BaseHandler):
         try:
             data = {}
             example_profiles = []
-            example_profiles.append({'name': 'Egi', 'contents': 25, 'documents': 104})
-            example_profiles.append({'name': 'Fbi', 'contents': 66, 'documents': 1023})
-            example_profiles.append({'name': 'NSF', 'contents': 263, 'documents': 140})
-            example_profiles.append({'name': 'Swiss', 'contents': 4, 'documents': 502})
+            example_profiles.append({'name': 'Communities', 'contents': 25, 'documents': 104})
+            example_profiles.append({'name': 'AOF', 'contents': 66, 'documents': 1023})
+            example_profiles.append({'name': 'RCUK', 'contents': 263, 'documents': 140})
+            example_profiles.append({'name': 'TARA', 'contents': 4, 'documents': 502})
             data['profiles'] = example_profiles
             self.write(json.dumps(data))
             self.finish()
@@ -899,21 +899,12 @@ class GetDocSamplesHandler(BaseHandler):
             data = {}
             doc_samples = []
             doc_samples.append({'name': 'Egi', 'documents': 104})
-            doc_samples.append({'name': 'Fbi', 'documents': 1023})
-            doc_samples.append({'name': 'NSF', 'documents': 140})
-            doc_samples.append({'name': 'Swiss', 'documents': 502})
-            doc_samples.append({'name': 'Egi', 'documents': 104})
-            doc_samples.append({'name': 'Fbi', 'documents': 1023})
-            doc_samples.append({'name': 'NSF', 'documents': 140})
-            doc_samples.append({'name': 'Swiss', 'documents': 502})
-            doc_samples.append({'name': 'Egi', 'documents': 104})
-            doc_samples.append({'name': 'Fbi', 'documents': 1023})
-            doc_samples.append({'name': 'NSF', 'documents': 140})
-            doc_samples.append({'name': 'Swiss', 'documents': 502})
-            doc_samples.append({'name': 'Egi', 'documents': 104})
-            doc_samples.append({'name': 'Fbi', 'documents': 1023})
-            doc_samples.append({'name': 'NSF', 'documents': 140})
-            doc_samples.append({'name': 'Swiss', 'documents': 502})
+            doc_samples.append({'name': 'AOF', 'documents': 1023})
+            doc_samples.append({'name': 'SNSF', 'documents': 140})
+            doc_samples.append({'name': 'ARIADNE', 'documents': 502})
+            doc_samples.append({'name': 'RCUK', 'documents': 104})
+            doc_samples.append({'name': 'TARA', 'documents': 1023})
+            doc_samples.append({'name': 'NIH', 'documents': 140})
             data['documents'] = doc_samples
             self.write(json.dumps(data))
             self.finish()
@@ -1191,7 +1182,6 @@ class RunMiningHandler(BaseHandler):
             for cnt in xrange(contextnext+2,extracontextnext+contextnext+1):
                 j2sextranext += ",next"+str(cnt)
             j2sextranext += ")"
-            print j2sextraprev, j2sprev, j2snext, j2sextranext, j2scontext
 
             # create positive and negative words weighted regex text
             pos_set = neg_set = conf = whr_conf = ''
@@ -1201,9 +1191,9 @@ class RunMiningHandler(BaseHandler):
                 pos_words = json.loads(mining_parameters['poswords'])
                 for key, value in pos_words.iteritems():
                     # MONO GIA TO EGI
-                    if 'lowercase' in mining_parameters and mining_parameters['lowercase'] == "1":
+                    if 'lowercase' in mining_parameters and mining_parameters['lowercase'] == 1:
                         key = key.decode('utf-8').lower()
-                    if 'stemming' in mining_parameters and mining_parameters['stemming'] == "1":
+                    if 'stemming' in mining_parameters and mining_parameters['stemming'] == 1:
                         key = 'stem('+key+')'
                     pos_set += r'regexpcountuniquematches("%s",%s)*%s + ' % (key,j2scontext,value)
                     # ORIGINAL
@@ -1216,9 +1206,9 @@ class RunMiningHandler(BaseHandler):
                 neg_words = json.loads(mining_parameters['negwords'])
                 for key, value in neg_words.iteritems():
                     # MONO GIA TO EGI
-                    if 'lowercase' in mining_parameters and mining_parameters['lowercase'] == "1":
+                    if 'lowercase' in mining_parameters and mining_parameters['lowercase'] == 1:
                         key = key.decode('utf-8').lower()
-                    if 'stemming' in mining_parameters and mining_parameters['stemming'] == "1":
+                    if 'stemming' in mining_parameters and mining_parameters['stemming'] == 1:
                         key = 'stem('+key+')'
                     neg_set += r'regexpcountuniquematches("%s",%s)*%s + ' % (key,j2scontext,value)
                     # ORIGINAL
@@ -1234,25 +1224,29 @@ class RunMiningHandler(BaseHandler):
             if conf != '':
                 conf += ' as conf'
                 whr_conf = 'and conf>=0'
+            print conf
 
             if numberOfDocsUploaded(user_id) != 0:
                 doc_filters = "comprspaces(regexpr('[\n|\r]',d2,' '))"
                 ackn_filters = "comprspaces(regexpr(\"\\'\", p2,''))"
-                if 'punctuation' in mining_parameters and mining_parameters['punctuation'] == "1":
+                if 'punctuation' in mining_parameters and mining_parameters['punctuation'] == 1:
                     doc_filters = 'keywords('+doc_filters+')'
                     ackn_filters = 'keywords('+ackn_filters+')'
-                if 'lowercase' in mining_parameters and mining_parameters['lowercase'] == "1":
+                if 'lowercase' in mining_parameters and mining_parameters['lowercase'] == 1:
                     doc_filters = 'lower('+doc_filters+')'
                     ackn_filters = 'lower('+ackn_filters+')'
-                if 'stopwords' in mining_parameters and mining_parameters['stopwords'] == "1":
+                if 'stopwords' in mining_parameters and mining_parameters['stopwords'] == 1:
                     doc_filters = 'filterstopwords('+doc_filters+')'
                     ackn_filters = 'filterstopwords('+ackn_filters+')'
-                if 'stemming' in mining_parameters and mining_parameters['stemming'] == "1":
+                if 'stemming' in mining_parameters and mining_parameters['stemming'] == 1:
                     doc_filters = 'stem('+doc_filters+')'
                     ackn_filters = 'stem('+ackn_filters+')'
                 list(cursor.execute("drop table if exists grantstemp"+user_id, parse=False))
                 query_pre_grants = "create temp table grantstemp{0} as select stripchars(p1) as gt1, case when p2 is null then null else {1} end as gt2 from (setschema 'p1,p2' file 'users_files/p{0}.tsv' dialect:tsv)".format(user_id, ackn_filters)
                 cursor.execute(query_pre_grants)
+                query00get = "select * from grantstemp{0}".format(user_id)
+                results00get = [r for r in cursor.execute(query00get)]
+                print results00get
                 list(cursor.execute("drop table if exists docs"+user_id, parse=False))
                 query1 = "create temp table docs{0} as select d1, {1} as d2 from (setschema 'd1,d2' select jsonpath(c1, '$.id', '$.text') from (file 'users_files/docs{0}.json'))".format(user_id, doc_filters)
                 cursor.execute(query1)
@@ -1265,12 +1259,10 @@ class RunMiningHandler(BaseHandler):
             # string concatenation workaround because of the special characters conflicts
             if 'wordssplitnum' in mining_parameters and mining_parameters['wordssplitnum'] != '':
                 words_split = int(mining_parameters['wordssplitnum'])
-                # TODO must correct this!!!
-                words_split = words_split + 1
-                gt2 = 'gt2'
-                if 'lowercase' in mining_parameters and mining_parameters['lowercase'] == "1":
+                gt2 = 'comprspaces(gt2)'
+                if 'lowercase' in mining_parameters and mining_parameters['lowercase'] == 1:
                     gt2 = 'lower('+gt2+')'
-                if 'stemming' in mining_parameters and mining_parameters['stemming'] == "1":
+                if 'stemming' in mining_parameters and mining_parameters['stemming'] == 1:
                     gt2 = 'stem('+gt2+')'
                 # MONO GIA TO EGI
                 if 0 < words_split and words_split <= 20:
@@ -1284,14 +1276,14 @@ class RunMiningHandler(BaseHandler):
                 #     acknowledgment_split = r'"dummy" as prev, regexpr("([\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|])", gt2, "\\\1") as middle, "dummy" as next'
 
                 # query0 = r"create temp table grants"+user_id+r' as select gt1 as g1, jmergeregexp(jgroup("(?<=[\s\b])"||middle||"(?=[\s\b])")) as g2 from '+r"(setschema 'gt1,prev,middle,next' select gt1, "+acknowledgment_split+r' from grantstemp'+user_id+r' where (gt1 or gt1!="") and gt2 not null) group by gt1 union all select distinct gt1 as g1, "(?!.*)" as g2 from grantstemp'+user_id+r" where (gt1 or gt1!='') and gt2 is null"
-                query0 = r"create temp table grants"+user_id+r' as select gt1 as g1, jmergeregexp(jgroup(middle)) as g2 from '+r"(setschema 'gt1,prev,middle,next' select gt1, "+acknowledgment_split+r' from grantstemp'+user_id+r' where (gt1 or gt1!="") and gt2 != "") group by gt1 union all select distinct gt1 as g1, "(?!.*)" as g2 from grantstemp'+user_id+r" where (gt1 or gt1!='') and gt2 = ''"
+                query0 = r"create temp table grants"+user_id+r' as select gt1 as g1, jmergeregexp(jgroup(middle)) as g2 from '+r"(setschema 'gt1,prev,middle,next' select gt1, "+acknowledgment_split+r' from grantstemp'+user_id+r' where (gt1 or gt1!="") and gt2 != "") group by gt1 union all select distinct gt1 as g1, "(.+)" as g2 from grantstemp'+user_id+r" where (gt1 or gt1!='') and gt2 = '' union all select distinct gt1 as g1, jmergeregexp(gt2) as g2 from grantstemp"+user_id+r" where (gt1 or gt1!='') and (gt2 or gt2!='') and regexpcountwords(' ', "+gt2+r")<"+str(words_split)+r""
                 cursor.execute(query0)
                 query0get = "select * from grants{0}".format(user_id)
                 results0get = [r for r in cursor.execute(query0get)]
                 print results0get
 
             # FOR EGI ONLY
-            query2 = r'select distinct d1, g1, extraprev, prev, middle, next, extranext, acknmatch, max(confidence) as confidence from (select d1, g1, regexpcountuniquematches(g2, '+j2scontext+r') as confidence, stripchars('+j2sextraprev+r') as extraprev, stripchars('+j2sprev+r') as prev, middle, stripchars('+j2snext+r') as next, stripchars('+j2sextranext+r') as extranext, '+j2scontext+r' as context, regexprfindall(g2, '+j2scontext+r') as acknmatch '+conf+r' from (select d1, textwindow(d2,'+str(extracontextprev+contextprev)+r','+str(extracontextnext+contextnext)+r','+str(contextmiddle)+r') from docs'+user_id+r'), (select g1, g2 from grants'+user_id+r') T where regexprmatches("(\b|\d|\W)"||T.g1||"(\b|\d|\W)",middle) '+whr_conf+r') group by d1'
+            query2 = r'select distinct d1, r1, extraprev, prev, middle, next, extranext, case when g2="(.+)" then "[ ]" else acknmatch end as acknmatch, max(confidence) as confidence from (select d1, regexpr("(?:\b|\d|\W)("||T.g1||")(?:\b|\d|\W)",middle) as r1, g1, g2, regexpcountuniquematches(g2, '+j2scontext+r') as confidence, stripchars('+j2sextraprev+r') as extraprev, stripchars('+j2sprev+r') as prev, middle, stripchars('+j2snext+r') as next, stripchars('+j2sextranext+r') as extranext, '+j2scontext+r' as context, regexprfindall(g2, '+j2scontext+r') as acknmatch '+conf+r' from (select d1, textwindow(d2,'+str(extracontextprev+contextprev)+r','+str(extracontextnext+contextnext)+r','+str(contextmiddle)+r') from docs'+user_id+r'), (select g1, g2 from grants'+user_id+r') T where r1 not null and acknmatch!="[]" '+whr_conf+r') group by d1'
             # ORIGINAL
             # query2 = "select d1, g1, context, acknmatch, max(confidence) as confidence from (select d1, g1, regexpcountuniquematches(g2, j2s(prev,middle,next)) as confidence, j2s(prev,middle,next) as context, regexprfindall(g2, j2s(prev,middle,next)) as acknmatch {0} from (select d1, textwindow2s(d2,20,{3},20) from docs{1}), (select g1, g2 from grants{1}) T where regexprmatches(T.g1,middle) {2}) group by d1".format(conf, user_id, whr_conf, contextmiddle)
 

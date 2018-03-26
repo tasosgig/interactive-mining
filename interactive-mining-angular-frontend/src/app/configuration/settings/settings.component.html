@@ -113,30 +113,6 @@
         </li>
         <li>
           <div class="uk-accordion-title">
-            <span class="uk-text-bold uk-text-uppercase">Mining area size</span>
-            <span class="uk-text-small uk-margin-small-left">before: {{settings.contextprev}}</span>
-            <span class="uk-text-small uk-margin-small-left">after: {{settings.contextnext}}</span>
-          </div>
-          <div class="uk-accordion-content">
-            <p class="uk-text-small">You may edit the length of the text area that the algorithm uses to decide if a match is a true positive.<br>This is mainly for advanced users, so you ‘ll rarely need to change these values.</p>
-            <form class="">
-              <div class="cm-match-area left">
-                <label class="uk-form-label" for="context-prev-words">Number of words before the match</label>
-                <div class="uk-form-controls">
-                  <input class="uk-input" type="number" name="context-prev-words" min="0" max="20" id="context-prev-words" placeholder="Before match, words" value="10" [value]="settings.contextprev" (change)="contextprevChange($event.target.value)"/>
-                </div>
-              </div>
-              <div class="cm-match-area right cm-margin-medium-bottom">
-                <label class="uk-form-label" for="context-next-words">Number of words after the match</label>
-                <div class="uk-form-controls">
-                  <input class="uk-input" type="number" name="context-next-words" min="0" max="20" id="context-next-words" placeholder="After match, words" value="5" [value]="settings.contextnext" (change)="contextnextChange($event.target.value)"/>
-                </div>
-              </div>
-            </form>
-          </div>
-        </li>
-        <li>
-          <div class="uk-accordion-title">
             <span class="uk-text-bold uk-text-uppercase">Text preprocessing</span>
             <!--<span *ngIf="settings.stopwords===1" class="uk-text-small uk-margin-small-left">stopwords</span>-->
             <!--<span *ngIf="settings.punctuation===1" class="uk-text-small uk-margin-small-left">punctuation</span>-->
@@ -155,6 +131,30 @@
               </div>
               <div class="uk-margin">
                 <label class="uk-form-label" for="stemming-filter"><input id="stemming-filter" class="uk-checkbox" type="checkbox" [checked]="settings.stemming===1" (change)="stemmingCheckBoxChange($event.target.checked)"> Word stemming <span class="cm-tooltip" uk-icon="icon: info" title="Stemming is a process of text normalisation, in which the <b>variant forms of a word are reduced to a common form</b>, for <b>example</b>:<br>connection, connections, connective, connected, connecting<br><b>are reduced to connect</b>." uk-tooltip="pos: right"></span></label>
+              </div>
+            </form>
+          </div>
+        </li>
+        <li>
+          <div class="uk-accordion-title">
+            <span class="uk-text-bold uk-text-uppercase">Mining area size</span>
+            <span *ngIf="settings.contextprev !== 10" class="uk-text-small uk-margin-small-left">before: {{settings.contextprev}}</span>
+            <span *ngIf="settings.contextnext !== 20" class="uk-text-small uk-margin-small-left">after: {{settings.contextnext}}</span>
+          </div>
+          <div class="uk-accordion-content">
+            <p class="uk-text-small">You may edit the length of the text area that the algorithm uses to decide if a match is a true positive.<br><span class="uk-text-danger">This is mainly for advanced users, so you ‘ll rarely need to change these values.</span></p>
+            <form class="">
+              <div class="cm-match-area left">
+                <label class="uk-form-label" for="context-prev-words">Number of words before the match</label>
+                <div class="uk-form-controls">
+                  <input class="uk-input" type="number" name="context-prev-words" min="0" max="20" id="context-prev-words" placeholder="Before match, words" value="10" [value]="settings.contextprev" (change)="contextprevChange($event.target.value)"/>
+                </div>
+              </div>
+              <div class="cm-match-area right cm-margin-medium-bottom">
+                <label class="uk-form-label" for="context-next-words">Number of words after the match</label>
+                <div class="uk-form-controls">
+                  <input class="uk-input" type="number" name="context-next-words" min="0" max="20" id="context-next-words" placeholder="After match, words" value="5" [value]="settings.contextnext" (change)="contextnextChange($event.target.value)"/>
+                </div>
               </div>
             </form>
           </div>
