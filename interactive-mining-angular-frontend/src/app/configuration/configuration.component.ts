@@ -32,7 +32,7 @@ export class ConfigurationComponent implements OnInit, AfterViewInit {
       localStorage.setItem('contextprev', '10');
     }
     if (!localStorage.getItem('contextnext') || localStorage.getItem('contextnext') === 'undefined') {
-      localStorage.setItem('contextnext', '5');
+      localStorage.setItem('contextnext', '20');
     }
     if (!localStorage.getItem('wordssplitnum') || localStorage.getItem('wordssplitnum') === 'undefined') {
       localStorage.setItem('wordssplitnum', '1');

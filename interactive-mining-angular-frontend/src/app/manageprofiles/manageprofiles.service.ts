@@ -56,7 +56,7 @@ export class ManageprofilesService {
   }
 
   loadExampleProfile(name: string): Observable<ProfileData> {
-    return this.http.get<ProfileData>(this.backendServerAddress + this.loadExampleProfileUrl + `?user=${this.userId}`)
+    return this.http.post<ProfileData>(this.backendServerAddress + this.loadExampleProfileUrl, {user: this.userId, name: name})
       .catch(this.util.handleError);
   }
 

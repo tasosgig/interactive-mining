@@ -158,8 +158,8 @@ def loadProfileDocs(user_id, profile_id):
     if os.path.isfile(unique_profile_docs_file_name):
         copyfile(unique_profile_docs_file_name, docs_file_name)
 
-def loadExampleDocs(user_id):
-    sample_file = open("static/exampleDocs.txt", 'r')
+def loadExampleDocs(docsLocation, user_id):
+    sample_file = open(docsLocation, 'r')
     # write data to physical file
     cname = "users_files/docs{0}.json".format(user_id)
     fh = open(cname, 'w')
@@ -169,7 +169,7 @@ def loadExampleDocs(user_id):
             break
         fh.write(copy_buffer)
     fh.close()
-    lines_num = sum(1 for line in open(cname))
+    return sum(1 for line in open(cname))
 
 def loadExampleProfile(user_id):
     return loadProfile("static/exampleProfile.oamp", user_id)
@@ -592,6 +592,7 @@ class GetExampleProfilesHandler(BaseHandler):
         try:
             data = {}
             example_profiles = []
+            example_profiles.append({'name': 'Clarin', 'contents': 11, 'documents': 7})
             example_profiles.append({'name': 'Communities', 'contents': 25, 'documents': 104})
             example_profiles.append({'name': 'AOF', 'contents': 66, 'documents': 1023})
             example_profiles.append({'name': 'RCUK', 'contents': 263, 'documents': 140})
@@ -643,28 +644,40 @@ class LoadExampleProfileHandler(BaseHandler):
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
-        self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        self.set_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
         self.set_header('Access-Control-Allow-Credentials', 'true')
         self.set_header('Content-Type', 'application/json')
     def options(self):
         # no body
         self.set_status(204)
         self.finish()
-    def get(self):
+    def post(self):
         try:
-            # get user id from arguments. Must have
-            if 'user' not in self.request.arguments or self.request.arguments['user'][0] == '':
+            # get user id from body. Must have
+            request_arguments = json.loads(self.request.body)
+            if 'user' not in request_arguments or request_arguments['user'] == '':
                 self.set_status(400)
                 self.write("Missing user's id parameter")
                 return
-            user_id = self.request.arguments['user'][0]
+            user_id = request_arguments['user']
+            # get data
+            if 'name' not in request_arguments or request_arguments['name'] == '':
+                self.set_status(400)
+                self.write("Missing example profiles name parameter")
+                return
+            example_name = request_arguments['name']
             # reset everything
             deleteAllUserFiles(user_id)
-            # load example data
-            loadExampleDocs(user_id)
-            data = loadExampleProfile(user_id)
-            data['docname'] = 'Example'
-            data['docsnumber'] = '26'
+            data = {}
+            if example_name == 'Clarin':
+                data = loadProfile("static/example{0}Profile.oamp".format(example_name), user_id)
+                data['docname'] = example_name
+                data['docsnumber'] = loadExampleDocs("static/example{0}Docs.json".format(example_name), user_id)
+            else:
+                # load example data
+                data = loadExampleProfile(user_id)
+                data['docname'] = 'Example'
+                data['docsnumber'] = loadExampleDocs("static/exampleDocs.txt", user_id)
             self.write(json.dumps(data))
             self.finish()
         except Exception as ints:
@@ -899,7 +912,7 @@ class GetDocSamplesHandler(BaseHandler):
             data = {}
             doc_samples = []
             doc_samples.append({'name': 'Egi', 'documents': 104})
-            doc_samples.append({'name': 'AOF', 'documents': 1023})
+            doc_samples.append({'name': 'Clarin', 'documents': 1023})
             doc_samples.append({'name': 'SNSF', 'documents': 140})
             doc_samples.append({'name': 'ARIADNE', 'documents': 502})
             doc_samples.append({'name': 'RCUK', 'documents': 104})
@@ -1029,6 +1042,8 @@ class ChooseDocSampleHandler(BaseHandler):
             sample_file_name = ""
             if doc_sample == "Egi":
                 sample_file_name = "static/egi_sample.tsv"
+            elif doc_sample == "Clarin":
+                sample_file_name = "static/clarin_docs.json"
             elif doc_sample == "Rcuk":
                 sample_file_name = "static/rcuk_sample.tsv"
             elif doc_sample == "Arxiv":
@@ -1228,21 +1243,26 @@ class RunMiningHandler(BaseHandler):
 
             if numberOfDocsUploaded(user_id) != 0:
                 doc_filters = "comprspaces(regexpr('[\n|\r]',d2,' '))"
+                grant_filters = "stripchars(comprspaces(regexpr(\"\\'\", p1,'')))"
                 ackn_filters = "comprspaces(regexpr(\"\\'\", p2,''))"
                 if 'punctuation' in mining_parameters and mining_parameters['punctuation'] == 1:
                     doc_filters = 'keywords('+doc_filters+')'
+                    grant_filters = 'keywords('+grant_filters+')'
                     ackn_filters = 'keywords('+ackn_filters+')'
                 if 'lowercase' in mining_parameters and mining_parameters['lowercase'] == 1:
                     doc_filters = 'lower('+doc_filters+')'
+                    grant_filters = 'lower('+grant_filters+')'
                     ackn_filters = 'lower('+ackn_filters+')'
                 if 'stopwords' in mining_parameters and mining_parameters['stopwords'] == 1:
                     doc_filters = 'filterstopwords('+doc_filters+')'
+                    grant_filters = 'filterstopwords('+grant_filters+')'
                     ackn_filters = 'filterstopwords('+ackn_filters+')'
                 if 'stemming' in mining_parameters and mining_parameters['stemming'] == 1:
                     doc_filters = 'stem('+doc_filters+')'
+                    grant_filters = 'stem('+grant_filters+')'
                     ackn_filters = 'stem('+ackn_filters+')'
                 list(cursor.execute("drop table if exists grantstemp"+user_id, parse=False))
-                query_pre_grants = "create temp table grantstemp{0} as select stripchars(p1) as gt1, case when p2 is null then null else {1} end as gt2 from (setschema 'p1,p2' file 'users_files/p{0}.tsv' dialect:tsv)".format(user_id, ackn_filters)
+                query_pre_grants = "create temp table grantstemp{0} as select {1} as gt1, case when p2 is null then null else {2} end as gt2 from (setschema 'p1,p2' file 'users_files/p{0}.tsv' dialect:tsv)".format(user_id, grant_filters, ackn_filters)
                 cursor.execute(query_pre_grants)
                 query00get = "select * from grantstemp{0}".format(user_id)
                 results00get = [r for r in cursor.execute(query00get)]

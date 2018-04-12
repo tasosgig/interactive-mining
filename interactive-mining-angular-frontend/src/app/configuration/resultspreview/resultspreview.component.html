@@ -40,7 +40,7 @@
               <input #docupload type="file" (change)="fileChangeUpload($event);docupload.value=''" accept=".txt,.pdf">
               <span class="uk-link">Upload your documents</span>
             </div>
-            <span class="cm-tooltip" uk-icon="icon: info" title="Upload either <b>1 single PDF</b> or <b>1 single TXT</b> file or a valid <b>JSON file with two keys (id, text)</b> JSON files are necessary when you want to test the algorithm in <b>many publications.</b>" uk-tooltip="pos: right"></span>
+              <span class="cm-tooltip" uk-icon="icon: info" title="<span class='cm-label cm-label-docs'>PDF</span><span class='cm-label cm-label-docs'>TXT</span><span class='cm-label cm-label-docs'>JSON</span><span class='uk-text uk-text-small cm-coloured-text-meta'>file type<br>maximum 1MB</span><br><br>Upload either 1 <b>single PDF</b> or 1 <b>single TXT</b> file or a valid <b>JSON file with two keys (id, text)</b><br>JSON files are necessary when you want to test the algorithm in <b>many publications.</b>" uk-tooltip="pos: right"></span>
           </div>
         </div>
 

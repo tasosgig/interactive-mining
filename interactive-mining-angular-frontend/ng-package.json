@@ -4,7 +4,8 @@
   "ngPackage": {
     "lib": {
       "entryFile": "public_api.ts",
-      "comments" : "none"
+      "comments" : "none",
+      "externals": {"ng2-nouislider": "ng2-nouislider"}
     },
     "dest": "../../dist/interactive-mining-lib"
   }
