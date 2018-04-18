@@ -170,7 +170,9 @@ export class ResultspreviewComponent implements OnInit {
                 // hightlight positive words
                 for (let posword in JSON.parse(localStorage.getItem('poswords'))) {
                   const search_regexp = new RegExp(posword, 'g');
-                  context = context.replace(search_regexp, '<span class="positive">' + posword + '</span>');
+                  context = context.replace(search_regexp, function (x) {
+                    return '<span class="positive">' + x + '</span>';
+                  });
                 }
                 // hightlight acknowledgment keywords
                 for (let ackn of values.acknmatch) {
@@ -180,7 +182,9 @@ export class ResultspreviewComponent implements OnInit {
                 // hightlight negative words
                 for (let negword in JSON.parse(localStorage.getItem('negwords'))) {
                   const search_regexp = new RegExp(negword, 'g');
-                  context = context.replace(search_regexp, '<span class="negative">' + negword + '</span>');
+                  context = context.replace(search_regexp, function (x) {
+                    return '<span class="negative">' + x + '</span>';
+                  });
                 }
                 context = this.highlightInElement(context, values.match);
                 match.context = context;

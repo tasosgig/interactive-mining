@@ -29,10 +29,10 @@ export class ConfigurationComponent implements OnInit, AfterViewInit {
       localStorage.setItem('negwords', '{}');
     }
     if (!localStorage.getItem('contextprev') || localStorage.getItem('contextprev') === 'undefined') {
-      localStorage.setItem('contextprev', '10');
+      localStorage.setItem('contextprev', '20');
     }
     if (!localStorage.getItem('contextnext') || localStorage.getItem('contextnext') === 'undefined') {
-      localStorage.setItem('contextnext', '20');
+      localStorage.setItem('contextnext', '10');
     }
     if (!localStorage.getItem('wordssplitnum') || localStorage.getItem('wordssplitnum') === 'undefined') {
       localStorage.setItem('wordssplitnum', '1');

@@ -138,8 +138,8 @@
         <li>
           <div class="uk-accordion-title">
             <span class="uk-text-bold uk-text-uppercase">Mining area size</span>
-            <span *ngIf="settings.contextprev !== 10" class="uk-text-small uk-margin-small-left">before: {{settings.contextprev}}</span>
-            <span *ngIf="settings.contextnext !== 20" class="uk-text-small uk-margin-small-left">after: {{settings.contextnext}}</span>
+            <span *ngIf="settings.contextprev !== 20" class="uk-text-small uk-margin-small-left">before: {{settings.contextprev}}</span>
+            <span *ngIf="settings.contextnext !== 10" class="uk-text-small uk-margin-small-left">after: {{settings.contextnext}}</span>
           </div>
           <div class="uk-accordion-content">
             <p class="uk-text-small">You may edit the length of the text area that the algorithm uses to decide if a match is a true positive.<br><span class="uk-text-danger">For advanced users only</span></p>
@@ -147,13 +147,13 @@
               <div class="cm-match-area left">
                 <label class="uk-form-label" for="context-prev-words">Number of words before the match</label>
                 <div class="uk-form-controls">
-                  <input class="uk-input" type="number" name="context-prev-words" min="0" max="20" id="context-prev-words" placeholder="Before match, words" value="10" [value]="settings.contextprev" (change)="contextprevChange($event.target.value)"/>
+                  <input class="uk-input" type="number" name="context-prev-words" min="0" max="50" id="context-prev-words" placeholder="Before match, words" value="20" [value]="settings.contextprev" (change)="contextprevChange($event.target.value)"/>
                 </div>
               </div>
               <div class="cm-match-area right cm-margin-medium-bottom">
                 <label class="uk-form-label" for="context-next-words">Number of words after the match</label>
                 <div class="uk-form-controls">
-                  <input class="uk-input" type="number" name="context-next-words" min="0" max="20" id="context-next-words" placeholder="After match, words" value="5" [value]="settings.contextnext" (change)="contextnextChange($event.target.value)"/>
+                  <input class="uk-input" type="number" name="context-next-words" min="0" max="50" id="context-next-words" placeholder="After match, words" value="10" [value]="settings.contextnext" (change)="contextnextChange($event.target.value)"/>
                 </div>
               </div>
             </form>

@@ -592,7 +592,7 @@ class GetExampleProfilesHandler(BaseHandler):
         try:
             data = {}
             example_profiles = []
-            example_profiles.append({'name': 'Clarin', 'contents': 11, 'documents': 7})
+            example_profiles.append({'name': 'Clarin', 'contents': 4, 'documents': 9})
             example_profiles.append({'name': 'Communities', 'contents': 25, 'documents': 104})
             example_profiles.append({'name': 'AOF', 'contents': 66, 'documents': 1023})
             example_profiles.append({'name': 'RCUK', 'contents': 263, 'documents': 140})
@@ -912,8 +912,8 @@ class GetDocSamplesHandler(BaseHandler):
             data = {}
             doc_samples = []
             doc_samples.append({'name': 'Egi', 'documents': 104})
-            doc_samples.append({'name': 'Clarin', 'documents': 1023})
-            doc_samples.append({'name': 'SNSF', 'documents': 140})
+            doc_samples.append({'name': 'Clarin', 'documents': 7})
+            doc_samples.append({'name': 'Wellcome Trust', 'documents': 250})
             doc_samples.append({'name': 'ARIADNE', 'documents': 502})
             doc_samples.append({'name': 'RCUK', 'documents': 104})
             doc_samples.append({'name': 'TARA', 'documents': 1023})
@@ -1043,11 +1043,9 @@ class ChooseDocSampleHandler(BaseHandler):
             if doc_sample == "Egi":
                 sample_file_name = "static/egi_sample.tsv"
             elif doc_sample == "Clarin":
-                sample_file_name = "static/clarin_docs.json"
-            elif doc_sample == "Rcuk":
-                sample_file_name = "static/rcuk_sample.tsv"
-            elif doc_sample == "Arxiv":
-                sample_file_name = "static/arxiv_sample.tsv"
+                sample_file_name = "static/exampleClarinDocs.json"
+            elif doc_sample == "Wellcome Trust":
+                sample_file_name = "static/exampleWTDocs.json"
             else:
                 self.set_status(400)
                 self.write("No Doc sample with this name")
@@ -1158,13 +1156,13 @@ class RunMiningHandler(BaseHandler):
             contextmiddle = [r for r in cursor.execute(querygrantsize)][0][0]+1
             if 'contextprev' in mining_parameters and mining_parameters['contextprev'] != '':
                 contextprev = int(mining_parameters['contextprev'])
-                if contextprev < 0 or contextprev > 20:
+                if contextprev < 0 or contextprev > 50:
                     self.set_status(400)
                     self.write("Context size must be in its limits...")
                     return
             if 'contextnext' in mining_parameters and mining_parameters['contextnext'] != '':
                 contextnext = int(mining_parameters['contextnext'])
-                if contextnext < 0 or contextnext > 20:
+                if contextnext < 0 or contextnext > 50:
                     self.set_status(400)
                     self.write("Context size must be in its limits...")
                     return
@@ -1231,11 +1229,11 @@ class RunMiningHandler(BaseHandler):
                     data['negwords'].append(key)
                 neg_set += "0"
             if pos_set != '' and neg_set != '':
-                conf = ", ({0} - {1})".format(pos_set, neg_set)
+                conf = ", ({0} - ({1}))".format(pos_set, neg_set)
             elif pos_set != '':
                 conf = ", {0}".format(pos_set)
             elif neg_set != '':
-                conf = ", -{0}".format(neg_set)
+                conf = ", -({0})".format(neg_set)
             if conf != '':
                 conf += ' as conf'
                 whr_conf = 'and conf>=0'
