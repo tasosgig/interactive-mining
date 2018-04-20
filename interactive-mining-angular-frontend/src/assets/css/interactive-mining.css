@@ -955,7 +955,7 @@ header.uk-sticky-fixed .cm-results-count-section {
 .cm-document-result .highlight {
   font-weight: bold;
   background-color: #bedfff;
-  padding: 2px 8px;
+  padding: 1px 3px;
   color: #222;
 }
 .cm-document-result .negative {

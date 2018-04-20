@@ -382,6 +382,8 @@ class InitialClientHandshakeHandler(BaseHandler):
                 user_id = self.request.arguments['user'][0]
                 database_file_name = "users_files/OAMiningProfilesDatabase_{0}.db".format(user_id)
                 if (not os.path.isfile(database_file_name)):
+                    if not os.path.exists("users_files"):
+                        os.makedirs(directory)
                     # create a database where the user stores his profiles info
                     import sys
                     sys.path.append(msettings.MADIS_PATH)
