@@ -5,6 +5,7 @@ import {Util} from '../util';
 import {Observable} from 'rxjs/Observable';
 import {ProfileMetadata} from './profile-metadata';
 import {ExampleProfilesMetadata} from './example-profiles-metadata';
+import {UsersMetadata} from './users-metadata';
 
 @Injectable()
 export class ManageprofilesService {
@@ -13,8 +14,11 @@ export class ManageprofilesService {
 
   private userId = '';
   private backendServerAddress = '';
+  public isCommunityManager = 'false';
 
   private initServerHandshake = '/initialhandshake';
+  private getusersProfilesUrl = '/getusersprofiles';
+  private updateProfileStatusUrl = '/updateprofilestatus';
   private getSavedProfilesUrl = '/getuserprofiles';
   private downloadProfileUrl = '/downloadprofile';
   private DeleteuserProfileUrl = '/deleteuserprofile';
@@ -27,10 +31,34 @@ export class ManageprofilesService {
   constructor(private http: HttpClient) {
     this.userId = this.util.getUserId();
     this.backendServerAddress = this.util.getBackendServerAddress();
+    this.isCommunityManager = this.util.getIsCommunityManager();
   }
 
-  initialServerHandshake(): Observable<any> {
-    return this.http.get(this.backendServerAddress + this.initServerHandshake + `?user=${this.userId}`)
+  initialServerHandshake(communityId: string): Observable<any> {
+    return this.http.get(this.backendServerAddress + this.initServerHandshake + `?user=${this.userId}&communityId=${communityId}`)
+      .catch(this.util.handleError);
+  }
+
+
+  getUsersProfiles(): Observable<UsersMetadata[]> {
+    return this.http.get(this.backendServerAddress + this.getusersProfilesUrl + `?isinadministrators=${this.isCommunityManager}`)
+      .map(data => data['profiles'])
+      .catch(this.util.handleError);
+  }
+
+  updateProfileStatus(userId: string, profileId: string, status: string): Observable<any> {
+    return this.http.post(this.backendServerAddress + this.updateProfileStatusUrl, {isinadministrators: this.isCommunityManager, user: userId, id: profileId, status: status})
+      .catch(this.util.handleError);
+  }
+
+  downloadUserProfileAdmin(userId: string, profileId: string): Observable<any> {
+    return this.http.post(this.backendServerAddress + this.downloadProfileUrl,
+      {user: userId, id: profileId}, {responseType: 'blob'})
+      .catch(this.util.handleError);
+  }
+
+  loadUserProfileAdmin(userId: string, profileId: string): Observable<ProfileData> {
+    return this.http.post<ProfileData>(this.backendServerAddress + this.loadSavedProfileUrl, {user: userId, id: profileId})
       .catch(this.util.handleError);
   }
 

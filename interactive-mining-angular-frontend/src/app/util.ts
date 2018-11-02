@@ -1,9 +1,9 @@
-import {Observable} from 'rxjs/Observable';
 import UIkit from 'uikit';
 import {HttpErrorResponse} from '@angular/common/http';
 import { saveAs } from 'file-saver/FileSaver';
 import { Response } from '@angular/http';
 import {ErrorObservable} from 'rxjs/observable/ErrorObservable';
+import {Observable} from 'rxjs';
 
 export class Util {
 
@@ -29,6 +29,10 @@ export class Util {
 
   public getBackendServerAddress(): string {
     return localStorage.getItem('mining_backend_address');
+  }
+
+  public getIsCommunityManager(): string {
+    return localStorage.getItem('isCommunityManager');
   }
 }
 

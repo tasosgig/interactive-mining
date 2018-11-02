@@ -45,6 +45,8 @@ class Application(tornado.web.Application):
         handlers = [
             (r"/version", VersionHandler),
             (r"/initialhandshake", InitialClientHandshakeHandler),
+            (r"/getusersprofiles", GetUsersProfilesHandler),
+            (r"/updateprofilestatus", UpdateProfileStatusHandler),
             (r"/getuserprofiles", GetUserProfilesHandler),
             (r"/loaduserprofile", LoadUserProfileHandler),
             (r"/deleteuserprofile", DeleteUserProfileHandler),
@@ -381,24 +383,138 @@ class InitialClientHandshakeHandler(BaseHandler):
             if 'user' in self.request.arguments and self.request.arguments['user'][0] != '':
                 user_id = self.request.arguments['user'][0]
                 database_file_name = "users_files/OAMiningProfilesDatabase_{0}.db".format(user_id)
+                if 'communityId' not in self.request.arguments or self.request.arguments['communityId'][0] == '':
+                    self.set_status(400)
+                    self.write("Missing arguement community id.")
+                    return
+                community_id = self.request.arguments['communityId'][0]
+                import sys
+                sys.path.append(msettings.MADIS_PATH)
+                import madis
                 if (not os.path.isfile(database_file_name)):
                     if not os.path.exists("users_files"):
-                        os.makedirs(directory)
+                        os.makedirs("users_files")
                     # create a database where the user stores his profiles info
-                    import sys
-                    sys.path.append(msettings.MADIS_PATH)
-                    import madis
                     # get the database cursor
                     cursor=madis.functions.Connection(database_file_name).cursor()
                     # Create database table
+                    cursor.execute("drop table if exists community", parse=False)
+                    cursor.execute("create table community(id)", parse=False)
+                    cursor.execute('INSERT INTO community VALUES("{0}")'.format(community_id), parse=False)
                     cursor.execute("drop table if exists database", parse=False)
                     cursor.execute("create table database(id,name,datecreated,status,matches,docname,docsnumber)", parse=False)
+                    cursor.close()
+                else:
+                    cursor=madis.functions.Connection(database_file_name).cursor()
+                    cursor.execute("drop table if exists community", parse=False)
+                    cursor.execute("create table community(id)", parse=False)
+                    cursor.execute('INSERT INTO community VALUES("{0}")'.format(community_id), parse=False)
                     cursor.close()
             else:
                 self.set_status(400)
                 self.write("Missing cookie containing user's id...")
                 return
             self.write({})
+            self.finish()
+        except Exception as ints:
+            self.set_status(400)
+            self.write("A server error occurred, please contact administrator!")
+            self.finish()
+            print ints
+            return
+
+
+class GetUsersProfilesHandler(BaseHandler):
+    passwordless=True
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+        self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        self.set_header('Access-Control-Allow-Credentials', 'true')
+        self.set_header('Content-Type', 'application/json')
+    def options(self):
+        # no body
+        self.set_status(204)
+        self.finish()
+    def get(self):
+        try:
+            # Check if the user has the admin parameter
+            if 'isinadministrators' not in self.request.arguments or self.request.arguments['isinadministrators'][0] != 'true':
+                self.set_status(400)
+                self.write("Must be an admin")
+                return
+            # list users
+            users = [re.search('OAMiningProfilesDatabase_([w0-9]+).+', f).group(1) for f in os.listdir('./users_files') if re.match(r'OAMiningProfilesDatabase_[w0-9]+\.db', f)]
+            # for every user, read its database to find his profiles
+            import sys
+            sys.path.append(msettings.MADIS_PATH)
+            import madis
+            # data to be sent
+            data = {}
+            users_profiles = []
+            for user in users:
+                database_file_name = "users_files/OAMiningProfilesDatabase_{0}.db".format(user)
+                if not os.path.isfile(database_file_name):
+                    self.set_status(400)
+                    self.write("Missing user\'s database")
+                    return
+                # get the database cursor
+                cursor=madis.functions.Connection(database_file_name).cursor()
+                try:
+                    # get community id
+                    community_id = [r for r in cursor.execute("SELECT id FROM community")][0]
+                except Exception as ints:
+                    print ints
+                    community_id = 'Unkown '+user
+                for r in cursor.execute("SELECT id,name,datecreated,status,matches,docname FROM database order by rowid desc"):
+                    users_profiles.append({"user":community_id,"userId":user,"profileId":r[0], "profile": r[1], "datecreated": r[2], "status": r[3], "matches": r[4], "docname": r[5]})
+            data['profiles'] = users_profiles
+            self.write(json.dumps(data))
+            self.finish()
+        except Exception as ints:
+            self.set_status(400)
+            self.write("A server error occurred, please contact administrator!")
+            self.finish()
+            print ints
+            return
+
+
+class UpdateProfileStatusHandler(BaseHandler):
+    passwordless=True
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+        self.set_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        self.set_header('Access-Control-Allow-Credentials', 'true')
+        self.set_header('Content-Type', 'application/json')
+    def options(self):
+        # no body
+        self.set_status(204)
+        self.finish()
+    def post(self):
+        try:
+            # get user id from body. Must have
+            request_arguments = json.loads(self.request.body)
+            if 'isinadministrators' not in request_arguments or request_arguments['isinadministrators'] != 'true':
+                self.set_status(400)
+                self.write("Must be an admin")
+                return
+            import sys
+            sys.path.append(msettings.MADIS_PATH)
+            import madis
+            user = request_arguments['user']
+            profile_id = request_arguments['id']
+            database_file_name = "users_files/OAMiningProfilesDatabase_{0}.db".format(user)
+            if not os.path.isfile(database_file_name):
+                self.set_status(400)
+                self.write("Missing user\'s database")
+                return
+            cursor=madis.functions.Connection(database_file_name).cursor()
+            # Write new Profile status to users database
+            status = request_arguments['status']
+            cursor.execute('UPDATE database set status="{1}" where id="{0}"'.format(profile_id,status), parse=False)
+            cursor.close()
+            self.write(json.dumps({}))
             self.finish()
         except Exception as ints:
             self.set_status(400)
@@ -445,7 +561,7 @@ class GetUserProfilesHandler(BaseHandler):
             user_profiles = []
             for r in cursor.execute("SELECT id,name,datecreated,status,matches,docname FROM database order by rowid desc"):
                 user_profiles.append({"id":r[0], "name": r[1], "datecreated": r[2], "status": r[3], "matches": r[4], "docname": r[5]})
-                data['profiles'] = user_profiles
+            data['profiles'] = user_profiles
             cursor.close()
             self.write(json.dumps(data))
             self.finish()

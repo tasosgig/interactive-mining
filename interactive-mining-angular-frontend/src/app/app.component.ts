@@ -8,7 +8,8 @@ import { Component, OnInit } from '@angular/core';
 export class AppComponent implements OnInit {
 
   private _userid = 'user5649231';
-  private _backendserveraddress = 'http://localhost:8080';
+  private _backendserveraddress = 'https://beta.services.openaire.eu/interactive-mining';
+  private _isCommunityManager = 'true';
 
   title = 'app';
 
@@ -17,5 +18,7 @@ export class AppComponent implements OnInit {
     console.log(localStorage.getItem('user_id'), this._userid);
     localStorage.setItem('mining_backend_address', this._backendserveraddress);
     console.log(localStorage.getItem('mining_backend_address'), this._backendserveraddress);
+    localStorage.setItem('isCommunityManager', this._isCommunityManager);
+    console.log(localStorage.getItem('isCommunityManager'), this._isCommunityManager);
   }
 }

@@ -5,6 +5,7 @@ import UIkit from 'uikit';
 import {PaginationInstance} from 'ngx-pagination';
 import {ProfileMetadata} from './profile-metadata';
 import {ExampleProfilesMetadata} from './example-profiles-metadata';
+import {UsersMetadata} from './users-metadata';
 import {saveFile} from '../util';
 
 @Component({
@@ -15,6 +16,14 @@ import {saveFile} from '../util';
 export class ManageprofilesComponent implements OnInit {
 
   // TODO profile table sorting: https://ciphertrick.com/2017/08/01/search-sort-pagination-in-angular/
+
+  public allUsersProfiles: Array<UsersMetadata> = [];
+  public statusValues = [
+    'Saved',
+    'Evaluating',
+    'On Beta'
+  ];
+  public isCommunityManager = false;
 
   public userSavedProfiles: Array<ProfileMetadata> = [];
   public exampleProfiles: Array<ExampleProfilesMetadata> = [];
@@ -29,15 +38,68 @@ export class ManageprofilesComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.initialServerhandshake();
+    this.route.queryParams
+      .subscribe(
+      params => {
+        console.log('queryParams', params['communityId']);
+        this.initialServerhandshake(params['communityId']);
+      });
+    this.isCommunityManager = this.manageProfilesService.isCommunityManager === 'true';
   }
 
-  initialServerhandshake(): void {
-    this.manageProfilesService.initialServerHandshake()
+  initialServerhandshake(communityId: string): void {
+    this.manageProfilesService.initialServerHandshake(communityId)
       .subscribe(() => {
+        if (this.isCommunityManager) {
+          this.getAllUsersProfiles();
+        }
         this.getSavedProfiles();
         this.getExampleProfiles();
       });
+  }
+
+  getAllUsersProfiles(): void {
+    this.manageProfilesService.getUsersProfiles()
+      .subscribe(res => {
+        if (res) {
+          this.allUsersProfiles = res;
+        }
+      });
+  }
+
+  loadUserProfileAdmin(userId: string, profileId: string, name: string): void {
+    this.manageProfilesService.loadUserProfileAdmin(userId, profileId)
+      .subscribe(res => {
+        // clear localstorage values
+        this.clearLocalStorage();
+        // store to client all profile data
+        localStorage.setItem('docname', res.docname);
+        localStorage.setItem('docsnumber', res.docsnumber);
+        localStorage.setItem('concepts', res.concepts);
+        localStorage.setItem('poswords', JSON.stringify(res.poswords));
+        localStorage.setItem('negwords', JSON.stringify(res.negwords));
+        localStorage.setItem('contextprev', res.contextprev);
+        localStorage.setItem('contextmiddle', res.contextmiddle);
+        localStorage.setItem('contextnext', res.contextnext);
+        localStorage.setItem('wordssplitnum', res.wordssplitnum);
+        localStorage.setItem('punctuation', res.punctuation);
+        localStorage.setItem('stopwords', res.stopwords);
+        localStorage.setItem('lowercase', res.lowercase);
+        localStorage.setItem('stemming', res.stemming);
+        this.router.navigate(['../upload-content'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
+      });
+  }
+
+  downloadUserProfileAdmin(userId: string, profileId: string, profileName: string): void {
+    this.manageProfilesService.downloadUserProfileAdmin(userId, profileId)
+      .subscribe(res => {
+        saveFile(res, profileName.replace(/ /g, '_') + '.oamp');
+      });
+  }
+
+  onStatusChange(userId: string, profileId: string, status: string): void {
+    this.manageProfilesService.updateProfileStatus(userId, profileId, status)
+      .subscribe();
   }
 
   getSavedProfiles(): void {

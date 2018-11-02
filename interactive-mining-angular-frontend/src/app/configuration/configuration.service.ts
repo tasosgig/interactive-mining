@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
-import {Util} from '../util';
 import {Observable} from 'rxjs/Observable';
 import {Settings} from './settings/settings';
 import {DocSamplesMetadata} from './doc-samples-metadata';
+import {Util} from '../util';
 
 @Injectable()
 export class ConfigurationService {
