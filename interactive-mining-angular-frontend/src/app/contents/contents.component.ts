@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChildren} from '@angular/core';
 import UIkit from 'uikit';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {Content} from './content';
 import {ContentsService} from './contents.service';
 
@@ -21,6 +21,12 @@ export class ContentComponent implements OnInit {
 
   ngOnInit() {
     this.getContent();
+    this.router.events.subscribe((evt) => {
+      if (!(evt instanceof NavigationEnd)) {
+        return;
+      }
+      window.scrollTo(0, 0);
+    });
   }
 
   getContent(): void {

@@ -57,10 +57,10 @@
   <div id="results-section" class="cm-results-rows">
     <ul id="docs-results" uk-accordion="multiple: true">
       <li *ngFor="let result of resultsArray;" class="uk-card uk-card-default uk-card-small uk-card-body uk-open">
-        <h3 class="uk-accordion-title">{{result.docTitle}}</h3>
+        <h3 class="uk-accordion-title"><span class="uk-text-meta">document:</span> {{result.docTitle}}</h3>
         <div class="uk-accordion-content" aria-hidden="false">
           <div *ngFor="let match of result.matches">
-            <div class="match">Match {{match.matchcounter}}: {{match.match}}</div>
+            <div class="match"><span class="uk-text-meta">match #{{match.matchcounter}}:</span> {{match.match}}</div>
             <p class="cm-document-result">
               {{match.extraprev}} <span class="textwindow" [innerHTML]="match.context"></span> {{match.extranext}}
             </p>

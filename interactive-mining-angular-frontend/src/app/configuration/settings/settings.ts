@@ -11,4 +11,5 @@ export interface Settings {
   stopwords: number;
   lowercase: number;
   stemming: number;
+  documentarea: string;
 }

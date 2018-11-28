@@ -49,6 +49,9 @@ export class ConfigurationComponent implements OnInit, AfterViewInit {
     if (!localStorage.getItem('stemming') || localStorage.getItem('stemming') === 'undefined') {
       localStorage.setItem('stemming', '0');
     }
+    if (!localStorage.getItem('documentarea') || localStorage.getItem('documentarea') === 'undefined') {
+      localStorage.setItem('documentarea', 'full');
+    }
   }
 
   promptToLeave(nextUrl: string): boolean {

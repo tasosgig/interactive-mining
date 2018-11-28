@@ -68,6 +68,7 @@ export class SettingsComponent implements OnInit {
       stopwords: Number.parseInt(localStorage.getItem('stopwords')),
       lowercase: Number.parseInt(localStorage.getItem('lowercase')),
       stemming: Number.parseInt(localStorage.getItem('stemming')),
+      documentarea: localStorage.getItem('documentarea'),
     };
     // show positive phrases
     this.positivePhrasesArray.length = 0;
@@ -225,6 +226,11 @@ export class SettingsComponent implements OnInit {
     this.settings.stemming = value ? 1 : 0;
   }
 
+  documentAreaChange(value: string): void {
+    localStorage.setItem('documentarea', value);
+    this.settings.documentarea = value;
+  }
+
   getSettingsFromLocalStorage(): Settings {
     return this.settings = {
       docname: localStorage.getItem('docname'),
@@ -239,6 +245,7 @@ export class SettingsComponent implements OnInit {
       stopwords: Number.parseInt(localStorage.getItem('stopwords')),
       lowercase: Number.parseInt(localStorage.getItem('lowercase')),
       stemming: Number.parseInt(localStorage.getItem('stemming')),
+      documentarea: localStorage.getItem('documentarea')
     };
   }
 

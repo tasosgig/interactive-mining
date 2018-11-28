@@ -2,7 +2,7 @@
 <div class="uk-section uk-section-default" style="padding-top: 20px;">
   <div class="uk-container uk-container-expand">
     <div class="uk-grid-collapse uk-child-width-expand uk-text-middle" uk-grid>
-      <p class="uk-margin-small-left">Use the table or the upload form to add your concepts <span class="cm-tooltip" uk-icon="icon: info" title="Provide <b>two columns</b> of data. The first column is a list of keywords that must be found in a publications’ fulltext. Such <b>keyword</b> may be a concept name, the name of an initiative of a community etc.<br>The second column provide a context. The <b>context</b> may be an acknowledgement statement or other phrase that is expected to be found when the concept in the first column is acknowledged." uk-tooltip="pos: right"></span></p>
+      <p class="uk-margin-small-left">Use the table or the upload form to add your concepts <span class="cm-tooltip" uk-icon="icon: info" title="Provide <b>two columns</b> of data. The first column is a list of keywords that must be found in a publications’ fulltext. Such <b>keyword</b> may be a concept name, the name of an initiative of a community etc.<br>The second column provide a context. The <b>context</b> may be an acknowledgement statement or other phrase that is expected to be found when the concept in the first column is acknowledged. Both columns accept a valid <b>Regular expression</b>." uk-tooltip="pos: right"></span></p>
       <div class="uk-text-right">
         <button class="uk-button cm-button-primary" [disabled]="!isAnyContent()" (click)="saveAndContinue()">Continue</button>
       </div>

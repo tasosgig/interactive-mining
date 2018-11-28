@@ -12,4 +12,5 @@ export interface ProfileData {
   stopwords: string;
   lowercase: string;
   stemming: string;
+  documentarea: string;
 }

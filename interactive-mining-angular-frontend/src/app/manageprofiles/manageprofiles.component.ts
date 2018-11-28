@@ -86,6 +86,7 @@ export class ManageprofilesComponent implements OnInit {
         localStorage.setItem('stopwords', res.stopwords);
         localStorage.setItem('lowercase', res.lowercase);
         localStorage.setItem('stemming', res.stemming);
+        localStorage.setItem('documentarea', res.documentarea);
         this.router.navigate(['../upload-content'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
       });
   }
@@ -133,6 +134,7 @@ export class ManageprofilesComponent implements OnInit {
         localStorage.setItem('stopwords', res.stopwords);
         localStorage.setItem('lowercase', res.lowercase);
         localStorage.setItem('stemming', res.stemming);
+        localStorage.setItem('documentarea', res.documentarea);
         this.router.navigate(['../upload-content'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
       });
   }
@@ -180,6 +182,7 @@ export class ManageprofilesComponent implements OnInit {
           localStorage.setItem('stopwords', res.stopwords);
           localStorage.setItem('lowercase', res.lowercase);
           localStorage.setItem('stemming', res.stemming);
+          localStorage.setItem('documentarea', res.documentarea);
           this.router.navigate(['../upload-content'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
         });
     }
@@ -210,6 +213,7 @@ export class ManageprofilesComponent implements OnInit {
         localStorage.setItem('stopwords', res.stopwords);
         localStorage.setItem('lowercase', res.lowercase);
         localStorage.setItem('stemming', res.stemming);
+        localStorage.setItem('documentarea', res.documentarea);
         this.router.navigate(['../upload-content'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
       });
   }
@@ -232,6 +236,7 @@ export class ManageprofilesComponent implements OnInit {
     localStorage.removeItem('stopwords');
     localStorage.removeItem('lowercase');
     localStorage.removeItem('stemming');
+    localStorage.removeItem('documentarea');
   }
 
 }

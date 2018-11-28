@@ -1,0 +1,6 @@
+.uk-accordion-title::after {
+  background-image: url(data:image/svg+xml;charset=utf-8,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%20%3Cpolyline%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.03%22%20points%3D%2216%207%2010%2013%204%207%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E);
+}
+.uk-open>.uk-accordion-title::after {
+  background-image: url(data:image/svg+xml;charset=utf-8,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%20%3Cpolyline%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.03%22%20points%3D%224%2013%2010%207%2016%2013%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E);
+}

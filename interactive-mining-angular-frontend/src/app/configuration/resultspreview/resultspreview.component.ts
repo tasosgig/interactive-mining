@@ -87,6 +87,7 @@ export class ResultspreviewComponent implements OnInit {
       stopwords: Number.parseInt(localStorage.getItem('stopwords')),
       lowercase: Number.parseInt(localStorage.getItem('lowercase')),
       stemming: Number.parseInt(localStorage.getItem('stemming')),
+      documentarea: localStorage.getItem('documentarea'),
     };
   }
 

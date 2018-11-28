@@ -387,7 +387,7 @@ class InitialClientHandshakeHandler(BaseHandler):
                     self.set_status(400)
                     self.write("Missing arguement community id.")
                     return
-                community_id = self.request.arguments['communityId'][0]
+                community_id = self.request.arguments['communityId'][0][:128]
                 import sys
                 sys.path.append(msettings.MADIS_PATH)
                 import madis
@@ -398,17 +398,17 @@ class InitialClientHandshakeHandler(BaseHandler):
                     # get the database cursor
                     cursor=madis.functions.Connection(database_file_name).cursor()
                     # Create database table
-                    cursor.execute("drop table if exists community", parse=False)
-                    cursor.execute("create table community(id)", parse=False)
-                    cursor.execute('INSERT INTO community VALUES("{0}")'.format(community_id), parse=False)
-                    cursor.execute("drop table if exists database", parse=False)
-                    cursor.execute("create table database(id,name,datecreated,status,matches,docname,docsnumber)", parse=False)
+                    cursor.execute('''DROP TABLE IF EXISTS community''', parse=False)
+                    cursor.execute('''CREATE TABLE community(id)''', parse=False)
+                    cursor.execute('''INSERT INTO community VALUES(?)''', (community_id,), parse=False)
+                    cursor.execute('''DROP TABLE IF EXISTS database''', parse=False)
+                    cursor.execute('''CREATE TABLE database(id,name,datecreated,status,matches,docname,docsnumber)''', parse=False)
                     cursor.close()
                 else:
                     cursor=madis.functions.Connection(database_file_name).cursor()
-                    cursor.execute("drop table if exists community", parse=False)
-                    cursor.execute("create table community(id)", parse=False)
-                    cursor.execute('INSERT INTO community VALUES("{0}")'.format(community_id), parse=False)
+                    cursor.execute('''DROP TABLE IF EXISTS community''', parse=False)
+                    cursor.execute('''CREATE TABLE community(id)''', parse=False)
+                    cursor.execute('''INSERT INTO community VALUES(?)''', (community_id,), parse=False)
                     cursor.close()
             else:
                 self.set_status(400)
@@ -444,7 +444,8 @@ class GetUsersProfilesHandler(BaseHandler):
                 self.write("Must be an admin")
                 return
             # list users
-            users = [re.search('OAMiningProfilesDatabase_([w0-9]+).+', f).group(1) for f in os.listdir('./users_files') if re.match(r'OAMiningProfilesDatabase_[w0-9]+\.db', f)]
+            users = [re.search('OAMiningProfilesDatabase_([\\w0-9]+).+', f).group(1) for f in os.listdir('./users_files') if re.match(r'OAMiningProfilesDatabase_[\w0-9]+\.db', f)]
+            print users
             # for every user, read its database to find his profiles
             import sys
             sys.path.append(msettings.MADIS_PATH)
@@ -462,11 +463,11 @@ class GetUsersProfilesHandler(BaseHandler):
                 cursor=madis.functions.Connection(database_file_name).cursor()
                 try:
                     # get community id
-                    community_id = [r for r in cursor.execute("SELECT id FROM community")][0]
+                    community_id = [r for r in cursor.execute('''SELECT id FROM community''')][0]
                 except Exception as ints:
                     print ints
                     community_id = 'Unkown '+user
-                for r in cursor.execute("SELECT id,name,datecreated,status,matches,docname FROM database order by rowid desc"):
+                for r in cursor.execute('''SELECT id,name,datecreated,status,matches,docname FROM database order by rowid desc'''):
                     users_profiles.append({"user":community_id,"userId":user,"profileId":r[0], "profile": r[1], "datecreated": r[2], "status": r[3], "matches": r[4], "docname": r[5]})
             data['profiles'] = users_profiles
             self.write(json.dumps(data))
@@ -502,8 +503,8 @@ class UpdateProfileStatusHandler(BaseHandler):
             import sys
             sys.path.append(msettings.MADIS_PATH)
             import madis
-            user = request_arguments['user']
-            profile_id = request_arguments['id']
+            user = request_arguments['user'][:128]
+            profile_id = request_arguments['id'][:128]
             database_file_name = "users_files/OAMiningProfilesDatabase_{0}.db".format(user)
             if not os.path.isfile(database_file_name):
                 self.set_status(400)
@@ -512,7 +513,7 @@ class UpdateProfileStatusHandler(BaseHandler):
             cursor=madis.functions.Connection(database_file_name).cursor()
             # Write new Profile status to users database
             status = request_arguments['status']
-            cursor.execute('UPDATE database set status="{1}" where id="{0}"'.format(profile_id,status), parse=False)
+            cursor.execute('''UPDATE database set status=? where id=?''', (profile_id,status,), parse=False)
             cursor.close()
             self.write(json.dumps({}))
             self.finish()
@@ -543,7 +544,7 @@ class GetUserProfilesHandler(BaseHandler):
                 self.set_status(400)
                 self.write("Missing user's id parameter")
                 return
-            user_id = self.request.arguments['user'][0]
+            user_id = self.request.arguments['user'][0][:128]
             # extract data from database
             import sys
             sys.path.append(msettings.MADIS_PATH)
@@ -559,7 +560,7 @@ class GetUserProfilesHandler(BaseHandler):
             # data to be sent
             data = {}
             user_profiles = []
-            for r in cursor.execute("SELECT id,name,datecreated,status,matches,docname FROM database order by rowid desc"):
+            for r in cursor.execute('''SELECT id,name,datecreated,status,matches,docname FROM database order by rowid desc'''):
                 user_profiles.append({"id":r[0], "name": r[1], "datecreated": r[2], "status": r[3], "matches": r[4], "docname": r[5]})
             data['profiles'] = user_profiles
             cursor.close()
@@ -593,13 +594,13 @@ class LoadUserProfileHandler(BaseHandler):
                 self.set_status(400)
                 self.write("Missing user's id argument")
                 return
-            user_id = request_arguments['user']
+            user_id = request_arguments['user'][:128]
             # get data
             if 'id' not in request_arguments or request_arguments['id'] == '':
                 self.set_status(400)
                 self.write("Missing profiles id argument")
                 return
-            profile_id = request_arguments['id']
+            profile_id = request_arguments['id'][:128]
             # delete profile from database
             import sys
             sys.path.append(msettings.MADIS_PATH)
@@ -609,7 +610,7 @@ class LoadUserProfileHandler(BaseHandler):
             # get the database cursor
             cursor=madis.functions.Connection(database_file_name).cursor()
             # check if this profile exists
-            profile_data = [r for r in cursor.execute('select docname,docsnumber from database where id="{0}"'.format(profile_id))]
+            profile_data = [r for r in cursor.execute('''SELECT docname,docsnumber FROM database WHERE id=?''', (profile_id,))]
             if len(profile_data) == 0:
                 self.set_status(400)
                 self.write("There is no profile with this name")
@@ -658,13 +659,13 @@ class DeleteUserProfileHandler(BaseHandler):
                 self.set_status(400)
                 self.write("Missing user's id argument")
                 return
-            user_id = request_arguments['user']
+            user_id = request_arguments['user'][:128]
             # get data
             if 'id' not in request_arguments or request_arguments['id'] == '':
                 self.set_status(400)
                 self.write("Missing profiles id argument")
                 return
-            profile_id = request_arguments['id']
+            profile_id = request_arguments['id'][:128]
             # delete profile from database
             import sys
             sys.path.append(msettings.MADIS_PATH)
@@ -674,7 +675,7 @@ class DeleteUserProfileHandler(BaseHandler):
             # get the database cursor
             cursor=madis.functions.Connection(database_file_name).cursor()
             # data to be sent
-            cursor.execute('delete from database where id="{0}"'.format(profile_id), parse=False)
+            cursor.execute('''DELETE FROM database WHERE id=?''',(profile_id,), parse=False)
             cursor.close()
             # delete profile from disk
             file_name = "users_files/OAMiningProfile_%s_%s.oamp" % (user_id,profile_id)
@@ -745,7 +746,7 @@ class CreateNewProfileHandler(BaseHandler):
                 self.set_status(400)
                 self.write("Missing user's id parameter")
                 return
-            user_id = self.request.arguments['user'][0]
+            user_id = self.request.arguments['user'][0][:128]
             deleteAllUserFiles(user_id)
             self.write(json.dumps({}))
             self.finish()
@@ -777,13 +778,13 @@ class LoadExampleProfileHandler(BaseHandler):
                 self.set_status(400)
                 self.write("Missing user's id parameter")
                 return
-            user_id = request_arguments['user']
+            user_id = request_arguments['user'][:128]
             # get data
             if 'name' not in request_arguments or request_arguments['name'] == '':
                 self.set_status(400)
                 self.write("Missing example profiles name parameter")
                 return
-            example_name = request_arguments['name']
+            example_name = request_arguments['name'][:128]
             # reset everything
             deleteAllUserFiles(user_id)
             data = {}
@@ -825,9 +826,9 @@ class UploadProfileHandler(BaseHandler):
                 self.set_status(400)
                 self.write("Missing user's id parameter")
                 return
-            user_id = self.request.arguments['user'][0]
+            user_id = self.request.arguments['user'][0][:128]
             # get file info and body from post data
-            fileinfo = self.request.files['upload'][0]
+            fileinfo = self.request.files['upload'][0][:128]
             fname = fileinfo['filename']
             extn = os.path.splitext(fname)[1]
             # must be .pdf or .json
@@ -869,7 +870,7 @@ class AlreadyConceptsHandler(BaseHandler):
                 self.set_status(400)
                 self.write("Missing user's id parameter")
                 return
-            user_id = self.request.arguments['user'][0]
+            user_id = self.request.arguments['user'][0][:128]
             data = {}
             data['data'] = {}
             file_name = "users_files/p%s.tsv" % (user_id)
@@ -917,9 +918,9 @@ class UploadContentFileHandler(BaseHandler):
                 self.set_status(400)
                 self.write("Missing user's id parameter")
                 return
-            user_id = self.request.arguments['user'][0]
+            user_id = self.request.arguments['user'][0][:128]
             # get file info and body from post data
-            fileinfo = self.request.files['upload'][0]
+            fileinfo = self.request.files['upload'][0][:128]
             fname = fileinfo['filename']
             extn = os.path.splitext(fname)[1]
             # must be .pdf or .json
@@ -975,7 +976,7 @@ class UpdateConceptsHandler(BaseHandler):
                 self.set_status(400)
                 self.write("Missing user's id argument")
                 return
-            user_id = request_arguments['user']
+            user_id = request_arguments['user'][:128]
             # get data
             concepts = json.loads(json.loads(self.request.body)['concepts'])
             # write data to physical file
@@ -1026,7 +1027,7 @@ class GetDocSamplesHandler(BaseHandler):
                 self.set_status(400)
                 self.write("Missing user's id parameter")
                 return
-            user_id = self.request.arguments['user'][0]
+            user_id = self.request.arguments['user'][0][:128]
             data = {}
             doc_samples = []
             doc_samples.append({'name': 'Egi', 'documents': 104})
@@ -1066,8 +1067,8 @@ class UploadDocumentsHandler(BaseHandler):
                 self.set_status(400)
                 self.write("Missing user's id parameter")
                 return
-            user_id = self.request.arguments['user'][0]
-            fileinfo = self.request.files['upload'][0]
+            user_id = self.request.arguments['user'][0][:128]
+            fileinfo = self.request.files['upload'][0][:128]
             fname = fileinfo['filename']
             extn = os.path.splitext(fname)[1]
             # data to be sent
@@ -1151,12 +1152,12 @@ class ChooseDocSampleHandler(BaseHandler):
                 self.set_status(400)
                 self.write("Missing user's id argument")
                 return
-            user_id = request_arguments['user']
+            user_id = request_arguments['user'][:128]
             if 'docsample' not in request_arguments or request_arguments['docsample'] == '':
                 self.set_status(400)
                 self.write("A doc sample name must be provided")
                 return
-            doc_sample = request_arguments['docsample']
+            doc_sample = request_arguments['docsample'][:128]
             sample_file_name = ""
             if doc_sample == "Egi":
                 sample_file_name = "static/egi_sample.tsv"
@@ -1218,7 +1219,7 @@ class AlreadyDocumentsHandler(BaseHandler):
                 self.set_status(400)
                 self.write("Missing user's id parameter")
                 return
-            user_id = self.request.arguments['user'][0]
+            user_id = self.request.arguments['user'][0][:128]
             data = {}
             if msettings.RESET_FIELDS == 1:
                 data['data'] = -1
@@ -1258,7 +1259,7 @@ class RunMiningHandler(BaseHandler):
                 self.set_status(400)
                 self.write("Missing user's id argument")
                 return
-            user_id = request_arguments['user']
+            user_id = request_arguments['user'][:128]
             mining_parameters = request_arguments['parameters']
             # get the database cursor
             cursor=msettings.Connection.cursor()
@@ -1270,7 +1271,7 @@ class RunMiningHandler(BaseHandler):
             contextprev = 10
             contextnext = 5
             # Automatically find middle size from grant codes white spaces
-            querygrantsize = "select max(p1) from (select regexpcountwords('\s',stripchars(p1)) as p1 from (setschema 'p1,p2' file 'users_files/p{0}.tsv' dialect:tsv))".format(user_id)
+            querygrantsize = '''SELECT max(p1) FROM (SELECT regexpcountwords('\s',stripchars(p1)) AS p1 FROM (setschema 'p1,p2' file 'users_files/p{0}.tsv' dialect:tsv))'''.format(user_id)
             contextmiddle = [r for r in cursor.execute(querygrantsize)][0][0]+1
             if 'contextprev' in mining_parameters and mining_parameters['contextprev'] != '':
                 contextprev = int(mining_parameters['contextprev'])
@@ -1357,8 +1358,16 @@ class RunMiningHandler(BaseHandler):
                 whr_conf = 'and conf>=0'
             print conf
 
+            # docs proccess
             if numberOfDocsUploaded(user_id) != 0:
-                doc_filters = "comprspaces(regexpr('[\n|\r]',d2,' '))"
+                document_source = 'd2'
+                if 'documentarea' in mining_parameters and mining_parameters['documentarea'] != '':
+                    print mining_parameters['documentarea']
+                    if mining_parameters['documentarea'] == 'acknowledgment':
+                        document_source = 'textacknowledgments('+document_source+')'
+                    elif mining_parameters['documentarea'] == 'citations':
+                        document_source = 'textreferences('+document_source+')'
+                doc_filters = "comprspaces(regexpr('[\n|\r]',"+document_source+",' '))"
                 grant_filters = "stripchars(comprspaces(regexpr(\"\\'\", p1,'')))"
                 ackn_filters = "comprspaces(regexpr(\"\\'\", p2,''))"
                 if 'punctuation' in mining_parameters and mining_parameters['punctuation'] == 1:
@@ -1380,9 +1389,9 @@ class RunMiningHandler(BaseHandler):
                 list(cursor.execute("drop table if exists grantstemp"+user_id, parse=False))
                 query_pre_grants = "create temp table grantstemp{0} as select {1} as gt1, case when p2 is null then null else {2} end as gt2 from (setschema 'p1,p2' file 'users_files/p{0}.tsv' dialect:tsv)".format(user_id, grant_filters, ackn_filters)
                 cursor.execute(query_pre_grants)
-                query00get = "select * from grantstemp{0}".format(user_id)
-                results00get = [r for r in cursor.execute(query00get)]
-                print results00get
+                # query00get = "select * from grantstemp{0}".format(user_id)
+                # results00get = [r for r in cursor.execute(query00get)]
+                # print results00get
                 list(cursor.execute("drop table if exists docs"+user_id, parse=False))
                 query1 = "create temp table docs{0} as select d1, {1} as d2 from (setschema 'd1,d2' select jsonpath(c1, '$.id', '$.text') from (file 'users_files/docs{0}.json'))".format(user_id, doc_filters)
                 cursor.execute(query1)
@@ -1391,6 +1400,7 @@ class RunMiningHandler(BaseHandler):
                 self.write("You have to provide atleast 1 document...")
                 return
 
+            # grants proccess
             list(cursor.execute("drop table if exists grants"+user_id, parse=False))
             # string concatenation workaround because of the special characters conflicts
             if 'wordssplitnum' in mining_parameters and mining_parameters['wordssplitnum'] != '':
@@ -1465,7 +1475,7 @@ class PrepareSavedProfileHandler(BaseHandler):
                 self.set_status(400)
                 self.write("Missing user's id argument")
                 return
-            user_id = request_arguments['user']
+            user_id = request_arguments['user'][:128]
             profile_parameters = request_arguments['parameters']
             import sys
             sys.path.append(msettings.MADIS_PATH)
@@ -1475,21 +1485,21 @@ class PrepareSavedProfileHandler(BaseHandler):
             profile_file_name = "users_files/OAMiningProfile_{0}.oamp".format(user_id)
             cursor=madis.functions.Connection(profile_file_name).cursor()
             # Create poswords table
-            cursor.execute("drop table if exists poswords", parse=False)
-            cursor.execute("create table poswords(c1,c2)", parse=False)
+            cursor.execute('''DROP TABLE IF EXISTS poswords''', parse=False)
+            cursor.execute('''CREATE TABLE poswords(c1,c2)''', parse=False)
             # Create negwords table
-            cursor.execute("drop table if exists negwords", parse=False)
-            cursor.execute("create table negwords(c1,c2)", parse=False)
+            cursor.execute('''DROP TABLE IF EXISTS negwords''', parse=False)
+            cursor.execute('''CREATE TABLE negwords(c1,c2)''', parse=False)
             # Create filters table
-            cursor.execute("drop table if exists filters", parse=False)
-            cursor.execute("create table filters(c1,c2)", parse=False)
+            cursor.execute('''DROP TABLE IF EXISTS filters''', parse=False)
+            cursor.execute('''CREATE TABLE filters(c1,c2)''', parse=False)
             # Create grants table
-            cursor.execute("drop table if exists grants", parse=False)
-            cursor.execute("create table grants(c1,c2)", parse=False)
+            cursor.execute('''DROP TABLE IF EXISTS grants''', parse=False)
+            cursor.execute('''CREATE TABLE grants(c1,c2)''', parse=False)
             if 'poswords' in profile_parameters and profile_parameters['poswords'] != '{}':
                 # construct math string for positive words matching calculation with weights
                 pos_words = json.loads(profile_parameters['poswords'])
-                cursor.executemany("insert into poswords(c1,c2) values(?,?)",
+                cursor.executemany('''INSERT INTO poswords(c1,c2) VALUES(?,?)''',
                           (
                                 (key, value,) for key, value in pos_words.iteritems()
                           )
@@ -1497,7 +1507,7 @@ class PrepareSavedProfileHandler(BaseHandler):
             if 'negwords' in profile_parameters and profile_parameters['negwords'] != '{}':
                 # construct math string for negative words matching calculation with weights
                 neg_words = json.loads(profile_parameters['negwords'])
-                cursor.executemany("insert into negwords(c1,c2) values(?,?)",
+                cursor.executemany('''INSERT INTO negwords(c1,c2) VALUES(?,?)''',
                           (
                                 (key, value,) for key, value in neg_words.iteritems()
                           )
@@ -1517,13 +1527,16 @@ class PrepareSavedProfileHandler(BaseHandler):
                 filters['punctuation'] = profile_parameters['punctuation']
             if 'stemming' in profile_parameters and profile_parameters['stemming'] != '':
                 filters['stemming'] = profile_parameters['stemming']
-            cursor.executemany("insert into filters(c1,c2) values(?,?)",
+            if 'documentarea' in profile_parameters and profile_parameters['documentarea'] != '':
+                filters['documentarea'] = profile_parameters['documentarea']
+            cursor.executemany('''INSERT INTO filters(c1,c2) VALUES(?,?)''',
                       (
                             (key, value,) for key, value in filters.iteritems()
                       )
             )
             if numberOfGrantsUploaded(user_id, request_arguments['concepts']) != 0:
-                  cursor.execute("insert into grants select stripchars(c1) as c1, stripchars(c2) as c2 from (file 'users_files/p{0}.tsv')".format(user_id))
+                # cursor.execute('''VAR 'currprofile' VALUES(?)''', ('users_files/p{0}.tsv'.format(user_id),))
+                cursor.execute('''INSERT INTO grants SELECT stripchars(c1) as c1, stripchars(c2) as c2 FROM (file 'users_files/p{0}.tsv')'''.format(user_id))
             cursor.close()
 
             data = {}
@@ -1559,11 +1572,11 @@ class SaveProfileToDatabaseHandler(BaseHandler):
                 self.set_status(400)
                 self.write("Missing user's id argument")
                 return
-            user_id = request_arguments['user']
+            user_id = request_arguments['user'][:128]
             # get data
-            profile_id = request_arguments['id']
-            profile_name = request_arguments['name']
-            doc_name = request_arguments['docname']
+            profile_id = request_arguments['id'][:128]
+            profile_name = request_arguments['name'][:128]
+            doc_name = request_arguments['docname'][:128]
             docs_number = request_arguments['docsnumber']
             # copy profile file to a unique user profile file
             profile_file_name = "users_files/OAMiningProfile_{0}.oamp".format(user_id)
@@ -1590,10 +1603,9 @@ class SaveProfileToDatabaseHandler(BaseHandler):
             cursor=madis.functions.Connection(database_file_name).cursor()
             user_profiles = []
             if old_profile:
-                query = 'UPDATE database set datecreated="{2}", status="{3}", matches="{4}", docname="{5}", docsnumber="{6}" where id="{0}"'.format(profile_id,profile_name,datetime.date.today().strftime("%B %d %Y"),"Ready","8/8",doc_name,docs_number)
+                cursor.execute('''UPDATE database SET datecreated=?, status=?, matches=?, docname=?, docsnumber=? WHERE id=?''', (datetime.date.today().strftime("%B %d %Y"),"Ready","8/8",doc_name,docs_number,profile_id), parse=False)
             else:
-                query = 'INSERT INTO database VALUES("{0}","{1}","{2}","{3}","{4}","{5}","{6}")'.format(profile_id,profile_name,datetime.date.today().strftime("%B %d %Y"),"Saved","8/8",doc_name,docs_number)
-            cursor.execute(query, parse=False)
+                cursor.execute('''INSERT INTO database VALUES(?,?,?,?,?,?,?)''', (profile_id,profile_name,datetime.date.today().strftime("%B %d %Y"),"Saved","8/8",doc_name,docs_number,), parse=False)
             cursor.close()
             self.write(json.dumps({}))
             self.finish()
@@ -1625,8 +1637,8 @@ class DownloadProfileHandler(BaseHandler):
                 self.set_status(400)
                 self.write("Missing user's id argument")
                 return
-            user_id = request_arguments['user']
-            profile_id = request_arguments['id']
+            user_id = request_arguments['user'][:128]
+            profile_id = request_arguments['id'][:128]
             unique_profile_file_name = "users_files/OAMiningProfile_{0}_{1}.oamp".format(user_id,profile_id)
             buf_size = 4096
             self.set_header('Content-Type', 'application/octet-stream')

@@ -3,6 +3,7 @@ import {HttpErrorResponse} from '@angular/common/http';
 import { saveAs } from 'file-saver/FileSaver';
 import { Response } from '@angular/http';
 import {ErrorObservable} from 'rxjs/observable/ErrorObservable';
+import { environment } from '../environments/environment';
 import {Observable} from 'rxjs';
 
 export class Util {
@@ -28,7 +29,8 @@ export class Util {
   }
 
   public getBackendServerAddress(): string {
-    return localStorage.getItem('mining_backend_address');
+    // return localStorage.getItem('mining_backend_address');
+    return environment.miningbackendserveraddress;
   }
 
   public getIsCommunityManager(): string {
