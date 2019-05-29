@@ -65,6 +65,7 @@
               <!--<th class="uk-table-shrink"></th>-->
               <th class="uk-table-expand cm-text-muted">Profile</th>
               <th class="uk-table-small cm-text-muted">Modified</th>
+              <th class="uk-table-small cm-text-muted">Notified <span class="cm-tooltip" uk-icon="icon: info" title="When your profile is in its final version, notify the OpenAIRE Mining experts to process it" uk-tooltip="pos: right"></span></th>
               <th class="uk-width-small cm-text-muted">Status</th>
               <!--<th class="uk-table-shrink uk-text-nowrap">Matches</th>-->
               <th></th>
@@ -96,6 +97,11 @@
                 <a class="uk-link-reset" (click)="loadSavedProfile(profile.id, profile.name)">{{profile.name}}</a>
               </td>
               <td class="cm-text-muted uk-text-nowrap">{{profile.datecreated}}</td>
+              <td class="cm-text-muted uk-text-nowrap">
+                <button *ngIf="!profile.notified && !pending" class="uk-button uk-button-secondary uk-button-small uk-text-center cm-margin" (click)="notifyProfile(profile)">Notify</button>
+                <button *ngIf="pending" class="uk-button uk-button-secondary uk-button-small uk-text-center cm-margin" disabled>Notifing... <span uk-spinner="ratio: 0.8"></span></button>
+                <span *ngIf="profile.notified " class="uk-label uk-label-success">Notified</span>
+              </td>
               <td class="uk-text-nowrap uk-text-warning">{{profile.status}}</td>
               <!--<td class="uk-text-nowrap">{{profile.matches}}</td>-->
               <td class="delete">

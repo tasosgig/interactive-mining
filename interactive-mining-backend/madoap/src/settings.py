@@ -11,6 +11,14 @@ MADIS_PATH='../../../interactive-mining-3rdparty-madis/madis/src'
 DB='static/database.db'
 RESET_FIELDS=1
 
+# SMTP_EMAIL SETTINGS
+SMTP_HOST = 'smtp.gmail.com'
+SMTP_PORT = 587
+SMTP_AUTH = True
+SMTP_FROM = 'openaire.test@gmail.com'
+SMTP_USERNAME = 'openaire.test@gmail.com'
+SMTP_PASSWORD = '...'
+
 FLOW_PATH=''
 
 # Change this. Make this unique, and don't share it with anybody.

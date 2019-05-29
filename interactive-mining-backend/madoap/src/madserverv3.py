@@ -64,7 +64,8 @@ class Application(tornado.web.Application):
             (r"/runmining", RunMiningHandler),
             (r"/preparesavedprofile", PrepareSavedProfileHandler),
             (r"/saveprofile", SaveProfileToDatabaseHandler),
-            (r"/downloadprofile", DownloadProfileHandler)
+            (r"/downloadprofile", DownloadProfileHandler),
+            (r"/notifyforprofile", NotifyHandler)
         ]
            
 
@@ -467,8 +468,8 @@ class GetUsersProfilesHandler(BaseHandler):
                 except Exception as ints:
                     print ints
                     community_id = 'Unkown '+user
-                for r in cursor.execute('''SELECT id,name,datecreated,status,matches,docname FROM database order by rowid desc'''):
-                    users_profiles.append({"user":community_id,"userId":user,"profileId":r[0], "profile": r[1], "datecreated": r[2], "status": r[3], "matches": r[4], "docname": r[5]})
+                for r in cursor.execute('''SELECT id,name,datecreated,status,matches,docname,notified FROM database order by rowid desc'''):
+                    users_profiles.append({"user":community_id,"userId":user,"profileId":r[0], "profile": r[1], "datecreated": r[2], "status": r[3], "matches": r[4], "docname": r[5], "notified": r[6] })
             data['profiles'] = users_profiles
             self.write(json.dumps(data))
             self.finish()
@@ -513,7 +514,7 @@ class UpdateProfileStatusHandler(BaseHandler):
             cursor=madis.functions.Connection(database_file_name).cursor()
             # Write new Profile status to users database
             status = request_arguments['status']
-            cursor.execute('''UPDATE database set status=? where id=?''', (profile_id,status,), parse=False)
+            cursor.execute('''UPDATE database set status=? where id=?''', (status,profile_id,), parse=False)
             cursor.close()
             self.write(json.dumps({}))
             self.finish()
@@ -560,8 +561,8 @@ class GetUserProfilesHandler(BaseHandler):
             # data to be sent
             data = {}
             user_profiles = []
-            for r in cursor.execute('''SELECT id,name,datecreated,status,matches,docname FROM database order by rowid desc'''):
-                user_profiles.append({"id":r[0], "name": r[1], "datecreated": r[2], "status": r[3], "matches": r[4], "docname": r[5]})
+            for r in cursor.execute('''SELECT id,name,datecreated,status,matches,docname,notified FROM database order by rowid desc'''):
+                user_profiles.append({"id":r[0], "name": r[1], "datecreated": r[2], "status": r[3], "matches": r[4], "docname": r[5], "notified": r[6]})
             data['profiles'] = user_profiles
             cursor.close()
             self.write(json.dumps(data))
@@ -1603,9 +1604,9 @@ class SaveProfileToDatabaseHandler(BaseHandler):
             cursor=madis.functions.Connection(database_file_name).cursor()
             user_profiles = []
             if old_profile:
-                cursor.execute('''UPDATE database SET datecreated=?, status=?, matches=?, docname=?, docsnumber=? WHERE id=?''', (datetime.date.today().strftime("%B %d %Y"),"Ready","8/8",doc_name,docs_number,profile_id), parse=False)
+                cursor.execute('''UPDATE database SET datecreated=?, status=?, matches=?, docname=?, docsnumber=?, notified=? WHERE id=?''', (datetime.date.today().strftime("%B %d %Y"),"Processing","8/8",doc_name,docs_number,0,profile_id), parse=False)
             else:
-                cursor.execute('''INSERT INTO database VALUES(?,?,?,?,?,?,?)''', (profile_id,profile_name,datetime.date.today().strftime("%B %d %Y"),"Saved","8/8",doc_name,docs_number,), parse=False)
+                cursor.execute('''INSERT INTO database VALUES(?,?,?,?,?,?,?,?)''', (profile_id,profile_name,datetime.date.today().strftime("%B %d %Y"),"Saved","8/8",doc_name,docs_number,0,), parse=False)
             cursor.close()
             self.write(json.dumps({}))
             self.finish()
@@ -1650,6 +1651,66 @@ class DownloadProfileHandler(BaseHandler):
                     if not data:
                         break
                     self.write(data)
+            self.finish()
+        except Exception as ints:
+            self.set_status(400)
+            self.write("A server error occurred, please contact administrator!")
+            self.finish()
+            print ints
+            return
+
+
+class NotifyHandler(BaseHandler):
+    passwordless=True
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+        self.set_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        self.set_header('Access-Control-Allow-Credentials', 'true')
+        self.set_header('Content-Type', 'application/oamp')
+    def options(self):
+        # no body
+        self.set_status(204)
+        self.finish()
+    def post(self):
+        try:
+            # get user id from body. Must have
+            request_arguments = json.loads(self.request.body)
+            if 'user' not in request_arguments or request_arguments['user'] == '':
+                self.set_status(400)
+                self.write("Missing user's id argument")
+                return
+            community = request_arguments['community'][:128]
+            user_id = request_arguments['user'][:128]
+            # get data
+            profile_id = request_arguments['id'][:128]
+            # Import smtplib for the actual sending function
+            import smtplib
+            subject = 'New Profile update of Community: {} on profile: {}'.format(community, profile_id)
+            text = 'Hello our great mining team experts of OpenAIRE,\n\nA new profile update of Community {}\non profile named: {}'.format(community, profile_id)
+            message = 'Subject: {}\n\n{}'.format(subject, text)
+            # Send the message via our own SMTP server.
+            s = smtplib.SMTP(msettings.SMTP_HOST, msettings.SMTP_PORT)
+            s.ehlo()
+            s.starttls()
+            s.ehlo()
+            s.login(msettings.SMTP_USERNAME, msettings.SMTP_PASSWORD)
+            s.sendmail(msettings.SMTP_FROM, 'sospioneer2002@gmail.com', message)
+            s.quit()
+
+            # write new profile to database
+            import sys
+            sys.path.append(msettings.MADIS_PATH)
+            import madis
+            # database file name
+            database_file_name = "users_files/OAMiningProfilesDatabase_{0}.db".format(user_id)
+            # get the database cursor
+            cursor=madis.functions.Connection(database_file_name).cursor()
+            user_profiles = []
+            cursor.execute('''UPDATE database SET notified=1 WHERE id=?''', (profile_id,), parse=False)
+            cursor.close()
+
+            self.write(json.dumps({}))
             self.finish()
         except Exception as ints:
             self.set_status(400)

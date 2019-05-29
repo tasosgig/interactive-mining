@@ -19,10 +19,12 @@ export class ManageprofilesComponent implements OnInit {
 
   public allUsersProfiles: Array<UsersMetadata> = [];
   public statusValues = [
-    'Saved',
+    'Processing',
     'Evaluating',
     'On Beta'
   ];
+
+  public communityId = '';
   public isCommunityManager = false;
 
   public userSavedProfiles: Array<ProfileMetadata> = [];
@@ -34,6 +36,8 @@ export class ManageprofilesComponent implements OnInit {
     currentPage: 1
   };
 
+  public pending = false;
+
   constructor(private manageProfilesService: ManageprofilesService, private route: ActivatedRoute, private router: Router) {
   }
 
@@ -41,8 +45,9 @@ export class ManageprofilesComponent implements OnInit {
     this.route.queryParams
       .subscribe(
       params => {
-        console.log('queryParams', params['communityId']);
-        this.initialServerhandshake(params['communityId']);
+        // console.log('queryParams', params['communityId']);
+        this.communityId = params['communityId'];
+        this.initialServerhandshake(this.communityId);
       });
     this.isCommunityManager = this.manageProfilesService.isCommunityManager === 'true';
   }
@@ -191,6 +196,18 @@ export class ManageprofilesComponent implements OnInit {
   getExampleProfiles(): void {
     this.manageProfilesService.getExampleProfiles()
       .subscribe(res => this.exampleProfiles = res);
+  }
+
+  notifyProfile(profile: ProfileMetadata ): void {
+    UIkit.modal.confirm('<span class="uk-text-bold">' +
+      'A notification will be sent to the OpenAIRE Mining experts, that your profile is in its final version!</br></br>Are you sure you want to proceed?</span>', {escClose: true}).then(() => {
+        this.pending = true;
+      this.manageProfilesService.notifyProfile(this.communityId, profile.id)
+        .subscribe(res => {
+          profile.notified = 1;
+          this.pending = false;
+        });
+    });
   }
 
   loadExampleProfile(name: string): void {

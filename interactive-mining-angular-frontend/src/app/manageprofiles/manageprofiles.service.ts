@@ -27,6 +27,7 @@ export class ManageprofilesService {
   private getExampleProfilesUrl = '/getexampleprofiles';
   private loadExampleProfileUrl = '/loadexampleprofile';
   private uploadProfileUrl = '/uploadprofile';
+  private notifyProfileUrl = '/notifyforprofile';
 
   constructor(private http: HttpClient) {
     this.userId = this.util.getUserId();
@@ -111,6 +112,11 @@ export class ManageprofilesService {
   getExampleProfiles(): Observable<ExampleProfilesMetadata[]> {
     return this.http.get(this.backendServerAddress + this.getExampleProfilesUrl)
       .map(data => data['profiles'])
+      .catch(this.util.handleError);
+  }
+
+  notifyProfile(communityId: string, profileId: string): Observable<any> {
+    return this.http.post(this.backendServerAddress + this.notifyProfileUrl, {community: communityId, user: this.userId, id: profileId})
       .catch(this.util.handleError);
   }
 

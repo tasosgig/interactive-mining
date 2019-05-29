@@ -4,5 +4,6 @@ export class ProfileMetadata {
   datecreated: string;
   status: string;
   matches: string;
+  notified: number;
 }
 
