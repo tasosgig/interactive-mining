@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 export const AppRoutes: Routes = [
   { path: '', redirectTo: '/mining/manage-profiles?communityId=Egi', pathMatch: 'full' },
-  { path: 'mining', loadChildren: './interactivemining/interactive-mining.module#InteractiveMiningModule'}
+  { path: 'mining', loadChildren: './lazy-mining.module#LazyMiningModule'}
 ];
 
 @NgModule({

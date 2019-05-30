@@ -73,7 +73,7 @@ export class SettingsComponent implements OnInit {
     // show positive phrases
     this.positivePhrasesArray.length = 0;
     const posphrases = JSON.parse(localStorage.getItem('poswords'));
-    for (let key in posphrases) {
+    for (const key in posphrases) {
       if (key) {
         const content = new Phrase();
         content.phrase = key;
@@ -84,7 +84,7 @@ export class SettingsComponent implements OnInit {
     // show negative phrases
     this.negativePhrasesArray.length = 0;
     const negphrases = JSON.parse(localStorage.getItem('negwords'));
-    for (let key in negphrases) {
+    for (const key in negphrases) {
       if (key) {
         const content = new Phrase();
         content.phrase = key;
@@ -127,7 +127,7 @@ export class SettingsComponent implements OnInit {
       localStorage.setItem('poswords', phrases);
       this.positivePhrasesArray.length = 0;
       const posphrases = JSON.parse(localStorage.getItem('poswords'));
-      for (let key in posphrases) {
+      for (const key in posphrases) {
         if (key) {
           const content = new Phrase();
           content.phrase = key;
@@ -139,7 +139,7 @@ export class SettingsComponent implements OnInit {
       localStorage.setItem('negwords', phrases);
       this.negativePhrasesArray.length = 0;
       const negphrases = JSON.parse(localStorage.getItem('negwords'));
-      for (let key in negphrases) {
+      for (const key in negphrases) {
         if (key) {
           const content = new Phrase();
           content.phrase = key;

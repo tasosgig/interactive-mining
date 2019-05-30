@@ -4,6 +4,7 @@ import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
 import {Router} from '@angular/router';
 import {BrowserModule} from '@angular/platform-browser';
+import {InteractiveMiningModule} from './interactivemining/interactive-mining.module';
 
 @NgModule({
   declarations: [
@@ -11,7 +12,8 @@ import {BrowserModule} from '@angular/platform-browser';
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    InteractiveMiningModule
   ],
   bootstrap: [AppComponent]
 })

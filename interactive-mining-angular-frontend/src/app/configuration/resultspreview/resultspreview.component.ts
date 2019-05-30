@@ -97,13 +97,13 @@ export class ResultspreviewComponent implements OnInit {
   }
 
   highlightInElement(element: string, text: string): string {
-    var elementHtml = element;
-    var tags = [];
-    var tagLocations = [];
-    var htmlTagRegEx = /<{1}\/{0,1}\w+>{1}/;
+    let elementHtml = element;
+    const tags = [];
+    const tagLocations = [];
+    const htmlTagRegEx = /<{1}\/{0,1}\w+>{1}/;
 
     // Strip the tags from the elementHtml and keep track of them
-    var htmlTag;
+    let htmlTag;
     while (htmlTag = elementHtml.match(htmlTagRegEx)) {
       tagLocations[tagLocations.length] = elementHtml.search(htmlTagRegEx);
       tags[tags.length] = htmlTag;
@@ -111,18 +111,18 @@ export class ResultspreviewComponent implements OnInit {
     }
 
     // Search for the text in the stripped html
-    var textLocation = elementHtml.search(text);
+    const textLocation = elementHtml.search(text);
     if (textLocation) {
-      //Add the highlight
-      var highlightHTMLStart = '<span class="highlight">';
-      var highlightHTMLEnd = '</span>';
+      // Add the highlight
+      const highlightHTMLStart = '<span class="highlight">';
+      const highlightHTMLEnd = '</span>';
       elementHtml = elementHtml.replace(text, highlightHTMLStart + text + highlightHTMLEnd);
 
       // Plug back in the HTML tags
-      var textEndLocation = textLocation + text.length;
-      for(let i = tagLocations.length - 1; i >= 0; i--) {
-        var location = tagLocations[i];
-        if(location > textEndLocation){
+      const textEndLocation = textLocation + text.length;
+      for (let i = tagLocations.length - 1; i >= 0; i--) {
+        let location = tagLocations[i];
+        if (location > textEndLocation) {
           location += highlightHTMLStart.length + highlightHTMLEnd.length;
         } else if (location > textLocation) {
           location += highlightHTMLStart.length;
@@ -147,41 +147,41 @@ export class ResultspreviewComponent implements OnInit {
           this.runingMining = false;
           UIkit.modal(document.getElementById('wait-spinner-modal-center')).hide();
           // enable sticky
-          UIkit.sticky(document.getElementById("cm-run-test-section"), {
+          UIkit.sticky(document.getElementById('cm-run-test-section'), {
             top: 25,
             showOnUp: true,
-            animation: "uk-animation-slide-top",
-            bottom: ".cm-results-section"
+            animation: 'uk-animation-slide-top',
+            bottom: '.cm-results-section'
           });
           this.resultsArray.length = 0;
           let matchcounter = 0;
-          for (let title in res.matches) {
+          for (const title in res.matches) {
             if (title) {
               const matches = res.matches[title];
-              let resultClass: DocumentResult = new DocumentResult();
+              const resultClass: DocumentResult = new DocumentResult();
               resultClass.docTitle = title;
-              let matchesArray: Array<Match> = [];
+              const matchesArray: Array<Match> = [];
               resultClass.matches = matchesArray;
-              for (let values of matches) {
-                let match: Match = new Match();
+              for (const values of matches) {
+                const match: Match = new Match();
                 match.match = values.match;
                 match.extraprev = values.extraprev;
                 match.extranext = values.extranext;
                 let context = values.prev + ' ' + values.middle + ' ' + values.next;
                 // hightlight positive words
-                for (let posword in JSON.parse(localStorage.getItem('poswords'))) {
+                for (const posword in JSON.parse(localStorage.getItem('poswords'))) {
                   const search_regexp = new RegExp(posword, 'g');
                   context = context.replace(search_regexp, function (x) {
                     return '<span class="positive">' + x + '</span>';
                   });
                 }
                 // hightlight acknowledgment keywords
-                for (let ackn of values.acknmatch) {
+                for (const ackn of values.acknmatch) {
                   const search_regexp = new RegExp(ackn.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&'), 'g');
                   context = context.replace(search_regexp, '<span class="positive">' + ackn + '</span>');
                 }
                 // hightlight negative words
-                for (let negword in JSON.parse(localStorage.getItem('negwords'))) {
+                for (const negword in JSON.parse(localStorage.getItem('negwords'))) {
                   const search_regexp = new RegExp(negword, 'g');
                   context = context.replace(search_regexp, function (x) {
                     return '<span class="negative">' + x + '</span>';

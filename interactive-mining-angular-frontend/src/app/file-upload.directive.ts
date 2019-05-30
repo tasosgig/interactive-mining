@@ -29,12 +29,12 @@ export class FileUploadDirective {
     evt.preventDefault();
     evt.stopPropagation();
     this.background = 'uk-placeholder cm-file-drop-area cm-coloured-text';
-    let files: Array<File> = evt.dataTransfer.files;
+    const files: Array<File> = evt.dataTransfer.files;
     let valid_file: File = null;
     let invalid_file: File = null;
     if (files.length === 1) {
-      let file = files[0];
-      let ext = file.name.split('.')[file.name.split('.').length - 1];
+      const file = files[0];
+      const ext = file.name.split('.')[file.name.split('.').length - 1];
       if (this.allowedExtensions.lastIndexOf(ext) !== -1 && file.size <= this.maxFileSize) {
         valid_file = file;
       } else {

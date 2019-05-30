@@ -4,7 +4,6 @@ import {SaveprofileComponent} from '../saveprofile/saveprofile.component';
 import {ConfigurationComponent} from '../configuration/configuration.component';
 import {ContentComponent} from '../contents/contents.component';
 import {ManageprofilesComponent} from '../manageprofiles/manageprofiles.component';
-import {InteractiveMiningComponent} from './interactive-mining.component';
 import {SaveProfileGuard, UploadContentGuard} from './save-profile-guard';
 
 const interactiveMiningRoutes: Routes = [

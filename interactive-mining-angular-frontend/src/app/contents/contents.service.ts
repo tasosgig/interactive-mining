@@ -33,7 +33,7 @@ export class ContentsService {
 
   contentsJsonToArray(json): Content[] {
     const contentArray: Array<Content> = [];
-    for (let key in json) {
+    for (const key in json) {
       if (key) {
         const content = new Content();
         content.keyword = key;

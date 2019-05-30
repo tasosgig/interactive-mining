@@ -90,8 +90,8 @@ export class ContentComponent implements OnInit {
   onFilesChange(file: File) {
     if (file !== null && file !== undefined) {
       console.log(file);
-      let ext = file.name.split('.')[file.name.split('.').length - 1];
-      let allowedExtensions = ['tsv', 'txt'];
+      const ext = file.name.split('.')[file.name.split('.').length - 1];
+      const allowedExtensions = ['tsv', 'txt'];
       if (allowedExtensions.lastIndexOf(ext) !== -1 && file.size <= 51200) {
         this.contentsService.uploadFile(file)
           .subscribe(contents => {
