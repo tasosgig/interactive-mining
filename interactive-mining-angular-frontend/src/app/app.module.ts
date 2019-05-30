@@ -4,7 +4,6 @@ import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
 import {Router} from '@angular/router';
 import {BrowserModule} from '@angular/platform-browser';
-import {InteractiveMiningModule} from './interactivemining/interactive-mining.module';
 
 @NgModule({
   declarations: [
@@ -12,7 +11,6 @@ import {InteractiveMiningModule} from './interactivemining/interactive-mining.mo
   ],
   imports: [
     BrowserModule,
-    InteractiveMiningModule,
     AppRoutingModule
   ],
   bootstrap: [AppComponent]

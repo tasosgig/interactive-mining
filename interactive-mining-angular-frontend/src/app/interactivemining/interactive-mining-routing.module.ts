@@ -8,9 +8,9 @@ import {InteractiveMiningComponent} from './interactive-mining.component';
 import {SaveProfileGuard, UploadContentGuard} from './save-profile-guard';
 
 const interactiveMiningRoutes: Routes = [
-  {path: 'mining', redirectTo: '/mining/manage-profiles', pathMatch: 'full'},
+  {path: '', redirectTo: '/mining/manage-profiles', pathMatch: 'full'},
   {
-    path: 'mining',
+    path: '',
     // component: InteractiveMiningComponent,
     children: [
       { path: 'manage-profiles', component: ManageprofilesComponent },
