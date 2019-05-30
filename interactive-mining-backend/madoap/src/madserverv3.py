@@ -1695,7 +1695,7 @@ class NotifyHandler(BaseHandler):
             s.starttls()
             s.ehlo()
             s.login(msettings.SMTP_USERNAME, msettings.SMTP_PASSWORD)
-            s.sendmail(msettings.SMTP_FROM, 'sospioneer2002@gmail.com', message)
+            s.sendmail(msettings.SMTP_FROM, msettings.SMTP_TO, message)
             s.quit()
 
             # write new profile to database

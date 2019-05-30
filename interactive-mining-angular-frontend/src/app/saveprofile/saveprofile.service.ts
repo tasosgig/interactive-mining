@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import {Observable} from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import {HttpClient} from '@angular/common/http';
 import {Util} from '../util';
+import {catchError} from 'rxjs/operators';
 
 @Injectable()
 export class SaveprofileService {
@@ -21,7 +22,7 @@ export class SaveprofileService {
   saveProfile(name: string, id: string, docName: string, dosNumber: number): Observable<any> {
       return this.http.post(this.backendServerAddress + this.saveProfileUrl,
         {user: this.userId, name: name, id: id, docname: docName, docsnumber: dosNumber })
-        .catch(this.util.handleError);
+        .pipe(catchError(this.util.handleError));
   }
 
 }

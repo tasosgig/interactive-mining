@@ -9,7 +9,7 @@ export class FileUploadDirective {
   @Input() private maxFileSize = 104857600;
   @Output() private filesChange: EventEmitter<File> = new EventEmitter();
   @Output() private filesInvalid: EventEmitter<File> = new EventEmitter();
-  @HostBinding('class') private background = 'uk-placeholder cm-file-drop-area cm-coloured-text';
+  @HostBinding('class') public background = 'uk-placeholder cm-file-drop-area cm-coloured-text';
 
   constructor() { }
 

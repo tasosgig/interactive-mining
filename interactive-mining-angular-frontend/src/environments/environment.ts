@@ -5,5 +5,5 @@
 
 export const environment = {
   production: false,
-  miningbackendserveraddress: 'http://localhost:8080'
+  miningbackendserveraddress: 'http://localhost'
 };

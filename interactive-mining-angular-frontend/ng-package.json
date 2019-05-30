@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/ng-packagr/ng-package.schema.json",
   "name": "interactive-mining",
+  "version": "1.0.0",
   "ngPackage": {
     "lib": {
       "entryFile": "public_api.ts",
@@ -8,5 +9,8 @@
       "externals": {"ng2-nouislider": "ng2-nouislider"}
     },
     "dest": "../../dist/interactive-mining-lib"
-  }
+  },
+  "whitelistedNonPeerDependencies": [
+    "."
+  ]
 }

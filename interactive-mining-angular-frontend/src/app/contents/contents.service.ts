@@ -1,9 +1,8 @@
 import {Injectable} from '@angular/core';
 import {Content} from './content';
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/catch';
-import {Observable} from 'rxjs/Observable';
+import { Observable } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import {Util} from '../util';
 
 
@@ -27,9 +26,9 @@ export class ContentsService {
 
   getContent(): Observable<Content[]> {
     this.concepts = localStorage.getItem('concepts');
-    return this.http.get(this.backendServerAddress + this.getContentUrl + `?user=${this.userId}&concepts=${this.concepts}`)
-      .map((data) => this.contentsJsonToArray(data['data']))
-      .catch(this.util.handleError);
+    return this.http.get<Content[]> (this.backendServerAddress + this.getContentUrl + `?user=${this.userId}&concepts=${this.concepts}`)
+      .pipe(map((data: Content[]) => this.contentsJsonToArray(data['data'])))
+      .pipe(catchError(this.util.handleError));
   }
 
   contentsJsonToArray(json): Content[] {
@@ -56,19 +55,19 @@ export class ContentsService {
       reportProgress: true
     };
     return this.http.post(this.backendServerAddress + this.uploadContentFileUrl, formData, options)
-      .map((data) => this.contentsJsonToArray(data['data']))
-      .catch(this.util.handleError);
+      .pipe(map((data: Content[]) => this.contentsJsonToArray(data['data'])))
+      .pipe(catchError(this.util.handleError));
   }
 
   updateContent(content: Array<Content>): Observable<any> {
     // transform data to json string
-    var hashmap = {};
+    const hashmap = {};
     content.forEach(function (element) {
       hashmap[element.keyword] = element.context;
     });
     return this.http.post(this.backendServerAddress + this.updateContentUrl, {user: this.userId, concepts: JSON.stringify(hashmap)})
-      .map((data) => data['concepts'])
-      .catch(this.util.handleError);
+      .pipe(map((data) => data['concepts']))
+      .pipe(catchError(this.util.handleError));
   }
 
 }

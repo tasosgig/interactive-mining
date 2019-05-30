@@ -1,14 +1,13 @@
 import UIkit from 'uikit';
-import {HttpErrorResponse} from '@angular/common/http';
-import { saveAs } from 'file-saver/FileSaver';
-import { Response } from '@angular/http';
+import {HttpErrorResponse, HttpResponse} from '@angular/common/http';
 import {ErrorObservable} from 'rxjs/observable/ErrorObservable';
 import { environment } from '../environments/environment';
-import {Observable} from 'rxjs';
+import {throwError} from 'rxjs/internal/observable/throwError';
+import {saveAs} from 'file-saver';
 
 export class Util {
 
-  public handleError (err: HttpErrorResponse): ErrorObservable {
+  public handleError (err: HttpErrorResponse): ErrorObservable<never> {
     if (err.error instanceof Error) {
       console.error('Client-side error occured.');
     } else {
@@ -21,7 +20,7 @@ export class Util {
       pos: 'top-center',
       timeout: 0
     });
-    return Observable.throw(err  || 'Server error');
+    return throwError(err  || 'Server error');
   }
 
   public getUserId(): string {
@@ -54,7 +53,7 @@ export const saveFile = (blobContent: Blob, fileName: string) => {
  * by looking inside content-disposition
  * @param res http Response
  */
-export const getFileNameFromResponseContentDisposition = (res: Response) => {
+export const getFileNameFromResponseContentDisposition = (res: HttpResponse<any>) => {
   const contentDisposition = res.headers.get('content-disposition') || '';
   const matches = /filename=([^;]+)/ig.exec(contentDisposition);
   const fileName = (matches[1] || 'untitled').trim();
