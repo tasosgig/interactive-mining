@@ -28,8 +28,11 @@ export class Util {
   }
 
   public getBackendServerAddress(): string {
-    // return localStorage.getItem('mining_backend_address');
-    return environment.miningbackendserveraddress;
+    if (localStorage.getItem('mining_backend_address')) {
+      return localStorage.getItem('mining_backend_address');
+    } else {
+      return environment.miningbackendserveraddress;
+    }
   }
 
   public getIsCommunityManager(): string {
