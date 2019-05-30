@@ -5,7 +5,7 @@ RESTRICT_IPS=False
 #RESTRICT_IPS=True
 USERNAME='openaire'
 PASSWORD='openaire'
-WEB_SERVER_PORT=8080
+WEB_SERVER_PORT=8081
 APPDIRNAME='openaireplus'
 MADIS_PATH='../../../interactive-mining-3rdparty-madis/madis/src'
 DB='static/database.db'
@@ -18,6 +18,7 @@ SMTP_AUTH = True
 SMTP_FROM = 'openaire.test@gmail.com'
 SMTP_USERNAME = 'openaire.test@gmail.com'
 SMTP_PASSWORD = '...'
+SMTP_TO = '...'
 
 FLOW_PATH=''
 
