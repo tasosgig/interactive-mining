@@ -17,7 +17,7 @@
         <tfoot>
         </tfoot>
         <tbody>
-        <tr *ngFor="let profile of allUsersProfiles | paginate: config; let i = index">
+        <tr *ngFor="let profile of allUsersProfiles | paginate: allProfiles; let i = index">
           <td class="uk-text-nowrap">{{profile.user}}</td>
           <td class="uk-table-link">
             <a class="uk-link-reset" (click)="loadUserProfileAdmin(profile.userId, profile.profileId, profile.profile)">{{profile.profile}}</a>
@@ -36,8 +36,8 @@
         </tbody>
       </table>
       <pagination-template *ngIf="allUsersProfiles.length" #p="paginationApi"
-                           [id]="config.id"
-                           (pageChange)="config.currentPage = $event">
+                           [id]="allProfiles.id"
+                           (pageChange)="allProfiles.currentPage = $event">
         <ul class="uk-pagination uk-flex-center" uk-margin>
           <li [class.uk-disabled]="p.isFirstPage()"><a (click)="p.previous()"><span uk-pagination-previous></span></a></li>
           <li *ngFor="let page of p.pages" [class.uk-active]="p.getCurrent() === page.value">
@@ -89,7 +89,7 @@
                 </div>
               </td>
             </tr>
-            <tr *ngFor="let profile of userSavedProfiles | paginate: config; let i = index">
+            <tr *ngFor="let profile of userSavedProfiles| paginate: userProfiles; let i = index" >
               <!--<td class="download">-->
                 <!--<a class="uk-icon-link uk-icon" uk-icon="icon: download" contenteditable="false" (click)="downloadProfile(profile.id, profile.name)"></a>-->
               <!--</td>-->
@@ -99,7 +99,7 @@
               <td class="cm-text-muted uk-text-nowrap">{{profile.datecreated}}</td>
               <td class="cm-text-muted uk-text-nowrap">
                 <button *ngIf="!profile.notified && !pending" class="uk-button uk-button-secondary uk-button-small uk-text-center cm-margin" (click)="notifyProfile(profile)">Notify</button>
-                <button *ngIf="pending" class="uk-button uk-button-secondary uk-button-small uk-text-center cm-margin" disabled>Notifing... <span uk-spinner="ratio: 0.8"></span></button>
+                <button *ngIf="pending" class="uk-button uk-button-secondary uk-button-small uk-text-center cm-margin" disabled>Notifying... <span uk-spinner="ratio: 0.8"></span></button>
                 <span *ngIf="profile.notified " class="uk-label uk-label-success">Notified</span>
               </td>
               <td class="uk-text-nowrap uk-text-warning">{{profile.status}}</td>
@@ -110,18 +110,18 @@
             </tr>
             </tbody>
           </table>
-          <pagination-template *ngIf="userSavedProfiles.length" #p="paginationApi"
-                               [id]="config.id"
-                               (pageChange)="config.currentPage = $event">
+          <pagination-template *ngIf="userSavedProfiles.length" #u="paginationApi"
+                               [id]="userProfiles.id"
+                               (pageChange)="userProfiles.currentPage = $event">
             <ul class="uk-pagination uk-flex-center" uk-margin>
-              <li [class.uk-disabled]="p.isFirstPage()"><a (click)="p.previous()"><span uk-pagination-previous></span></a></li>
-              <li *ngFor="let page of p.pages" [class.uk-active]="p.getCurrent() === page.value">
-                <a (click)="p.setCurrent(page.value)" *ngIf="p.getCurrent() !== page.value">
+              <li [class.uk-disabled]="u.isFirstPage()"><a (click)="u.previous()"><span uk-pagination-previous></span></a></li>
+              <li *ngFor="let page of u.pages" [class.uk-active]="u.getCurrent() === page.value">
+                <a (click)="u.setCurrent(page.value)" *ngIf="u.getCurrent() !== page.value">
                   <span>{{ page.label }}</span>
                 </a>
-                <span *ngIf="p.getCurrent() === page.value">{{ page.label }}</span>
+                <span *ngIf="u.getCurrent() === page.value">{{ page.label }}</span>
               </li>
-              <li [class.uk-disabled]="p.isLastPage()"><a (click)="p.next()"><span uk-pagination-next></span></a></li>
+              <li [class.uk-disabled]="u.isLastPage()"><a (click)="u.next()"><span uk-pagination-next></span></a></li>
             </ul>
           </pagination-template>
         </div>
@@ -140,7 +140,7 @@
         <!--&lt;!&ndash;</div>&ndash;&gt;-->
       <!--</div>-->
     <!--</div>-->
-    <div *ngIf="userSavedProfiles.length" class="uk-container-small">
+    <div *ngIf="userSavedProfiles.length > 0" class="uk-container-small">
       <a class="test-upload uk-button cm-button-primary uk-text-center cm-margin" (click)="createNewProfile()">
         <span class="uk-text-middle">Create a new mining profile</span>
       </a>

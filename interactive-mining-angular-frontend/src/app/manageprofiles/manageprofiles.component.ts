@@ -10,8 +10,7 @@ import {saveFile} from '../util';
 
 @Component({
   selector: 'app-manageprofiles',
-  templateUrl: './manageprofiles.component.html',
-  styleUrls: ['./manageprofiles.component.css']
+  templateUrl: './manageprofiles.component.html'
 })
 export class ManageprofilesComponent implements OnInit {
 
@@ -30,8 +29,14 @@ export class ManageprofilesComponent implements OnInit {
   public userSavedProfiles: Array<ProfileMetadata> = [];
   public exampleProfiles: Array<ExampleProfilesMetadata> = [];
 
-  public config: PaginationInstance = {
-    id: 'custom',
+  public allProfiles: PaginationInstance = {
+    id: 'all',
+    itemsPerPage: 5,
+    currentPage: 1
+  };
+
+  public userProfiles: PaginationInstance = {
+    id: 'user',
     itemsPerPage: 5,
     currentPage: 1
   };
@@ -47,12 +52,12 @@ export class ManageprofilesComponent implements OnInit {
       params => {
         // console.log('queryParams', params['communityId']);
         this.communityId = params['communityId'];
-        this.initialServerhandshake(this.communityId);
+        this.initialServerHandshake(this.communityId);
       });
     this.isCommunityManager = this.manageProfilesService.isCommunityManager === 'true';
   }
 
-  initialServerhandshake(communityId: string): void {
+  private initialServerHandshake(communityId: string): void {
     this.manageProfilesService.initialServerHandshake(communityId)
       .subscribe(() => {
         if (this.isCommunityManager) {
@@ -63,13 +68,48 @@ export class ManageprofilesComponent implements OnInit {
       });
   }
 
-  getAllUsersProfiles(): void {
+  private getAllUsersProfiles(): void {
     this.manageProfilesService.getUsersProfiles()
       .subscribe(res => {
         if (res) {
           this.allUsersProfiles = res;
         }
       });
+  }
+
+  private getSavedProfiles(): void {
+    this.manageProfilesService.getSavedProfiles()
+      .subscribe(res => {
+        if (res) {
+          this.userSavedProfiles = res;
+        }
+      });
+  }
+
+  private getExampleProfiles(): void {
+    this.manageProfilesService.getExampleProfiles()
+      .subscribe(res => this.exampleProfiles = res);
+  }
+
+  private clearLocalStorage(): void {
+    // clear localstorage values
+    localStorage.removeItem('grants');
+    localStorage.removeItem('profilename');
+    localStorage.removeItem('profileid');
+    localStorage.removeItem('docname');
+    localStorage.removeItem('docsnumber');
+    localStorage.removeItem('concepts');
+    localStorage.removeItem('poswords');
+    localStorage.removeItem('negwords');
+    localStorage.removeItem('contextprev');
+    localStorage.removeItem('contextmiddle');
+    localStorage.removeItem('contextnext');
+    localStorage.removeItem('wordssplitnum');
+    localStorage.removeItem('punctuation');
+    localStorage.removeItem('stopwords');
+    localStorage.removeItem('lowercase');
+    localStorage.removeItem('stemming');
+    localStorage.removeItem('documentarea');
   }
 
   loadUserProfileAdmin(userId: string, profileId: string, name: string): void {
@@ -106,15 +146,6 @@ export class ManageprofilesComponent implements OnInit {
   onStatusChange(userId: string, profileId: string, status: string): void {
     this.manageProfilesService.updateProfileStatus(userId, profileId, status)
       .subscribe();
-  }
-
-  getSavedProfiles(): void {
-    this.manageProfilesService.getSavedProfiles()
-      .subscribe(res => {
-        if (res) {
-          this.userSavedProfiles = res;
-        }
-      });
   }
 
   loadSavedProfile(id: string, name: string): void {
@@ -193,14 +224,12 @@ export class ManageprofilesComponent implements OnInit {
     }
   }
 
-  getExampleProfiles(): void {
-    this.manageProfilesService.getExampleProfiles()
-      .subscribe(res => this.exampleProfiles = res);
-  }
 
   notifyProfile(profile: ProfileMetadata ): void {
     UIkit.modal.confirm('<span class="uk-text-bold">' +
-      'A notification will be sent to the OpenAIRE Mining experts, that your profile is in its final version!</br></br>Are you sure you want to proceed?</span>', {escClose: true}).then(() => {
+      'A notification will be sent to the OpenAIRE Mining experts, ' +
+      'that your profile is in its final version!</br></br>' +
+      'Are you sure you want to proceed?</span>', {escClose: true}).then(() => {
         this.pending = true;
       this.manageProfilesService.notifyProfile(this.communityId, profile.id)
         .subscribe(res => {
@@ -233,27 +262,6 @@ export class ManageprofilesComponent implements OnInit {
         localStorage.setItem('documentarea', res.documentarea);
         this.router.navigate(['../upload-content'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
       });
-  }
-
-  clearLocalStorage(): void {
-    // clear localstorage values
-    localStorage.removeItem('grants');
-    localStorage.removeItem('profilename');
-    localStorage.removeItem('profileid');
-    localStorage.removeItem('docname');
-    localStorage.removeItem('docsnumber');
-    localStorage.removeItem('concepts');
-    localStorage.removeItem('poswords');
-    localStorage.removeItem('negwords');
-    localStorage.removeItem('contextprev');
-    localStorage.removeItem('contextmiddle');
-    localStorage.removeItem('contextnext');
-    localStorage.removeItem('wordssplitnum');
-    localStorage.removeItem('punctuation');
-    localStorage.removeItem('stopwords');
-    localStorage.removeItem('lowercase');
-    localStorage.removeItem('stemming');
-    localStorage.removeItem('documentarea');
   }
 
 }

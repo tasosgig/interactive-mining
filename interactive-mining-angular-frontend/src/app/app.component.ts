@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import {environment} from '../environments/environment.prod';
 
 @Component({
   selector: 'app-root',
@@ -8,7 +9,7 @@ import { Component, OnInit } from '@angular/core';
 export class AppComponent implements OnInit {
 
   private _userid = 'user5649231';
-  private _backendserveraddress = 'https://beta.services.openaire.eu/interactive-mining';
+  private _backendserveraddress = environment.miningbackendserveraddress;
   private _isCommunityManager = 'true';
 
   title = 'app';
