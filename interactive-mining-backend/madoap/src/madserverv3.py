@@ -403,7 +403,7 @@ class InitialClientHandshakeHandler(BaseHandler):
                     cursor.execute('''CREATE TABLE community(id)''', parse=False)
                     cursor.execute('''INSERT INTO community VALUES(?)''', (community_id,), parse=False)
                     cursor.execute('''DROP TABLE IF EXISTS database''', parse=False)
-                    cursor.execute('''CREATE TABLE database(id,name,datecreated,status,matches,docname,docsnumber)''', parse=False)
+                    cursor.execute('''CREATE TABLE database(id,name,datecreated,status,matches,docname,docsnumber,notified)''', parse=False)
                     cursor.close()
                 else:
                     cursor=madis.functions.Connection(database_file_name).cursor()
@@ -462,6 +462,7 @@ class GetUsersProfilesHandler(BaseHandler):
                     return
                 # get the database cursor
                 cursor=madis.functions.Connection(database_file_name).cursor()
+		cursor.execute('''ALTER TABLE database ADD COLUMN notified INTEGER DEFAULT 0''')
                 try:
                     # get community id
                     community_id = [r for r in cursor.execute('''SELECT id FROM community''')][0]
