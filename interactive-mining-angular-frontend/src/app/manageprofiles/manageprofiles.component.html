@@ -157,10 +157,10 @@
             <li *ngFor="let profile of exampleProfiles">
               <a (click)="loadExampleProfile(profile.name)">
                 <div class="uk-card uk-card-default uk-card-hover uk-card-body uk-text-center uk-margin-medium-top uk-margin-medium-bottom">
-                  <h3 class="uk-card-title uk-text-bold">{{profile.name | uppercase}}</h3>
-                  <h4 class="uk-card-title uk-margin-remove-bottom">{{profile.contents}}</h4>
+                  <h3 class="uk-card-title examples-text uk-text-bold">{{profile.name | uppercase}}</h3>
+                  <h4 class="uk-card-title examples-text uk-margin-remove-bottom">{{profile.contents}}</h4>
                   <p class="uk-text-small uk-margin-remove-top">concepts</p>
-                  <h4 class="uk-card-title uk-margin-remove-bottom">{{profile.documents}}</h4>
+                  <h4 class="uk-card-title examples-text uk-margin-remove-bottom">{{profile.documents}}</h4>
                   <p class="uk-text-small uk-margin-remove-top">documents</p>
                 </div>
               </a>

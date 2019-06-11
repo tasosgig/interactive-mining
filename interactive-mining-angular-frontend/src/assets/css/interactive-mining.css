@@ -1108,3 +1108,7 @@ header.uk-sticky-fixed .cm-results-count-section {
   right: 0;
   padding-top: 10px;
 }
+
+.examples-text {
+  color: #444444 !important;
+}

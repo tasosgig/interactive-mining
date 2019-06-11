@@ -88,7 +88,10 @@ export class ManageprofilesComponent implements OnInit {
 
   private getExampleProfiles(): void {
     this.manageProfilesService.getExampleProfiles()
-      .subscribe(res => this.exampleProfiles = res);
+      .subscribe(res => {
+        console.log(res);
+        this.exampleProfiles = res;
+      });
   }
 
   private clearLocalStorage(): void {
