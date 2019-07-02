@@ -1607,7 +1607,7 @@ class SaveProfileToDatabaseHandler(BaseHandler):
             if old_profile:
                 cursor.execute('''UPDATE database SET datecreated=?, status=?, matches=?, docname=?, docsnumber=?, notified=? WHERE id=?''', (datetime.date.today().strftime("%B %d %Y"),"Processing","8/8",doc_name,docs_number,0,profile_id), parse=False)
             else:
-                cursor.execute('''INSERT INTO database VALUES(?,?,?,?,?,?,?,?)''', (profile_id,profile_name,datetime.date.today().strftime("%B %d %Y"),"Saved","8/8",doc_name,docs_number,0,), parse=False)
+                cursor.execute('''INSERT INTO database VALUES(?,?,?,?,?,?,?,?)''', (profile_id,profile_name,datetime.date.today().strftime("%B %d %Y"),"Processing","8/8",doc_name,docs_number,0,), parse=False)
             cursor.close()
             self.write(json.dumps({}))
             self.finish()
