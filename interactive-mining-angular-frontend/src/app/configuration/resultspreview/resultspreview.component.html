@@ -35,7 +35,7 @@
           <span *ngIf="documentsLoaded>0" class="uk-text uk-text-success" style="margin-top: 12px">{{documentsLoaded}} document{{documentsLoaded===1?'':'s'}} loaded</span>
           <span *ngIf="documentsLoaded<1" class="uk-text uk-text-danger" style="margin-top: 12px">No documents selected</span>
           <div class="uk-text-right uk-margin-small-top">
-            <span class="uk-text-middle">or</span>
+            <span class="uk-text-middle">or  </span>
             <div uk-form-custom>
               <input #docupload type="file" (change)="fileChangeUpload($event);docupload.value=''" accept=".txt,.pdf">
               <span class="uk-link">Upload your documents</span>

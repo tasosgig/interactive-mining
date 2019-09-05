@@ -15,7 +15,7 @@ export class Util {
     }
     console.log(err);
     UIkit.notification({
-      message: err.message,
+      message: err.error,
       status: 'danger',
       pos: 'top-center',
       timeout: 0
