@@ -89,7 +89,6 @@ export class ContentComponent implements OnInit {
 
   onFilesChange(file: File) {
     if (file !== null && file !== undefined) {
-      console.log(file);
       const ext = file.name.split('.')[file.name.split('.').length - 1];
       const allowedExtensions = ['tsv', 'txt'];
       if (allowedExtensions.lastIndexOf(ext) !== -1 && file.size <= 51200) {
@@ -121,7 +120,6 @@ export class ContentComponent implements OnInit {
   }
 
   promptToLeave(nextUrl: string): boolean {
-    console.log(nextUrl);
     if (nextUrl.indexOf('upload-content') >= 0 || nextUrl.indexOf('configure-profile') >= 0 || nextUrl.indexOf('save-profile') >= 0) {
       return true;
     } else {

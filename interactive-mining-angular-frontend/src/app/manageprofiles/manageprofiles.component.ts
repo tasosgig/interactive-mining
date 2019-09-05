@@ -50,7 +50,6 @@ export class ManageprofilesComponent implements OnInit {
     this.route.queryParams
       .subscribe(
       params => {
-        // console.log('queryParams', params['communityId']);
         this.communityId = params['communityId'];
         this.initialServerHandshake(this.communityId);
       });
@@ -89,7 +88,6 @@ export class ManageprofilesComponent implements OnInit {
   private getExampleProfiles(): void {
     this.manageProfilesService.getExampleProfiles()
       .subscribe(res => {
-        console.log(res);
         this.exampleProfiles = res;
       });
   }
@@ -154,7 +152,6 @@ export class ManageprofilesComponent implements OnInit {
   loadSavedProfile(id: string, name: string): void {
     this.manageProfilesService.loadSavedProfile(id)
       .subscribe(res => {
-        console.log(res);
         // clear localstorage values
         this.clearLocalStorage();
         // store to client all profile data
@@ -209,7 +206,6 @@ export class ManageprofilesComponent implements OnInit {
       // get new profile data
       this.manageProfilesService.uploadFile(file)
         .subscribe(res => {
-          console.log(res);
           localStorage.setItem('concepts', res.concepts);
           localStorage.setItem('poswords', JSON.stringify(res.poswords));
           localStorage.setItem('negwords', JSON.stringify(res.negwords));
@@ -248,7 +244,6 @@ export class ManageprofilesComponent implements OnInit {
     // get new profile data
     this.manageProfilesService.loadExampleProfile(name)
       .subscribe(res => {
-        console.log(res);
         localStorage.setItem('concepts', res.concepts);
         localStorage.setItem('docname', res.docname);
         localStorage.setItem('docsnumber', res.docsnumber);
