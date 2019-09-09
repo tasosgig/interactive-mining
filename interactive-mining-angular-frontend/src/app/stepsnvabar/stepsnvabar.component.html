@@ -1,48 +1,58 @@
 <!--<div *ngIf="proccessStep>0" class="uk-flex-inline cm-nav-container">-->
-  <!--<div class="cm-left-box"><a (click)="cancelHandle()"><button id="cancel-main-btn" class="uk-close-large cm-close-btn" type="button" uk-close></button></a></div>-->
-  <!--<div class="cm-navigation cm-nav-toolbar">-->
-    <!--<ul class="uk-subnav uk-subnav-line">-->
-      <!--<li class="cm-nav-li" [ngClass]="{'cm-nav-active':proccessStep===1, 'cm-nav-disabled':proccessStep<1}">-->
-        <!--<a class="cm-nav-a" [routerLink]="proccessStep>1 ? ['/upload-content'] : []">-->
-          <!--<div class="cm-nav-number-container"><span class="cm-nav-number uk-text-middle">1</span></div>-->
-          <!--<span class="cm-nav-title uk-text-middle">Matching context<br>definition</span>-->
-        <!--</a>-->
-      <!--</li>-->
-      <!--<li class="cm-nav-li" [ngClass]="{'cm-nav-active':proccessStep===2, 'cm-nav-disabled':proccessStep<2}">-->
-        <!--<a class="cm-nav-a" [routerLink]="proccessStep>2 ? ['/configure-profile'] : []">-->
-          <!--<div class="cm-nav-number-container"><span class="cm-nav-number uk-text-middle">2</span></div>-->
-          <!--<span class="cm-nav-title uk-text-middle">Matching proccess<br>configuration</span>-->
-        <!--</a>-->
-      <!--</li>-->
-      <!--<li class="cm-nav-li" [ngClass]="{'cm-nav-active':proccessStep===3, 'cm-nav-disabled':proccessStep<3}">-->
-        <!--<a class="cm-nav-a" [routerLink]="proccessStep>3 ? ['/save-profile'] : []">-->
-          <!--<div class="cm-nav-number-container"><span class="cm-nav-number uk-text-middle">3</span></div>-->
-          <!--<span class="cm-nav-title uk-text-middle">Save your<br>matching profile</span>-->
-        <!--</a>-->
-      <!--</li>-->
-    <!--</ul>-->
-  <!--</div>-->
+<!--<div class="cm-left-box"><a (click)="cancelHandle()"><button id="cancel-main-btn" class="uk-close-large cm-close-btn" type="button" uk-close></button></a></div>-->
+<!--<div class="cm-navigation cm-nav-toolbar">-->
+<!--<ul class="uk-subnav uk-subnav-line">-->
+<!--<li class="cm-nav-li" [ngClass]="{'cm-nav-active':proccessStep===1, 'cm-nav-disabled':proccessStep<1}">-->
+<!--<a class="cm-nav-a" [routerLink]="proccessStep>1 ? ['/upload-content'] : []">-->
+<!--<div class="cm-nav-number-container"><span class="cm-nav-number uk-text-middle">1</span></div>-->
+<!--<span class="cm-nav-title uk-text-middle">Matching context<br>definition</span>-->
+<!--</a>-->
+<!--</li>-->
+<!--<li class="cm-nav-li" [ngClass]="{'cm-nav-active':proccessStep===2, 'cm-nav-disabled':proccessStep<2}">-->
+<!--<a class="cm-nav-a" [routerLink]="proccessStep>2 ? ['/configure-profile'] : []">-->
+<!--<div class="cm-nav-number-container"><span class="cm-nav-number uk-text-middle">2</span></div>-->
+<!--<span class="cm-nav-title uk-text-middle">Matching proccess<br>configuration</span>-->
+<!--</a>-->
+<!--</li>-->
+<!--<li class="cm-nav-li" [ngClass]="{'cm-nav-active':proccessStep===3, 'cm-nav-disabled':proccessStep<3}">-->
+<!--<a class="cm-nav-a" [routerLink]="proccessStep>3 ? ['/save-profile'] : []">-->
+<!--<div class="cm-nav-number-container"><span class="cm-nav-number uk-text-middle">3</span></div>-->
+<!--<span class="cm-nav-title uk-text-middle">Save your<br>matching profile</span>-->
+<!--</a>-->
+<!--</li>-->
+<!--</ul>-->
+<!--</div>-->
 <!--</div>-->
 <div class="uk-alert uk-alert-primary uk-flex uk-flex-middle">
   <span class="uk-margin-small-right uk-icon" uk-icon="warning"></span>
   <div>
-    Manage text mining rules, test the rules and see the results, save and load mining profiles.<br>
-    These algorithms mine full-texts to identify links between literature and your research initiative, to appear in your dashboard.
+    Configure text mining algorithms to mine full-texts of publications in order to identify links between scientific
+    literature and your research initiative: define text mining rules, test them on a sample corpus of publications, see
+    the results, update and manage the rules, save and load mining profiles; once you’re ready to commit a profile,
+    notify the OpenAIRE Mining Team so that we can validate the rules, update you mining module, and produce a new set
+    of links to appear in your dashboard on the next run.
   </div>
-
 </div>
 <div *ngIf="proccessStep>0" class="uk-section uk-section-default" style="padding-bottom: 50px;">
   <div class="uk-container uk-container-large">
     <div class="uk-grid-collapse uk-child-width-expand" uk-grid>
       <div class="cm-nav2 uk-width-expand">
         <a class="cm-nav2-home" (click)="cancelHandle(proccessStep)"><span class="uk-icon" uk-icon="icon: home"></span></a>
-        <a class="cm-nav2-step" [ngClass]="{'cm-nav2-step-active':proccessStep===1, 'cm-nav2-step-disabled':proccessStep<1}" [routerLink]="proccessStep>1 ? ['../upload-content'] : []" queryParamsHandling="preserve">Add concepts</a>
-        <a class="cm-nav2-step" [ngClass]="{'cm-nav2-step-active':proccessStep===2, 'cm-nav2-step-disabled':proccessStep<2}" [routerLink]="proccessStep>2 ? ['../configure-profile'] : []" queryParamsHandling="preserve">Configure matching proccess</a>
-        <a class="cm-nav2-step" [ngClass]="{'cm-nav2-step-active':proccessStep===3, 'cm-nav2-step-disabled':proccessStep<3}" [routerLink]="proccessStep>3 ? ['../save-profile'] : []" queryParamsHandling="preserve">Save matching profile</a>
+        <a class="cm-nav2-step"
+           [ngClass]="{'cm-nav2-step-active':proccessStep===1, 'cm-nav2-step-disabled':proccessStep<1}"
+           [routerLink]="proccessStep>1 ? ['../upload-content'] : []" queryParamsHandling="preserve">Add concepts</a>
+        <a class="cm-nav2-step"
+           [ngClass]="{'cm-nav2-step-active':proccessStep===2, 'cm-nav2-step-disabled':proccessStep<2}"
+           [routerLink]="proccessStep>2 ? ['../configure-profile'] : []" queryParamsHandling="preserve">Configure
+          matching proccess</a>
+        <a class="cm-nav2-step"
+           [ngClass]="{'cm-nav2-step-active':proccessStep===3, 'cm-nav2-step-disabled':proccessStep<3}"
+           [routerLink]="proccessStep>3 ? ['../save-profile'] : []" queryParamsHandling="preserve">Save matching
+          profile</a>
       </div>
       <!--<a class="uk-width-auto uk-float-right uk-link-muted" (click)="cancelHandle()" style="line-height: 52px;">-->
-        <!--<span class="uk-icon uk-margin-small-right" uk-icon="icon: close"></span>-->
-        <!--<span class="uk-text-middle">Cancel</span>-->
+      <!--<span class="uk-icon uk-margin-small-right" uk-icon="icon: close"></span>-->
+      <!--<span class="uk-text-middle">Cancel</span>-->
       <!--</a>-->
     </div>
   </div>
