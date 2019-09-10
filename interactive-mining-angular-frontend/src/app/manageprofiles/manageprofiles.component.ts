@@ -71,7 +71,7 @@ export class ManageprofilesComponent implements OnInit {
     this.manageProfilesService.getUsersProfiles()
       .subscribe(res => {
         if (res) {
-          this.allUsersProfiles = res;
+          this.allUsersProfiles = res.sort(this.sortByDate);
         }
       });
   }
@@ -80,7 +80,7 @@ export class ManageprofilesComponent implements OnInit {
     this.manageProfilesService.getSavedProfiles()
       .subscribe(res => {
         if (res) {
-          this.userSavedProfiles = res;
+          this.userSavedProfiles = res.sort(this.sortByDate);
         }
       });
   }
@@ -90,6 +90,18 @@ export class ManageprofilesComponent implements OnInit {
       .subscribe(res => {
         this.exampleProfiles = res;
       });
+  }
+
+  private sortByDate(a: any, b: any): number {
+    const aDate = new Date(a.datecreated);
+    const bDate = new Date(b.datecreated);
+    if (aDate.getTime() > bDate.getTime()) {
+      return -1;
+    } else if (aDate.getTime() < bDate.getTime()) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 
   private clearLocalStorage(): void {
