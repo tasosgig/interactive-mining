@@ -127,7 +127,7 @@
                 <label class="uk-form-label" for="punctuation-filter"><input id="punctuation-filter" class="uk-checkbox" type="checkbox" [checked]="settings.punctuation===1" (change)="punctuationCheckBoxChange($event.target.checked)"> Punctuation removal</label>
               </div>
               <div class="uk-margin">
-                <label class="uk-form-label" for="lowercase-filter"><input id="all-lowercase-filter" class="uk-checkbox" type="checkbox" [checked]="settings.lowercase===1" (change)="allLowercaseCheckBoxChange($event.target.checked)"> Convert everything to lower case</label>
+                <label class="uk-form-label" for="all-lowercase-filter"><input id="all-lowercase-filter" class="uk-checkbox" type="checkbox" [checked]="settings.allLowercase===1" (change)="allLowercaseCheckBoxChange($event.target.checked)"> Convert everything to lower case</label>
               </div>
               <div class="uk-margin">
                 <label class="uk-form-label" for="lowercase-filter"><input id="lowercase-filter" class="uk-checkbox" type="checkbox" [checked]="settings.lowercase===1" (change)="lowercaseCheckBoxChange($event.target.checked)"> Convert to lower-case only during evaluation of phrases</label>
