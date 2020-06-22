@@ -9,6 +9,7 @@ export interface Settings {
   wordssplitnum: number;
   punctuation: number;
   stopwords: number;
+  allLowercase: number;
   lowercase: number;
   stemming: number;
   documentarea: string;

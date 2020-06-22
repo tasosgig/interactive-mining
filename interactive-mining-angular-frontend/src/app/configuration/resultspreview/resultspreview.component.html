@@ -10,10 +10,6 @@
       <div class="uk-margin">
         <p>Select or upload a dataset to test the mining algorithm. Each dataset contains documents from various sources according to its title.</p>
         <div class="uk-grid-collapse uk-child-width-expand" uk-grid>
-          <!--<form class="uk-search uk-search-default uk-width-1-5@m">-->
-            <!--<span class="uk-search-icon-flip" uk-search-icon></span>-->
-            <!--<input class="uk-search-input" type="search" placeholder="Search..." style="background-color:  white;">-->
-          <!--</form>-->
           <button *ngIf="documentsLoaded>0" class="uk-button cm-button-primary uk-width-auto cm-doc-selected">{{docNameLoaded}}<span uk-icon="icon: check; ratio: 1"></span></button>
           <div class="uk-width-expand" uk-slider>
             <div class="uk-position-relative">

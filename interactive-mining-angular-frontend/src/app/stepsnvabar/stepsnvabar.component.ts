@@ -13,7 +13,6 @@ export class StepsnvabarComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, private router: Router) {
     router.events.subscribe((val) => {
-      // see also
       if (val instanceof NavigationEnd) {
         this.changeStep(val.urlAfterRedirects);
       }

@@ -66,6 +66,7 @@ export class SettingsComponent implements OnInit {
       wordssplitnum: Number.parseInt(localStorage.getItem('wordssplitnum')),
       punctuation: Number.parseInt(localStorage.getItem('punctuation')),
       stopwords: Number.parseInt(localStorage.getItem('stopwords')),
+      allLowercase: Number.parseInt(localStorage.getItem('allLowercase')),
       lowercase: Number.parseInt(localStorage.getItem('lowercase')),
       stemming: Number.parseInt(localStorage.getItem('stemming')),
       documentarea: localStorage.getItem('documentarea'),
@@ -216,6 +217,11 @@ export class SettingsComponent implements OnInit {
     this.settings.punctuation = value ? 1 : 0;
   }
 
+  allLowercaseCheckBoxChange(value: boolean): void {
+    localStorage.setItem('allLowercase', value ? '1' : '0');
+    this.settings.allLowercase = value ? 1 : 0;
+  }
+
   lowercaseCheckBoxChange(value: boolean): void {
     localStorage.setItem('lowercase', value ? '1' : '0');
     this.settings.lowercase = value ? 1 : 0;
@@ -243,6 +249,7 @@ export class SettingsComponent implements OnInit {
       wordssplitnum: Number.parseInt(localStorage.getItem('wordssplitnum')),
       punctuation: Number.parseInt(localStorage.getItem('punctuation')),
       stopwords: Number.parseInt(localStorage.getItem('stopwords')),
+      allLowercase: Number.parseInt(localStorage.getItem('allLowercase')),
       lowercase: Number.parseInt(localStorage.getItem('lowercase')),
       stemming: Number.parseInt(localStorage.getItem('stemming')),
       documentarea: localStorage.getItem('documentarea')

@@ -127,7 +127,10 @@
                 <label class="uk-form-label" for="punctuation-filter"><input id="punctuation-filter" class="uk-checkbox" type="checkbox" [checked]="settings.punctuation===1" (change)="punctuationCheckBoxChange($event.target.checked)"> Punctuation removal</label>
               </div>
               <div class="uk-margin">
-                <label class="uk-form-label" for="lowercase-filter"><input id="lowercase-filter" class="uk-checkbox" type="checkbox" [checked]="settings.lowercase===1" (change)="lowercaseCheckBoxChange($event.target.checked)"> Convert to lower case</label>
+                <label class="uk-form-label" for="lowercase-filter"><input id="all-lowercase-filter" class="uk-checkbox" type="checkbox" [checked]="settings.lowercase===1" (change)="allLowercaseCheckBoxChange($event.target.checked)"> Convert everything to lower case</label>
+              </div>
+              <div class="uk-margin">
+                <label class="uk-form-label" for="lowercase-filter"><input id="lowercase-filter" class="uk-checkbox" type="checkbox" [checked]="settings.lowercase===1" (change)="lowercaseCheckBoxChange($event.target.checked)"> Convert to lower-case only during evaluation of phrases</label>
               </div>
               <div class="uk-margin">
                 <label class="uk-form-label" for="stemming-filter"><input id="stemming-filter" class="uk-checkbox" type="checkbox" [checked]="settings.stemming===1" (change)="stemmingCheckBoxChange($event.target.checked)"> Word stemming <span class="cm-tooltip" uk-icon="icon: info" title="Stemming is a process of text normalisation, in which the <b>variant forms of a word are reduced to a common form</b>, for <b>example</b>:<br>connection, connections, connective, connected, connecting<br><b>are reduced to connect</b>" uk-tooltip="pos: right"></span></label>

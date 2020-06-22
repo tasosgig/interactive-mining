@@ -85,6 +85,7 @@ export class ResultspreviewComponent implements OnInit {
       wordssplitnum: Number.parseInt(localStorage.getItem('wordssplitnum')),
       punctuation: Number.parseInt(localStorage.getItem('punctuation')),
       stopwords: Number.parseInt(localStorage.getItem('stopwords')),
+      allLowercase: Number.parseInt(localStorage.getItem('allLowercase')),
       lowercase: Number.parseInt(localStorage.getItem('lowercase')),
       stemming: Number.parseInt(localStorage.getItem('stemming')),
       documentarea: localStorage.getItem('documentarea'),
