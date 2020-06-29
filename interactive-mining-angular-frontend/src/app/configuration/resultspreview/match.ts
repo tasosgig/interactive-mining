@@ -4,4 +4,5 @@ export class Match {
   context: string;
   extraprev: string;
   extranext: string;
+  occurences: string;
 }

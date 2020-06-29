@@ -98,13 +98,13 @@ export class ResultspreviewComponent implements OnInit {
   }
 
   highlightInElement(element: string, text: string): string {
-    let elementHtml = element;
-    const tags = [];
-    const tagLocations = [];
-    const htmlTagRegEx = /<{1}\/{0,1}\w+>{1}/;
+    var elementHtml = element;
+    var tags = [];
+    var tagLocations = [];
+    var htmlTagRegEx = /<{1}\/{0,1}\w+>{1}/;
 
     // Strip the tags from the elementHtml and keep track of them
-    let htmlTag;
+    var htmlTag;
     while (htmlTag = elementHtml.match(htmlTagRegEx)) {
       tagLocations[tagLocations.length] = elementHtml.search(htmlTagRegEx);
       tags[tags.length] = htmlTag;
@@ -112,7 +112,7 @@ export class ResultspreviewComponent implements OnInit {
     }
 
     // Search for the text in the stripped html
-    const textLocation = elementHtml.search(text);
+    var textLocation = elementHtml.search(text);
     if (textLocation) {
       // Add the highlight
       const highlightHTMLStart = '<span class="highlight">';
@@ -120,9 +120,9 @@ export class ResultspreviewComponent implements OnInit {
       elementHtml = elementHtml.replace(text, highlightHTMLStart + text + highlightHTMLEnd);
 
       // Plug back in the HTML tags
-      const textEndLocation = textLocation + text.length;
+      var textEndLocation = textLocation + text.length;
       for (let i = tagLocations.length - 1; i >= 0; i--) {
-        let location = tagLocations[i];
+        var location = tagLocations[i];
         if (location > textEndLocation) {
           location += highlightHTMLStart.length + highlightHTMLEnd.length;
         } else if (location > textLocation) {
@@ -168,6 +168,9 @@ export class ResultspreviewComponent implements OnInit {
                 match.match = values.match;
                 match.extraprev = values.extraprev;
                 match.extranext = values.extranext;
+                match.occurences  = values.occurences;
+
+
                 let context = values.prev + ' ' + values.middle + ' ' + values.next;
                 // hightlight positive words
                 for (const posword in JSON.parse(localStorage.getItem('poswords'))) {
@@ -188,6 +191,7 @@ export class ResultspreviewComponent implements OnInit {
                     return '<span class="negative">' + x + '</span>';
                   });
                 }
+
                 context = this.highlightInElement(context, values.match);
                 match.context = context;
                 match.matchcounter = ++matchcounter;

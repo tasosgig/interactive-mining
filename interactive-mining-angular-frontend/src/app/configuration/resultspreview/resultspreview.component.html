@@ -46,8 +46,8 @@
   <div id="cm-run-test-section">
     <div class="uk-display-inline">
       <button id="run-mining-btn" class="uk-button cm-run-test-button" [disabled]="documentsLoaded<1" (click)="runMining()">Run rules test</button>
-      <span *ngIf="matches_number !== ''" id="results-number" class="cm-coloured-text uk-margin-left uk-text-bottom">{{matches_number}} matche{{matches_number == '1'?'':'s'}} found</span>
-      <span *ngIf="prev_matches_number !== ''" id="results-number-previous" class="cm-text-muted uk-text-bottom">, {{prev_matches_number}} matche{{prev_matches_number == '1'?'':'s'}} found previously</span>
+      <span *ngIf="matches_number !== ''" id="results-number" class="cm-coloured-text uk-margin-left uk-text-bottom">{{matches_number}} match{{matches_number == '1'?'':'es'}} found</span>
+      <span *ngIf="prev_matches_number !== ''" id="results-number-previous" class="cm-text-muted uk-text-bottom">, {{prev_matches_number}} match{{prev_matches_number == '1'?'':'es'}} found previously</span>
     </div>
   </div>
   <div id="results-section" class="cm-results-rows">
@@ -55,8 +55,16 @@
       <li *ngFor="let result of resultsArray;" class="uk-card uk-card-default uk-card-small uk-card-body uk-open">
         <h3 class="uk-accordion-title"><span class="uk-text-meta">document:</span> {{result.docTitle}}</h3>
         <div class="uk-accordion-content" aria-hidden="false">
+         </div>
+          <div class="uk-accordion-content" aria-hidden="false">
           <div *ngFor="let match of result.matches">
             <div class="match"><span class="uk-text-meta">match #{{match.matchcounter}}:</span> {{match.match}}</div>
+            <p class="cm-document-result" style="color:brown">
+              <b>All possible occurences in original text:</b> </p>
+           <p [innerHTML]="match.occurences" ></p>
+           <p class="cm-document-result" style="color:green">
+              <b>High confidence match after applying the mining rules: </b></p>
+
             <p class="cm-document-result">
               {{match.extraprev}} <span class="textwindow" [innerHTML]="match.context"></span> {{match.extranext}}
             </p>
