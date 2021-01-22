@@ -560,18 +560,6 @@
   content: "Empty field";
   color: #ccc;
 }
-.cm-tooltip {
-  width: 15px;
-  display: inline-flex;
-}
-.uk-tooltip {
-  padding: 5px 10px;
-  background: var(--cm-theme-12);
-  border: 1px solid var(--cm-theme-6);
-  border-radius: 4px;
-  color: var(--cm-theme-1);
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 8px 3px;
-}
 /* Custom config section
  ========================================================================== */
 .cm-config-settings-section {
