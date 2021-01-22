@@ -47,12 +47,19 @@ export class ManageprofilesComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.route.queryParams
-      .subscribe(
-      params => {
-        this.communityId = params['communityId'];
+    this.route.params.subscribe(params => {
+      if (params['community']) {
+        this.communityId = params['community'];
         this.initialServerHandshake(this.communityId);
-      });
+      } else {
+        this.route.queryParams
+          .subscribe(
+            queryParams => {
+              this.communityId = queryParams['communityId'];
+              this.initialServerHandshake(this.communityId);
+            });
+      }
+    });
     this.isCommunityManager = this.manageProfilesService.isCommunityManager === 'true';
   }
 

@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {SaveprofileComponent} from '../saveprofile/saveprofile.component';
 import {ConfigurationComponent} from '../configuration/configuration.component';
@@ -7,23 +7,18 @@ import {ManageprofilesComponent} from '../manageprofiles/manageprofiles.componen
 import {SaveProfileGuard, UploadContentGuard} from './save-profile-guard';
 
 const interactiveMiningRoutes: Routes = [
-  {path: '', redirectTo: '/mining/manage-profiles', pathMatch: 'full'},
+  {path: 'manage-profiles', component: ManageprofilesComponent},
   {
-    path: '',
-    // component: InteractiveMiningComponent,
-    children: [
-      { path: 'manage-profiles', component: ManageprofilesComponent },
-      { path: 'upload-content',
-        component: ContentComponent,
-        canDeactivate: [UploadContentGuard]
-      },
-      { path: 'configure-profile',
-        component: ConfigurationComponent,
-        canDeactivate: [SaveProfileGuard]
-      },
-      { path: 'save-profile', component: SaveprofileComponent }
-    ]
-  }
+    path: 'upload-content',
+    component: ContentComponent,
+    canDeactivate: [UploadContentGuard]
+  },
+  {
+    path: 'configure-profile',
+    component: ConfigurationComponent,
+    canDeactivate: [SaveProfileGuard]
+  },
+  {path: 'save-profile', component: SaveprofileComponent}
 ];
 
 @NgModule({
@@ -38,4 +33,5 @@ const interactiveMiningRoutes: Routes = [
     SaveProfileGuard
   ]
 })
-export class InteractiveMiningRoutingModule { }
+export class InteractiveMiningRoutingModule {
+}
