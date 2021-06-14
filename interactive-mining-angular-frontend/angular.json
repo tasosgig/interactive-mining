@@ -22,8 +22,7 @@
             ],
             "styles": [
               "src/styles.css",
-              "src/assets/css/interactive-mining.css",
-              "src/assets/css/animations.css"
+              "src/assets/css/interactive-mining.css"
             ],
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",

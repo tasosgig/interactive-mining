@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
 import {Content} from './content';
-import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import {Util} from '../util';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 
 
 @Injectable()

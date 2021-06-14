@@ -1,13 +1,13 @@
 import UIkit from 'uikit';
 import {HttpErrorResponse, HttpResponse} from '@angular/common/http';
-import {ErrorObservable} from 'rxjs/observable/ErrorObservable';
 import { environment } from '../environments/environment';
-import {throwError} from 'rxjs/internal/observable/throwError';
 import {saveAs} from 'file-saver';
+import {Observable} from 'rxjs';
+import {throwError} from 'rxjs';
 
 export class Util {
 
-  public handleError (err: HttpErrorResponse): ErrorObservable<never> {
+  public handleError (err: HttpErrorResponse): Observable<never> {
     if (err.error instanceof Error) {
       console.error('Client-side error occured.');
     } else {

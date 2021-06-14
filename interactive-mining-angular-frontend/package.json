@@ -18,17 +18,16 @@
     "@angular/compiler": "^7.2.14",
     "@angular/core": "^7.2.14",
     "@angular/forms": "^7.2.14",
-    "@angular/http": "^7.2.14",
     "@angular/platform-browser": "^7.2.14",
     "@angular/platform-browser-dynamic": "^7.2.14",
     "@angular/router": "^7.2.14",
     "core-js": "^2.4.1",
     "file-saver": "^2.0.2",
     "jquery": "^3.4.1",
-    "ng-focus-if": "^1.0.7",
     "ng2-nouislider": "^1.8.2",
     "ngx-pagination": "^3.2.1",
     "nouislider": "^13.1.5",
+    "rxjs": "^6.5.1",
     "tslib": "^1.9.0",
     "uikit": "^3.1.5",
     "zone.js": "^0.9.1"
@@ -53,10 +52,7 @@
     "karma-jasmine-html-reporter": "^1.4.2",
     "ng-packagr": "^5.2.0",
     "protractor": "~5.4.2",
-    "rxjs": "6.5.1",
-    "rxjs-compat": "^6.5.1",
     "ts-node": "~8.2.0",
-    "tslint": "~5.16.0",
     "typescript": "~3.2.4"
   }
 }
