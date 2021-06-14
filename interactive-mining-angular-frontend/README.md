@@ -18,11 +18,15 @@ Place these files in your angular.json
       "../node_modules/interactiveminingv3/assets/js/jquery.sticky-sidebar.js"
     ]
 
-Import this css files on your global styles.css or on another more specific scss. E.g
+Import this css files on your specific scss file. E.g
 
+    @use "sass:meta";
+    @import "~interactiveminingv3/assets/css/variables.css";
+    
     .mining {
-      @import "~interactiveminingv3/assets/css/interactive-mining.css";
-      @import "~interactiveminingv3/assets/css/animations.css";
+      
+      @include meta.load-css("node_modules/interactiveminingv3/assets/css/interactive-mining.css");
+      @include meta.load-css("node_modules/interactiveminingv3/assets/css/animations.css");
     }
 
 Store to LocalStorage the Username and the Backend
